@@ -1,2 +1,25 @@
-\chapter{Governing Equations} \label{ch:gov_eqns}
+\chapter{Application of Matrix Exponential Methods to the Species Transport Equation}\label{ch:application}
 
+\section{Eigenvalue Analysis of the Transition Matrix}
+
+\section{Application to Nuclear Burnup Equations}
+
+Nuclear burnup calculations involve solving a set of first order linear ODEs, written as Equation \ref{eq:burnup}  \cite{pusa2010}.
+
+\begin{equation}
+    \frac{d\boldsymbol{n}}{dt} = \boldsymbol{A}\boldsymbol{n} + \boldsymbol{S}, \quad \boldsymbol{n}(t_{0}) = \boldsymbol{n}_{0}
+    \label{eq:burnup}
+\end{equation}
+
+Where, $\boldsymbol{n}(t)$ is the nuclide concentration vector, $\boldsymbol{A}$ is the transition matrix, $\boldsymbol{S}$ is a vector of constant source terms and $\boldsymbol{n}_{0}$ is the initial condition vector. The transition matrix ($\boldsymbol{A}$) contains the decay and transmutation coefficients. 
+
+In situations when $\boldsymbol{S} = 0$ Equation \ref{eq:burnup} has the solution $\boldsymbol{n}(t) = e^{\boldsymbol{A}t}\boldsymbol{n}_{0}$ where $e^{\boldsymbol{A}t}$ is defined by the power series shown in Equation \ref{eq:power_series_exp}\cite{pusa2010}\cite{moler2003}.
+
+\begin{equation}
+    e^{\boldsymbol{A}t} = \sum_{k = 0}^{\infty}\frac{1}{k!}(\boldsymbol{A}t)^{k}
+    \label{eq:power_series_exp}
+\end{equation}
+
+When $\boldsymbol{S}$ is not equal to zero, the transition matrix $\boldsymbol{A}$ can be modified to $\hat{\boldsymbol{A}}$ by adding a dummy species to hold constant source terms \cite{isotalo2015}. 
+
+For molten salt reactors, these depletion calculations involve solving scalar linear partial differential equations (PDEs) using matrix exponential methods for high time domain accuracy. This method involves first discretizing the spatial dependence of a PDE to a system of coupled ODEs. The resulting set of ODEs will have the same form of Equation \ref{eq:burnup} with the addition of new coefficients in $\boldsymbol{A}$ representing the approximation of spatial dependence. 
