@@ -1,257 +1,297 @@
-\chapter{Matrix Exponential Methods}\label{ch:matrix_exp_methods}
-Many methods exist for solving systems of first order differential equations. In vector matrix form, the problem involves solving a system of ordinary differential equations of the form,
+\chapter{Nuclear Fuel Depletion} \label{ch:burnupEquations}
+Over the life time of a nuclear reactor the composition of the fuel changes from being exposed to a neutron rich environment. The changes in fuel composition have an important impact on the reactor power distribution, stability and control. Reactor efficiency as well as fuel utilization and economics are also greatly influenced from changes in fuel composition. As a nuclear reactor operates through time, the composition of the fuel elements changes due to fission, radioactive decay and neutron capture reactions. This change in composition is important because nuclear reaction rates are dependent on the material they occur. Fission rates are most important to calculate in order to maintain core critically. Not only does fissile material deplete producing fission products but fertile material can be converted into new fissile material. 
+
+A complete depletion calculation would involve the simultaneous solution of the neutron transport equation along with the isotopic evolution of thousands of fission products and fissile material depletion. This is not possible in practice and approximations to these calculations must be done. The neutron transport and fuel depletion calculations are done separately and their coupling is often done with predictor corrector methods. During neutron transport calculations fuel composition is assumed to be constant. For depletion, reaction rates are assumed to be constant. This process is repeated until a stopping criteria is reached. 
+
+In traditional LWRs, fuel elements are housed in fuel rod bundles, which are not allowed to move during operation. Because molten salt reactors are liquid fueled, they can be refueled and have fission products processed online. In addition to online processing, fissial material circulates through the reactor loop. These unique design features of molten salt reactors produce new challenges for fuel depletion calculations. The following sections discuss the nuclear reactions involved in the production of radionuclides, neutron transport and the burnup equations.
+
+\section{Nuclear Reactions}
+
+\subsection{Radioactive Decay}
+When the nucleus of an atomic element is unstable it can undergo spontaneous transformation into a different element by the emission of energy and or particles \cite{duderstadt1976}. The most relevant modes for decay in burnup calculations are $\alpha$ decay, proton emission(is this really that common?), neutron emission, $\beta^{-}$ and $\beta^{+}$. A summary of these decay modes are shown in Table \ref{tab:decayModes} \cite{pusaThesis}. The rate at which a nuclide i changes as a function of time is proportional to its decay constant $\lambda_{i}$ and the decay of other nuclides which contribute as a source to nuclide i  \cite{duderstadt1976}, 
 
 \begin{equation}
-    \frac{d\boldsymbol{y}}{dt} = \boldsymbol{f}(t,\boldsymbol{y}), \quad \boldsymbol{y}({t_{0})} = \boldsymbol{y_{0}}
-    \label{eq:ODE_matrix_form}
-\end{equation}{}
-
-\noindent
-where $\boldsymbol{y}$, $\boldsymbol{f}(t,\boldsymbol{y})$ and $\boldsymbol{y}_{0}$ are column vectors and $\boldsymbol{f}(t,\boldsymbol{t})$ can contain linear and nonlinear terms. 
-
-$$
-\boldsymbol{y}(t) = 
-\begin{bmatrix}
-y_{1}(t) \\
-y_{2}(t) \\
-\vdots \\
-y_{m}(t) \\
-\end{bmatrix}, \quad 
-\boldsymbol{f}(t,\boldsymbol{y}) = 
-\begin{bmatrix}
-f_{1}(t, y_{1}, y_{2}, \dots y_{m}) \\ 
-f_{2}(t, y_{1}, y_{2}, \dots y_{m}) \\ 
-\vdots \\
-f_{m}(t, y_{1}, y_{2}, \dots y_{m}) \\ 
-\end{bmatrix}, \quad
-\boldsymbol{y}_{0} = 
-\begin{bmatrix}
-y_{1,0} \\
-y_{2,0} \\
-\vdots \\ 
-y_{m,0} \\
-\end{bmatrix}
-$$
-
-There are many popular methods to solve these equations including Euler, Runge–Kutta and multistep. These methods involve dividing the time domain into discrete lengths and stepping through the domain by approximating each time step from the previous steps solution and a slope between the points. When the function vector $\boldsymbol{f}(t,\boldsymbol{y})$ contains terms that are stiff, these methods become computationally expensive and inaccurate for larger time steps \cite{ash2009} \cite{ODECh82011}.
-
-A more adventitious method for solving Equation \ref{eq:ODE_matrix_form} is the use of exponential time differencing  \cite{ash2009} \cite{cox2002} \cite{bratsos2019}. To explain this method, Equation \ref{eq:ODE_matrix_form} is rewritten in a form that decomposes $\boldsymbol{f}(t,\boldsymbol{y})$ into two operators, one representing a constant linear operator and one for the nonlinear operator. Equation \ref{eq:ODE_matrix_linear_nonlinear_form} shows this separation with $\boldsymbol{L}$ being the linear operator and $\boldsymbol{N}$ being the nonlinear.
-
-
-\begin{equation}
-    \frac{d\boldsymbol{y}}{dt} = \boldsymbol{Ly} + \boldsymbol{N}(t,\boldsymbol{y}) 
-    \label{eq:ODE_matrix_linear_nonlinear_form}
-\end{equation}{}
-
-Solving Equation \ref{eq:ODE_matrix_linear_nonlinear_form} using a class of methods involving matrix exponentials can  be broken down into two main categories, integration factor and exponential time differencing. Both of the previously stated methods are discussed further in the next sections. 
-
-\section{Integrating Factor Method}
-The integrating factor method begins by defining the following expression \cite{Kassam2005},
-
-\begin{equation}
-    \boldsymbol{v} = e^{-\boldsymbol{L}t}\boldsymbol{y},
-    \label{eq:v_deff_IF_method}
-\end{equation}{}
-
-\noindent
-where $e^{-\boldsymbol{L}t}$ is the integrating factor. Next, Equation \ref{eq:v_deff_IF_method} is differentiated with respect with time to give,
-
-\begin{equation}
-    \frac{d\boldsymbol{v}}{dt} = -e^{-\boldsymbol{L}t}\boldsymbol{L}\boldsymbol{y} + e^{-\boldsymbol{L}t} \frac{d\boldsymbol{y}}{dt}.
-\end{equation}{}
-
-\noindent
-Multiplying Equation \ref{eq:ODE_matrix_linear_nonlinear_form} by the integrating factor and bringing the linear operator to the right hand side gives, 
-
-\begin{equation}
-    e^{-\boldsymbol{L}t}\frac{d\boldsymbol{y}}{dt} - e^{-\boldsymbol{L}t}\boldsymbol{L}\boldsymbol{y} = e^{-\boldsymbol{L}t}\boldsymbol{N}(t,\boldsymbol{y}) = \frac{d\boldsymbol{v}}{dt}.
-\end{equation}{}
-
-\noindent
-This brings the final form of the equation to solve, 
-
-\begin{equation}
-    \frac{d\boldsymbol{v}}{dt} = e^{-\boldsymbol{L}t}\boldsymbol{N}(t,e^{\boldsymbol{L}t}\boldsymbol{v}), 
-\end{equation}{}
-
-\noindent
-or, 
-
-\begin{equation}
-    \frac{d\boldsymbol{v}}{dt} = \boldsymbol{f}(t,\boldsymbol{v}).
-    \label{eq:IFM_transformed_equation_to_solve}
-\end{equation}{}
-
-Solving Equation \ref{eq:IFM_transformed_equation_to_solve} can be done using any usual Runge–Kutta, or multistep method. For example, lets solve using a fourth order Runge-Kutta method \cite{Kassam2005}.
-
-
-\begin{equation*}
-    k_{1} = h\boldsymbol{f}(t_{n},\boldsymbol{v}_{n})
-\end{equation*}{}
-\vspace*{-1.0cm}
-\begin{equation*}
-    k_{2} = h\boldsymbol{f}(t_{n}+h/2, \boldsymbol{v}_{n} + k_{1}/2)
-\end{equation*}{}
-\vspace*{-1.0cm}
-\begin{equation*}
-    k_{3} = h\boldsymbol{f}(t_{n}+h/2, \boldsymbol{v}_{n} + k_{2}/2)
-\end{equation*}{}
-\vspace*{-1.0cm}
-\begin{equation*}
-    k_{4} = h\boldsymbol{f}(t_{n}+h, \boldsymbol{v}_{n} + k_{3})
-\end{equation*}{}
-\vspace*{-1.0cm}
-\begin{equation}
-    \boldsymbol{v}_{n+1} \approx \boldsymbol{v}_{n} + \frac{1}{6}(k_{1} + 2k_{2} + 2k_{3} + k_{4})
-\end{equation}{}
-
-\noindent
-
-
-
-\noindent
-Integrating factor methods have the property of being exact when $\boldsymbol{N}(t,\boldsymbol{y}) = 0$ \cite{ash2009}. 
-
-\section{Exponential Time Differencing}
-Exponential time differencing methods are very similar to the integrating factor method except for how it handles the nonlinear portion of Equation \ref{eq:ODE_matrix_linear_nonlinear_form}. First taking the integrating factor and multiply it through Equation \ref{eq:ODE_matrix_linear_nonlinear_form} and integrating over the time step \cite{cox2002}. 
-
-\begin{equation}
-    \boldsymbol{y}_{n+1} = \boldsymbol{y}_{n}e^{\boldsymbol{L}\Delta t} + e^{\boldsymbol{L}\Delta t} \int_{0}^{\Delta t} e^{-\boldsymbol{L}\tau}N(\boldsymbol{y}(t_{n} + \tau), t_{n}+\tau)d\tau
-\end{equation}{}
-
-\noindent
-This formalization is exact and exponential time differencing methods work to approximate the integral of the nonlinear portion. 
-
-\section{Solutions to the Matrix Exponential}
-When obtaining solutions based on exponential time differencing or integrating factor methods, an exponential of a matrix needs to be computed. There are multiple computational methods for solving for the matrix exponential, many of them are developed specifically to evaluate $e^{\boldsymbol{A}}$ or $e^{\boldsymbol{A}}\boldsymbol{v}$. One evaluates the matrix exponential directly and the other calculates the action of the exponential on a vector. When $\boldsymbol{A}$ is dense or has a low to moderate size (few hundreds) methods such as Pad\'e approximation or Chebyshev rational approximation can be employed. For large sparse matrices, Kraylov subspace methods offer more efficient calculations \cite{exokit}. In situations when the matrix $\boldsymbol{A}$ is diagonal, computing the matrix exponential becomes,
-
-$$
-e^{\boldsymbol{A}} = 
-\begin{bmatrix}
-a_{1,1} & 0 & 0 & \hdots & 0 \\
-0 & a_{2,2} & 0 & \hdots & 0 \\
-0 & 0 & a_{3,3} & \hdots & 0 \\
-\vdots & \vdots & \vdots & \ddots & \vdots\\
-0 & 0 & 0 & \hdots & a_{m,m} \\
-\end{bmatrix}
-=
-\begin{bmatrix}
-e^{a_{1,1}} & 0 & 0 & \hdots & 0 \\
-0 & e^{a_{2,2}} & 0 & \hdots & 0 \\
-0 & 0 & e^{a_{3,3}} & \hdots & 0 \\
-\vdots & \vdots & \vdots & \ddots & \vdots\\
-0 & 0 & 0 & \hdots & e^{a_{m,m}} \\
-\end{bmatrix}
-.
-$$
-
-\noindent
-These sort of situations arise when solving PDEs using spectral methods \cite{ash2009} \cite{cox2002} \cite{kazimi1990}. In this chapter multiple methods for evaluating the matrix exponential are presented. Each of these methods come with various advantages and disadvantages and specific matrix properties that are required for computation. 
-
-
-
-\subsection{Taylor Series Expansion}
-Formally,  matrix exponential is defined using an infinite Taylor series \cite{exokit} \cite{moler2003} \cite{pusa2010}. 
-\begin{equation}
-    e^{\boldsymbol{A}} = \sum_{k = 0}^{\infty}\frac{1}{k!}\boldsymbol{A}^{k}
-    \label{eq:power_series_exp}
+    \frac{dn_{i}}{dt} = \sum_{j=1}^{N} \lambda_{j\rightarrow i}n_{j}(t) -\lambda_{i} n_{i}(t).
+    \label{eq:decaySingleMode}
 \end{equation}
 
-\noindent This method however, is not commonly used in application for either the matrix or the scalar case. The number of terms required to achieve convergence can be large and produce computational inefficiency. This method is also suffers from numerical round off errors from cancellation for large values of $k$ \cite{moler2003}. 
-
-
-\subsection{Pad\'e Approximation}
-The Pad\'e approximation represents a function by expanding it as a ratio of two power series. A ($p,q$) Pad\'e approximation for $e^{\boldsymbol{A}}$ is defined by \cite{moler2003}, 
+\noindent The radioactive decay constant $\lambda$ is a natural constant and is related to the half life of the nuclide. This relation is,
 
 \begin{equation}
-    R_{p,q} = \frac{N_{p,q}(\boldsymbol{A})}{D_{p,q}(\boldsymbol{A})}
-    \label{eq:padeApprox}
+    \lambda = \frac{\ln(2)}{T_{1/2}}.
 \end{equation}
 
-\noindent where
+\noindent As the half life of the isotope decreases, its decay constant increases. 
 
-\begin{equation*}
-    N_{p,q}(\boldsymbol{A}) = \sum_{j=0}^{P}\frac{(p + q - j)!p!}{(p + q)!j!(p - j)!}\boldsymbol{A}^{j}
-\end{equation*}
-
-\begin{equation*}
-    D_{p,q}(\boldsymbol{A}) = \sum_{j=0}^{P}\frac{(p + q - j)!q!}{(p + q)!j!(q - j)!}(-\boldsymbol{A})^{j}.
-\end{equation*}
-
-\noindent The error associated with the previous Pad\'e approximation is demonstrated by \cite{higham2005}
+Some nuclides have more than one mode of decay. Some of these decay modes compete with one another such as $\beta^{+}$ and electron capture. When nuclide \textit{i} has more than one decay mode, its decay constant is a summation of all k decay modes,
 
 \begin{equation}
-    e^{\boldsymbol{A}} - R_{p,q}(\boldsymbol{A}) = (-1)^{m}\frac{k!m!}{(k+m)!(k+m+1)!}\boldsymbol{A}^{k+m+1} + \mathcal{O}(\boldsymbol{A}^{k+m+2}).
+    \lambda_{i} = \lambda_{i,1} + \lambda_{i,2} + \lambda_{i,3} ... = \sum_{k} \lambda_{i,k}.
 \end{equation}
 
-Pad\'e methods are similar to Taylor series as they approximate a function using a series solution, however, Pad\'e series usually out preform Taylor series. Series solutions methods, such as Pad\'e are also more accurate near the origin, meaning that the matrix norm $||A||$ must be sufficiently small for the approximation to be accurate \cite{pusa2010}. Yet another problem arises when $\boldsymbol{A}$ has a wide spread of eigenvalues, causing an ill-conditioned linear system  \cite{exokit} \cite{moler2003}.  
-
-When applying the Pad\'e approximation it is often adventitious to set $p$ and $q$ equal to one another, this is referred to as diagonal approximations. Setting $q = p$ requires about the same amount of work if $q > p$ for the same $q$, but would result in a approximation that is of order $2p > p + q$. Another reason to set $q=p$ comes from examining the spectrum of $\boldsymbol{A}$. If the eigenvalues of $\boldsymbol{A}$ are located on the left hand side of the complex plane, then $e^{\boldsymbol{A}t}$ goes to zero as $t$ goes to infinity. With $q > p$, $R_{pq}(\boldsymbol{A}t)$ is bounded, but if $q < p$, $R_{pq}(\boldsymbol{A}t)$ is unbounded \cite{moler2003}. 
-
-
-Instead of directing using Equation \ref{eq:padeApprox}, Horners rule can be applied to the numerator and denominator to reduce the number of operations. This result is shown in Equation \ref{eq:hornerPadeApprox}. 
+\noindent While total decay is sufficient for use in the loss of nuclide \textit{i} from Equation \ref{eq:decaySingleMode}, a branching ratio must be used to denoted the fraction of nuclide \textit{j} which decays into \textit{i}. The branching ratio is defined as,
 
 \begin{equation}
-    R_{pp}(\boldsymbol{A})=
-    \begin{cases}
-        1+2\frac{\boldsymbol{A}\sum_{k=0}^{p/2-1}c_{2k+1}\boldsymbol{A}^{2k}}{\sum_{k=0}^{p/2}c_{2k}\boldsymbol{A}^{2k}-\boldsymbol{A}\sum_{k=0}^{p/2-1}c_{2k+1}\boldsymbol{A}^{2k}} & p \text{ even}\\[1em]
-        
-        -1-2\frac{\sum_{k=0}^{(p-1)/2}c_{2k}\boldsymbol{A}^{2k}}{\boldsymbol{A}\sum_{k=0}^{(p-1)/2}c_{2k+1}\boldsymbol{A}^{2k}-\sum_{k=0}^{(p-1)/2}c_{2k}\boldsymbol{A}^{2k}} & p \text{ odd}
-    \end{cases}
-    \label{eq:hornerPadeApprox}
+    b_{j\rightarrow i} = \frac{\lambda_{j\rightarrow i}}{\lambda_{j}}.
 \end{equation}
 
-\noindent where
+\noindent For nuclide \textit{j} which has multiple decay modes k, the branching ratio denotes the fraction of decays for nuclide \textit{j} which produce nuclide \textit{i}. Substituting this relation into Equation \ref{eq:decaySingleMode},
+
+\begin{equation}
+    \frac{dn_{i}}{dt} = \sum_{j=1}^{N} b_{j\rightarrow i}\lambda_{j}n_{j}(t) -\lambda_{i} n_{i}(t).
+    \label{eq:decay}
+\end{equation}
+
+
+\begin{table}[t]
+    \caption{\label{tab:decayModes} Summary of Decay Modes where Z is atomic number and A is mass number \cite{pusaThesis}}
+    \centering
+    \begin{tabular}{c|c|c}
+    \hline
+    \textbf{Mode of decay} & \textbf{Daughter nuclide} & \textbf{By-product nuclide} \\ [0.5ex] 
+    \hline
+    \hline
+    \\ [-1em]
+    $\alpha$ decay & (Z - 2, A - 1) & ${}^{4}$He \\ \hline 
+    \\ [-1em]
+    Proton emission & (Z - 1, A - 1) & ${}^{1}$H \\ \hline
+    \\ [-1em]
+    Neutron emission & (Z, A - 1) & - \\ \hline
+    \\ [-1em]
+    $\beta^{-}$ & (Z + 1, A) & - \\ \hline
+    \\ [-1em]
+    $\beta^{+}$ & (Z - 1, A) & - \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Neutron Induced Reactions}
+Neutron induced reactions follow the schematic shown in Figure \ref{fig:nuclearReaction}.  The projectile neutron encounters a target, resulting in the nuclear reaction. In this reaction, the neutron is denoted by \textit{a} and the target by \textit{b}, \textit{c} and \textit{d} are the resulting products. These reactions are often written in the following notation \cite{duderstadt1976},
 
 \begin{equation*}
-    c_{k} = c_{k-1}\frac{p+1-k}{(2p+1-k)k}
+    b (a,c) d 
 \end{equation*}
 
-\noindent with $c_{0} = 1$. This evaluates Equation \ref{eq:padeApprox} with half the number of operations \cite{exokit}.
+\begin{figure}[b]
+  \centering
+  \includegraphics[width=3.0in]{images/nuclearReaction.png}\\
+  \caption{Schematic of general nuclear reaction}
+  \label{fig:nuclearReaction}
+\end{figure} 
 
+The frequency of a reaction is governed by the probability at which it can occur. This probability related to the  cross section. The microscopic cross section is a factor that characterizes the probability of a neutron-nuclear reaction with an atomic nucleus \cite{duderstadt1976}. Specifically, the formal definition of the microscopic cross section is,
 
-\subsection{Scaling and Squaring}
-Both Taylor and Pad\'e methods fail to approximate the matrix exponential when $||\boldsymbol{A}||$ or the spread of the eigenvalues are large. This problem is exacerbated when computing $e^{\boldsymbol{A}t}$ for sufficiently large values of $t$. The scaling and squaring method works to fixed these problem by exploiting the property
+\begin{equation}
+    \sigma = \frac{\text{Number of reactions} / \text{nucleus} / \text{sec}}{\text{Number of incident neutrons} / \text{cm}^{2} / \text{sec}} = \frac{(R/N_{i})}{\phi},
+\end{equation}
 
 \begin{equation*}
-    e^{\boldsymbol{A}} = \big( e^{\boldsymbol{A}/m}\big)^{m}
-    \label{eq:scalingAndSquaring},
+    R = \bigg[\frac{\# \text{ of reactions}}{\text{cm}^{2}\cdot \text{sec}}\bigg], \quad \sigma = \big[\text{cm}^{2}\big], \quad \phi = \bigg[\frac{\# \text{ of neutrons}}{\text{cm}^{2}\cdot \text{sec}} \bigg], \quad n_{i} = \bigg[\frac{\# \text{ of atoms}}{\text{cm}^{3}}\bigg].
 \end{equation*}
 
-\noindent $m$ is a scalar chosen to be $2^{\alpha}$ where $\alpha$ is the number of times the matrix is squared \cite{moler2003}. 
+There are a number of neutron induced reactions that occur in a nuclear reactor. They can be divided into two main categories: scattering and absorption. Scattering reactions can then be further divided into elastic and inelastic reactions. Elastic scattering reactions, denoted by $(n,n)$ are those reactions in which an incoming neutron scatters off of a nucleus, changing the neutrons energy and direction. In some cases the neutron can be absorbed into the nucleus for a short time, before being ejected. This may leave the nucleus in an excited state before returning to its initial state. These type of reactions are noted by $(n,n')$ and are known as inelastic scattering. 
 
-Moler and Van Loan \cite{moler2003} derived an error analysis for choosing the proper value of $m$ based on $||\boldsymbol{A}||$. As noted by Higham \cite{higham2005}, this derivation contained weaknesses. Moler assumed that the matrix norm needed to be less than one half ($||A|| < 1/2$) but Higham proved that this was not the case. Higham further showed that the required minimal matrix norm is different for each order of the Pad\'e implementation. Above this norm, a higher order Pad\'e approximation would be required, or matrix scaling would need to be take place. One other weakness was the derivation of their error bound. It was designed to be easily computable, which resulted in their error bound not being sharp \cite{higham2005}. 
+Absorption reactions are those in which a neutron is absorbed by the atomic nucleus. The resulting products from these reactions include, energy, neutrons, protons and $\alpha$ particles. A summary of these reactions which are relevant in burnup calculations are shown in Table \ref{tab:reactionModes} \cite{pusaThesis}. The change in a nuclides concentration as a function of time for a general absorption reaction is,
 
-%\begin{table}[t]
-%   \caption{\label{tab:scalingSquaringOptimalValues} Summary of optimal Pad\'e orders and required matrix multiplications \cite{higham2005}}
-%   \centering
-%   \begin{tabular}{c| cccccccccc}
-%   \hline
-%   $m$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10\\
-%   \hline 
-%    $\theta_{m}$ & 3.7e-8 & 5.3e-4 & 1.5e-2 & 8.5e-2 & 2.5e-1 & 5.4e-1 & 9.5e-1 & 1.5e0 & 2.1e0 & 2.8e0 \\
-%   \hline
-%   $\pi_{m}$ & 0 & 1 & 2 & 3 & 3 & 4 & 4 & 5 & 5 & 6 \\
-%   \hline
-%   \end{tabular}
+\begin{equation}
+    \frac{dn_{i}}{dt} = \sum_{j=1}^{N} \sum_{k=1}^{K}\gamma_{j\rightarrow i,k}\sigma_{k,j}\phi n_{j}(t) - \phi\sum_{k=1}^{K} \sigma_{k,i}n_{i}(t),
+    \label{eq:neutronIndecedReaction}
+\end{equation}
 
-%   \vspace*{4 mm}
-   
-%   \begin{tabular}{c| ccccccccccc}
-%   \hline
-%   $m$ & 11 & 12 & 13 & 14 & 15 & 16 & 17 & 18 & 19 & 20 & 21\\
-%   \hline 
-%    $\theta_{m}$ & 3.6e0 & 4.5e0 & 5.4e0 & 6.3e0 & 7.3e0 & 8.4e0 & 9.4e0 & 1.1e1 & 1.2e1 & 1.3e1 & 1.4e1 \\
-%   \hline
- %  $\pi_{m}$ & 6 & 6 & 6 & 7 & 7 & 7 & 7 & 8 & 8 & 8 & 8 \\
- %  \hline
- %  \end{tabular}
-%\end{table}
+\noindent where $\gamma_{j\rightarrow i,k}$ is the fraction of nuclide \textit{i} from nuclide \textit{j} through reaction \textit{k}. The first term in Equation  \ref{eq:neutronIndecedReaction} is the generation from the reaction of nuclide. First each nuclide is summed over, followed by a summation of each reaction for nuclide \textit{j}. If reaction \textit{k} results in generating nuclide \textit{i}, then $\sigma_{k,j}$ and $\gamma_{j\rightarrow i,k}$ are both none zero. The second term in Equation \ref{eq:neutronIndecedReaction} is the loss of nuclide \textit{i} from reaction \textit{k}. For each nuclide \textit{i} a summation is taken over all possible neutron induced reactions. 
+
+The microscopic cross section characterizes the probability that a neutron will have a reaction with a single nucleus. Often it is required to understand how neutrons will interact with macroscopic chunk of the material \cite{duderstadt1976}. The macroscopic cross section provides the ability to compute how a large portion of material will react under a flux of particles or energy. This macroscopic cross section is the computation of the atomic number density multiplied by the microscopic cross section. For a material consisting of multiple atomic elements, the macroscopic cross section of reaction $x$ is computed by,
+
+\begin{equation}
+    \Sigma_{x} = \sum_{i=1}^{N}n_{i}\sigma_{i,x},
+\end{equation}
+
+\noindent The macroscopic cross section can be thought of as the probability per length path that a neutron will have a reaction with the nucleus \cite{duderstadt1976}. 
+
+\begin{table}[t]
+    \caption{\label{tab:reactionModes} Summary of Decay Modes where Z is atomic number and A is mass number \cite{pusaThesis}}
+    \centering
+    \begin{tabular}{c|c|c}
+    \hline
+    \textbf{Mode of reaction} & \textbf{Daughter nuclide} & \textbf{By-product nuclide} \\ [0.5ex] 
+    \hline
+    \hline
+    \\ [-1em]
+    (n,2n) & (Z, A - 1) & - \\ \hline 
+    \\ [-1em]
+    (n,3n) & (Z, A - 2) & - \\ \hline 
+    \\ [-1em]
+    (n,4n) & (Z, A - 3) & - \\ \hline 
+    \\ [-1em]
+    (n,$\gamma$) & (Z, A + 1) & - \\ \hline 
+    \\ [-1em]
+    (n,p) & (Z - 1, A) & ${}^{1}H$ \\ \hline 
+    \\ [-1em]
+    (n,d) & (Z - 1, A - 1) & ${}^{2}$H \\ \hline 
+    \\ [-1em]
+    (n,t) & (Z - 1, A - 2) & ${}^{3}$H \\ \hline 
+    \\ [-1em]
+    (n,${}^{3}$He) & (Z - 2, A - 2) & ${}^{3}$He \\ \hline 
+    \\ [-1em]
+    (n,$\alpha$) & (Z - 2, A - 3) & ${}^{4}$He \\ \hline 
+    \\ [-1em]
+    Fission & fission products & - \\ \hline
+    \end{tabular}
+\end{table}
+
+When fissile material undergoes a neutron absorption (to relate it to the previous paragraphs), neutron induced fission can occur releasing neutrons, energy and fission products. Typically, fission is a two-body reaction, meaning that the target nucleus splits into two isotopes of smaller atomic number. The independent fission product yield is the expected fraction a nuclide is produced for a single fission event. Because the cross section is dependent on the incident neutron energy, fission product yields dependent on the neutron energy. The yields of fission products for ${}^{235}$U for fast and thermal neutrons is shown in Figure \ref{fig:fissionYield}.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=5.5in]{images/fissionYield.png}\\
+  \caption{Fission product yield for thermal and fast neutrons}
+  \label{fig:fissionYield}
+\end{figure} 
 
 
+\section{Neutron Transport Equation}
+The neutron transport equation describes the angular neutron density as a function of time, space and energy. Let the spatial position be denoted by $r$ and the energy of a neutron $E$. A neutron will travel in direction $\Omega$ and will scatter at angle $\Omega'$ and energy $E'$.  The neutron transport equation is,
+
+\begin{equation}
+    \frac{1}{v}\frac{\partial \varphi}{\partial t} + \Omega \cdot \nabla \varphi + \Sigma_{t}\varphi = \int_{4\pi} d\Omega'\int_{0}^{\infty}dE'\Sigma_{s}\varphi' + \frac{\chi}{4\pi}\int_{0}^{\infty}dE'\nu\Sigma_{f}\varphi,
+    \label{eq:angularNeutronTransport}
+\end{equation}
+
+\noindent where 
+
+$\begin{aligned}
+&\varphi = \varphi(r, E, \Omega) \equiv   \text{Angular neutron flux at energy } E \text{ and angle } \Omega  \\
+&\varphi' = \varphi(r, E', \Omega') \equiv   \text{Angular neutron flux at energy } E' \text{ and angle } \Omega'  \\
+& v = v(E) \equiv \text{ Neutron velocity} \\
+&\Sigma_{t} = \Sigma_{t}(r, E) \equiv \text{ Total neutron cross section} \\
+&\Sigma_{s} = \Sigma_{s}(E' \rightarrow E,\Omega' \rightarrow \Omega) \equiv \text{ Neutron scattering cross section from energy } E \\
+& \text{ and angle } \Omega \text{ to energy } E' \text{ and angle } \Omega' \\
+&\chi = \chi(E) \equiv \text{ Energy distribution of fission neutrons} \\
+&\nu = \nu(E') \equiv \text{ Average number of neutrons released during fission at energy } E' \\ 
+&\Sigma_{f} = \Sigma_{f}(E') \equiv \text{ Cross section for neutron fission at energy } E' 
+\end{aligned}$
+
+\vspace{0.5cm}
+
+\noindent Starting from the left hand side of Equation \ref{eq:angularNeutronTransport} we have the the change in neutron density with time, neutron streaming and neutron removal from reaction. On the right hand side is the source from a neutron scattering in from and different energy and angle, followed by the source from nuclear fission. The source for the scattering term must be integrated over all angles and energy and the same for the fission source. The angular neutron flux cannot be directly used in the neutron induced reaction equations presented before. These equations require the scalar flux, which is the integral over all angles for the angular neutron flux,
+
+\begin{equation}
+    \phi(r,E) = \int \varphi(r,E,\Omega)d \Omega.
+\end{equation}
+
+Angular dependence for the scattering source can be handled through the use of Legendre expansions or spherical harmonics. Spacial angular dependence is often treated with Gauss-Legenre quadratures such as the Sn or Pn equations, such methods are out of the scope of this work \cite{millerCompTransport}. The energy dependence in Equation \ref{eq:angularNeutronTransport} is almost always handled using the multigroup approximation. This approximation works by dividing up the energy dependence in groups by applying an energy interval for each group and integrating over that interval. The group cross sections are defined in a way to conserve the reaction rates. The multigroup constants are defined by \cite{millerCompTransport} \cite{duderstadt1976},
+
+\begin{equation}
+    \Sigma_{s}^{gg'} = \frac{\int_{g}^{g-1}\int_{g'}^{g'-1}\Sigma_{s}(r,E'\rightarrow E,t)\varphi(r,E',t) dE'dE}{\int_{g}^{g-1}\varphi(r,E,t) dE},
+\end{equation}
+
+\begin{equation}
+    \Sigma_{t}^{g} = \frac{\int_{g}^{g-1}\Sigma_{t}(r,E,t)\varphi(r,E,t) dE}{\int_{g}^{g-1}\varphi(r,E,t) dE},
+\end{equation}
+
+\begin{equation}
+    \nu\Sigma_{f}^{g} = \frac{\int_{g}^{g-1}\nu\Sigma_{f}(r,E,t)\varphi(r,E,t) dE}{\int_{g}^{g-1}\varphi(r,E,t) dE},
+\end{equation}
+
+\begin{equation}
+    \chi^{g} = \int_{g}^{g-1}\chi(E) dE,
+\end{equation}
+
+\begin{equation}
+    \varphi^{g} = \int_{g}^{g-1}\varphi(r,E,t) dE.
+\end{equation}
+
+The time variance in Equation \ref{eq:angularNeutronTransport} is most often neglected for reactor analysis. Instead the problem is transformed into an eigenvalue problem. Although there are multiple different eigenvalue formulations, the $\lambda$ (k-effictive, criticality) eigenvalue is the most common \cite{millerCompTransport}. If Equation \ref{eq:angularNeutronTransport} is written in matrix vector form, then the criticality equation is,
+
+\begin{equation}
+    \boldsymbol{A}\boldsymbol{\varphi} = \frac{1}{\lambda}\boldsymbol{B}\boldsymbol{\varphi}.
+\end{equation}
+
+\noindent where $\lambda$ is the largest of the eigenvalues and can be found using the power iteration. When $\lambda$ is greater than 1 then the reactor is supercritical and the neutron population will increase over time. If $\lambda$ is less than 1 the system is subcritical and the neutron population will decrease over time. If $\lambda$ is equal to 1 then the system is critical and the neutron population will remain constant \cite{duderstadt1976}. 
 
 
+\section{Burnup Equations}
+Nuclear burnup calculations solve a set of first order ODE's which aim to simulate the isotopic concentrations of radionuclides in a nuclear reactor. These equations important in reactor calculations because the neutronic properties and neutron distributions in the reactor is dependent on composition of the environments material. After a neutron transport solve, the cross sections and scalar neutron flux are collapsed into a single energy group. Because of the manner in which the groups are collapsed, the reaction rates from the multigroup equations equal the reaction rates for the single group. Over a single burn up calculation step all cross sections and the scalar neutron flux is assumed to be constant. When solving the depletion equations, the reactor is often subdivide into finite volume depletion zones. Each depletion zone with have different material, and differing neutron flux, this results in the reaction rates varying between each region. Using volume average operators and the multigroup approximation, the neutron flux and microscopic cross section is collapsed into single values for each depletion zone \cite{aarnoThesis},
 
-\subsection{Solutions Based on the Cauchy Integral Formula}
+\begin{equation}
+    \overline{\sigma}_{k,j} = \frac{\int_{V}\int_{0}^{\infty}\sigma_{k,j}(r,E)\phi(r,E) dEdV}{\int_{V}\int_{0}^{\infty}\phi(r,E) dEdV},
+\end{equation}
+
+\begin{equation}
+    \overline{\phi} = \frac{1}{V}\int_{V}\int_{0}^{\infty}\phi(r,E)dEdV.
+\end{equation}
+
+\begin{equation}
+    \overline{n}(t) = \frac{1}{V}\int_{V}n(r,t)dV
+\end{equation}
+
+\noindent This results in the set of ODE's of the form,
+
+\begin{equation}
+    \frac{d\overline{n}_{i}}{dt} = \sum_{j=1}^{N}\bigg(b_{j\rightarrow i}\lambda_{j} + 
+    \sum_{k=1}^{K}\gamma_{j\rightarrow i,k}\overline{\sigma}_{k,j}\overline{\phi} \bigg)\overline{n}_{j}(t) - \bigg(\lambda_{i} + \overline{\phi}\sum_{k=1}^{K} \overline{\sigma}_{k,i}\bigg)\overline{n}_{i}(t).
+    \label{eq:LWRDepletion}
+\end{equation}
+
+There are multiple methods for solving the isotopic concentrations in nuclear reactors \cite{isotalo2011} \cite{pusa2010} \cite{akio2007}. Normal numerical integration techniques such as Runge Kutta face complications because of the various orders of magnitude for the decay constants of short and long lived nuclides. This results in a stiff system of ODE's, which are difficulty and costly to solve. Recently, matrix exponential methods have become popular for depletion calculations because of there high level of accuracy \cite{pusaThesis} \cite{aarnoThesis}. 
+
+\subsection{Extension to Molten Salt Reactors}
+Traditional nuclear reactors contain their fuel in a solid form that is unable to move during operation. These fuel elements are housed in pellets which are loaded in fuel rods. These rods are collected into fuel bundles which are then loaded into the reactor core for operation. Loading the reactor core with fuel in this form does not allow the material to transport through the reactor loop. Molten salt reactors work with a liquid form of the fuel that is dissolved in a molten salt. This liquid form of the fuel allows it to transport through the reactor loop during operation. Thus the depletion equations used in traditional reactors no longer holds true for molten salt reactors. Equation \ref{eq:LWRDepletion} must be modified to include the change in nuclide concentration with fluid movement: convection and diffusion. 
+
+Depletion calculations in MSRs can be better represented by the multicomponent chemical species transport equation. The species transport equation is derived by a conservation of mass basis which accounts for change is time, convective and diffusion transport and rate of generation from reaction \cite{bird2006}. Equation \ref{eq:speciesTransportEquation} is the species transport equation for species \textit{i}. 
+
+\begin{equation}
+    \underbrace{\frac{\partial \rho_{i}}{\partial t}}_{\substack{\text{Change in} \\
+    \text{density} \\
+    \text{with time}}} + 
+    \underbrace{\nabla \cdot \rho_{i}(r,t)\boldsymbol{v}}_{\substack{\text{Transport} \\
+    \text{with fluid} \\
+    \text{velocity}}}
+    + \underbrace{\nabla \cdot j_{i}(r,t)}_{\substack{\text{Transport} \\
+    \text{with mass} \\
+    \text{diffusion}}} = 
+    \underbrace{R_{i}(r,t)}_{\substack{\text{Generation} \\
+    \text{from} \\
+    \text{reaction}}}
+    \label{eq:speciesTransportEquation}
+\end{equation}
+
+\noindent It is important to note that the velocity in the second term must be the averaged velocity for the concentration of interest. In Equation \ref{eq:speciesTransportEquation} for example, the concentration units are for mass concentration or density. This means that the velocity used in the second term must be the mass averaged velocity \cite{zackThesis}. 
+
+Equation \ref{eq:LWRDepletion} is simply the rate of generation for nuclide species \textit{i} and can be plugged in for $r_{i}$ in Equation \ref{eq:speciesTransportEquation}. Before it can be plugged in, the units in Equation \ref{eq:LWRDepletion} need to be transformed from atoms per volume to mass per volume using Avogadros constant the molar mass, $n_{i} = \rho_{i}N_{A} / M_{i}$. Using this relation and plugging in Equation \ref{eq:LWRDepletion} into \ref{eq:speciesTransportEquation} results in the MSR depletion equation,
+
+
+\begin{equation}
+\begin{split}
+    \frac{\partial \rho_{i}}{\partial t}
+    + \nabla \cdot \rho_{i}(r,t)\boldsymbol{v}
+    + \nabla \cdot j_{i}(r)
+    &=
+    \sum_{j=1}^{N}\frac{M_{i}}{M_{j}}\bigg(b_{j\rightarrow i}\lambda_{j} + 
+    \sum_{k=1}^{K}\gamma_{j\rightarrow i,k}\sigma_{k,j}(r)\phi(r,t) \bigg)\rho_{j}(r,t)\\
+    &- \bigg(\lambda_{i} + \phi(r,t)\sum_{k=1}^{K} \sigma_{k,i}(r)\bigg)\rho_{i}(r,t).
+\end{split}
+    \label{eq:MSRDepletion}
+\end{equation}
+
+The MSR depletion equation represents the change in an isotopes density via fluid transport, mass diffusion and nuclear reactions. Equation \ref{eq:MSRDepletion} is a nonlinear PDE, first order in time and second order in space. It should be noted that Equation \ref{eq:LWRDepletion} was already discritized in space. For completeness $\sigma_{k,j}$ and $\phi$ are also functions are space and time in Equation \ref{eq:MSRDepletion} however, the scalar flux is for a single energy group. Solving Equation \ref{eq:MSRDepletion} is the primary topic and will be discussed through out the remainder of the dissertation.
+
+\subsection{Boundary Conditions}
+Mathematically, there are three types of boundary conditions for Eqaution \ref{eq:MSRDepletion}: Dirichlet, Neumann and Robin. Each of these boundary conditions are implemented in a way that permit inlet and outlet flow. Dirichlet boundary conditions specify a single constant value at the boundary. A Neumann boundary condition specifies the gradient normal to the boundary surface to be constant. The Robin boundary condition includes both the dependent variable and gradient are included. Table \ref{tab:boundaryConditions} summarizes each of the boundary conditions.
+
+\begin{table}[h]
+    \caption{\label{tab:boundaryConditions} Boundary Conditions}
+    \centering
+    \begin{tabular}{c|c}
+    \hline
+    \textbf{Boundary condition} & \textbf{Form} \\ [0.5ex] 
+    \hline
+    \hline
+    \\ [-0.75em]
+    Dirichlet & $\rho_{i}(x_{b}) = C$\\ [0.8ex] \hline \\ [-0.75em]
+    Neumann & $\frac{\partial \rho_{i}}{\partial x}(x_{b}) = C$\\ [0.8ex] \hline \\ [-0.75em]
+    Robin & $a\rho_{i}(x_{b}) + b\frac{\partial \rho_{i}}{\partial x}(x_{b}) = C$\\ [0.8ex] \hline
+    \end{tabular}
+\end{table}
+
 
 

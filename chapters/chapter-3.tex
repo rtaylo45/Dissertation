@@ -1,25 +1,559 @@
-\chapter{Application of Matrix Exponential Methods to the Species Transport Equation}\label{ch:application}
+\chapter{Matrix Exponential Methods}\label{ch:matrixEXPMethods}
+The primary method for solving the MSR depletion equation is accomplished by transforming it into a system of first order ODEs. This Chapter presents a method called  matrix exponential methods by the author. It is called by this name because it requires the computation of the exponential of a matrix in order to solve the system of ODEs.
 
-\section{Eigenvalue Analysis of the Transition Matrix}
-
-\section{Application to Nuclear Burnup Equations}
-
-Nuclear burnup calculations involve solving a set of first order linear ODEs, written as Equation \ref{eq:burnup}  \cite{pusa2010}.
+Many methods exist for solving systems of first order differential equations. In vector matrix form, the problem involves solving a system of ordinary differential equations of the form,
 
 \begin{equation}
-    \frac{d\boldsymbol{n}}{dt} = \boldsymbol{A}\boldsymbol{n} + \boldsymbol{S}, \quad \boldsymbol{n}(t_{0}) = \boldsymbol{n}_{0}
-    \label{eq:burnup}
+    \frac{d\boldsymbol{y}}{dt} = \boldsymbol{f}(t,\boldsymbol{y}), \quad \boldsymbol{y}({t_{0})} = \boldsymbol{y_{0}}
+    \label{eq:ODE_matrix_form}
+\end{equation}{}
+
+\noindent
+where $\boldsymbol{y}$, $\boldsymbol{f}(t,\boldsymbol{y})$ and $\boldsymbol{y}_{0}$ are column vectors and $\boldsymbol{f}(t,\boldsymbol{t})$ can contain linear and nonlinear terms. 
+
+$$
+\boldsymbol{y}(t) = 
+\begin{bmatrix}
+y_{1}(t) \\
+y_{2}(t) \\
+\vdots \\
+y_{m}(t) \\
+\end{bmatrix}, \quad 
+\boldsymbol{f}(t,\boldsymbol{y}) = 
+\begin{bmatrix}
+f_{1}(t, y_{1}, y_{2}, \dots y_{m}) \\ 
+f_{2}(t, y_{1}, y_{2}, \dots y_{m}) \\ 
+\vdots \\
+f_{m}(t, y_{1}, y_{2}, \dots y_{m}) \\ 
+\end{bmatrix}, \quad
+\boldsymbol{y}_{0} = 
+\begin{bmatrix}
+y_{1,0} \\
+y_{2,0} \\
+\vdots \\ 
+y_{m,0} \\
+\end{bmatrix}
+$$
+
+There are many popular methods to solve these equations including Euler, Runge–Kutta and multistep. These methods involve dividing the time domain into discrete lengths and stepping through the domain by approximating each time step from the previous steps solution and a slope between the points. When the function vector $\boldsymbol{f}(t,\boldsymbol{y})$ contains terms that are stiff, these methods become computationally expensive and inaccurate for larger time steps \cite{ash2009} \cite{ODECh82011}.
+
+A more adventitious method for solving Equation \ref{eq:ODE_matrix_form} is the use of exponential time differencing  \cite{ash2009} \cite{cox2002} \cite{bratsos2019}. To explain this method, Equation \ref{eq:ODE_matrix_form} is rewritten in a form that decomposes $\boldsymbol{f}(t,\boldsymbol{y})$ into two operators, one representing a constant linear operator and one for the nonlinear operator. Equation \ref{eq:ODE_matrix_linear_nonlinear_form} shows this separation with $\boldsymbol{L}$ being the linear operator and $\boldsymbol{N}$ being the nonlinear.
+
+
+\begin{equation}
+    \frac{d\boldsymbol{y}}{dt} = \boldsymbol{Ly} + \boldsymbol{N}(t,\boldsymbol{y}) 
+    \label{eq:ODE_matrix_linear_nonlinear_form}
+\end{equation}{}
+
+Solving Equation \ref{eq:ODE_matrix_linear_nonlinear_form} using a class of methods involving matrix exponentials can  be broken down into two main categories, integration factor and exponential time differencing. Both of the previously stated methods are discussed further in the next sections. 
+
+\section{Integrating Factor Method}
+The integrating factor method begins by defining the following expression \cite{Kassam2005},
+
+\begin{equation}
+    \boldsymbol{v} = e^{-\boldsymbol{L}t}\boldsymbol{y},
+    \label{eq:v_deff_IF_method}
+\end{equation}{}
+
+\noindent
+where $e^{-\boldsymbol{L}t}$ is the integrating factor. Next, Equation \ref{eq:v_deff_IF_method} is differentiated with respect with time to give,
+
+\begin{equation}
+    \frac{d\boldsymbol{v}}{dt} = -e^{-\boldsymbol{L}t}\boldsymbol{L}\boldsymbol{y} + e^{-\boldsymbol{L}t} \frac{d\boldsymbol{y}}{dt}.
+\end{equation}{}
+
+\noindent
+Multiplying Equation \ref{eq:ODE_matrix_linear_nonlinear_form} by the integrating factor and bringing the linear operator to the right hand side gives, 
+
+\begin{equation}
+    e^{-\boldsymbol{L}t}\frac{d\boldsymbol{y}}{dt} - e^{-\boldsymbol{L}t}\boldsymbol{L}\boldsymbol{y} = e^{-\boldsymbol{L}t}\boldsymbol{N}(t,\boldsymbol{y}) = \frac{d\boldsymbol{v}}{dt}.
+\end{equation}{}
+
+\noindent
+This brings the final form of the equation to solve, 
+
+\begin{equation}
+    \frac{d\boldsymbol{v}}{dt} = e^{-\boldsymbol{L}t}\boldsymbol{N}(t,e^{\boldsymbol{L}t}\boldsymbol{v}), 
+\end{equation}{}
+
+\noindent
+or, 
+
+\begin{equation}
+    \frac{d\boldsymbol{v}}{dt} = \boldsymbol{f}(t,\boldsymbol{v}).
+    \label{eq:IFM_transformed_equation_to_solve}
+\end{equation}{}
+
+Solving Equation \ref{eq:IFM_transformed_equation_to_solve} can be done using any usual Runge–Kutta, or multistep method. For example, the fourth order Runge-Kutta method gives the following formula \cite{Kassam2005}.
+
+
+\begin{equation}
+\begin{split}
+    & k_{1} = h\boldsymbol{f}(t_{n},\boldsymbol{v}_{n}) \\
+    & k_{2} = h\boldsymbol{f}(t_{n}+h/2, \boldsymbol{v}_{n} + k_{1}/2) \\
+    & k_{3} = h\boldsymbol{f}(t_{n}+h/2, \boldsymbol{v}_{n} + k_{2}/2) \\
+    & k_{4} = h\boldsymbol{f}(t_{n}+h, \boldsymbol{v}_{n} + k_{3}) \\
+    & \boldsymbol{v}_{n+1} \approx \boldsymbol{v}_{n} + \frac{1}{6}(k_{1} + 2k_{2} + 2k_{3} + k_{4}) \\
+    & \boldsymbol{y}_{n+1} = e^{\boldsymbol{L} (t_{n}+h)}\boldsymbol{v}_{n+1}
+\end{split}
+\end{equation}{}
+
+Integrating factor methods have the property of being exact when $\boldsymbol{N}(t,\boldsymbol{y}) = 0$ \cite{ash2009}. 
+
+\section{Exponential Time Differencing}
+Exponential time differencing methods are very similar to the integrating factor method except for how it handles the nonlinear portion of Equation \ref{eq:ODE_matrix_linear_nonlinear_form}. Deriving the exponential time differencing formula begins by multiplying Equation \ref{eq:ODE_matrix_linear_nonlinear_form} by the integrating factor,
+
+\begin{equation}
+    e^{-\boldsymbol{L}t}\bigg( \frac{d\boldsymbol{y}}{dt}-\boldsymbol{L}y\bigg) = e^{-\boldsymbol{L}t}\boldsymbol{N}(t,\boldsymbol{y}),
 \end{equation}
 
-Where, $\boldsymbol{n}(t)$ is the nuclide concentration vector, $\boldsymbol{A}$ is the transition matrix, $\boldsymbol{S}$ is a vector of constant source terms and $\boldsymbol{n}_{0}$ is the initial condition vector. The transition matrix ($\boldsymbol{A}$) contains the decay and transmutation coefficients. 
-
-In situations when $\boldsymbol{S} = 0$ Equation \ref{eq:burnup} has the solution $\boldsymbol{n}(t) = e^{\boldsymbol{A}t}\boldsymbol{n}_{0}$ where $e^{\boldsymbol{A}t}$ is defined by the power series shown in Equation \ref{eq:power_series_exp}\cite{pusa2010}\cite{moler2003}.
+\noindent using the product rule this can be written as,
 
 \begin{equation}
-    e^{\boldsymbol{A}t} = \sum_{k = 0}^{\infty}\frac{1}{k!}(\boldsymbol{A}t)^{k}
+    \frac{d}{dt}\bigg(e^{-\boldsymbol{L}t}\boldsymbol{y}\bigg) = e^{-\boldsymbol{L}t}\boldsymbol{N}(t,\boldsymbol{y}).
+\end{equation}
+
+\noindent Next the function is integrated from a point $t_{n}$ to $t_{n} + \Delta t$ where $\Delta t = t_{n+1} - t_{n}$,
+
+\begin{equation}
+    e^{-(t_{n} + \Delta t)\boldsymbol{L}}\boldsymbol{y}(t_{n} + \Delta t) - e^{-t_{n}\boldsymbol{L}}\boldsymbol{y}(t_{n}) = \int_{t_{n}}^{t_{n}+\Delta t}e^{-\boldsymbol{L}t}\boldsymbol{N}(t,\boldsymbol{y})dt.
+\end{equation}
+
+\noindent Let $t = t_{n} + \tau \quad dt = d\tau \quad  \tau \in [0,\Delta t]$, applying these change of variables gives \cite{bratsos2015}, 
+
+\begin{equation}
+    e^{-(t_{n} + \Delta t)\boldsymbol{L}}\boldsymbol{y}(t_{n} + \Delta t) - e^{-t_{n}\boldsymbol{L}}\boldsymbol{y}(t_{n}) = \int_{0}^{\Delta t}e^{-\boldsymbol{L}(t_{n} + \tau)}\boldsymbol{N}(t_{n} + \tau,\boldsymbol{y}(t_{n} + \tau))d\tau.
+    \label{eq:transformedExpTimeDifferencing}
+\end{equation}
+
+\noindent Because $t_{n}$,  $\tau$ and $\Delta t$ are scalars, the exponential can be written as,
+
+\begin{equation}
+\begin{split}
+     & e^{-\boldsymbol{L}(t_{n}+\tau)} = e^{-\boldsymbol{L}t_{n}}e^{-\boldsymbol{L}\tau} \\ 
+     & e^{-(t_{n}+\Delta t)\boldsymbol{L}} = e^{-\boldsymbol{L}t_{n}}e^{-\boldsymbol{L}\Delta t}.
+\end{split}
+\end{equation}
+
+\noindent Applying to Equation \ref{eq:transformedExpTimeDifferencing}, $e^{\boldsymbol{L}t_{n}}$ cancels out on both sides. This leads to,
+
+\begin{equation}
+    e^{-\Delta t\boldsymbol{L}}\boldsymbol{y}(t_{n} + \Delta t) - \boldsymbol{y}(t_{n}) = \int_{0}^{\Delta t}e^{-\boldsymbol{L}\tau}\boldsymbol{N}(t_{n} + \tau,\boldsymbol{y}(t_{n} + \tau))d\tau, 
+\end{equation}
+
+
+
+\noindent moving $\boldsymbol{y}(t_{n})$ to the right hand side and multiplying both sides by $e^{\Delta t \boldsymbol{L}}$ gives the final result,
+
+\begin{equation}
+    \boldsymbol{y}(t_{n} + \Delta t) = e^{\Delta t\boldsymbol{L}}\boldsymbol{y}(t_{n}) + e^{\Delta t\boldsymbol{L}}\int_{0}^{\Delta t}e^{-\boldsymbol{L}\tau}\boldsymbol{N}(t_{n} + \tau,\boldsymbol{y}(t_{n} + \tau))d\tau,
+    \label{eq:ETDMethodExact}
+\end{equation}
+
+\noindent where $\Delta t \boldsymbol{L}$ is called the transition matrix.
+This formalization is exact and exponential time differencing methods work to approximate the integral of the nonlinear portion. Exponential  time  differencing  methods have the property of being exact when $\boldsymbol{N}(\boldsymbol{y},t) = \text{constant}$ \cite{ash2009}.
+
+Evaluating the integral in Equation \ref{eq:ETDMethodExact} can be done using traditional multistep methods or with Runge-Kutta methods \cite{cox2002}. For example, a fourth order Runge-Kutta approximation for the integral gives the following formula for Equation \ref{eq:ETDMethodExact} \cite{cox2002},
+
+\begin{equation}
+\begin{split}
+    % an
+     \boldsymbol{a}_{n} &= e^{\boldsymbol{L}\Delta t/2}\boldsymbol{y}(t_{n}) + \boldsymbol{L}^{-1}\big(e^{\boldsymbol{L}\Delta t/2} - \boldsymbol{I} \big)\boldsymbol{N}(t_{n},\boldsymbol{y}(t_{n})) \\
+    % bn 
+    \boldsymbol{b}_{n} &= e^{\boldsymbol{L}\Delta t/2}\boldsymbol{y}(t_{n}) + \boldsymbol{L}^{-1}\big(e^{\boldsymbol{L}\Delta t/2} - \boldsymbol{I} \big)\boldsymbol{N}(t_{n}+\Delta t/2,\boldsymbol{a}_{n}) \\
+    % cn
+     \boldsymbol{c}_{n} &= e^{\boldsymbol{L}\Delta t/2}\boldsymbol{a}_{n} + \boldsymbol{L}^{-1}\big(e^{\boldsymbol{L}\Delta t/2} - \boldsymbol{I} \big)\big(2\boldsymbol{N}(t_{n}+\Delta t/2,\boldsymbol{b} _{n}) - \boldsymbol{N}(t_{n},\boldsymbol{y}(t_{n}))\big) \\
+     % yn
+     \boldsymbol{y}(t_{n+1}) &= e^{\boldsymbol{L}\Delta t}\boldsymbol{y}(t_{n}) + \Delta t^{-2}\boldsymbol{L}^{-3}\big([-4\boldsymbol{I} - \Delta t\boldsymbol{L} + e^{\boldsymbol{L}\Delta t}(4\boldsymbol{I} -3\Delta t\boldsymbol{L} + (\Delta t\boldsymbol{L})^{2})]\boldsymbol{N}(t_{n}, \boldsymbol{y}(t_{n}))) \\
+     &+ 2[2\boldsymbol{I} + \Delta t\boldsymbol{L} + e^{\boldsymbol{L}\Delta t}(-2\boldsymbol{I} + \Delta t\boldsymbol{L})](\boldsymbol{N}(t_{n} + \Delta t/2, \boldsymbol{a}_{n}) + \boldsymbol{N}(t_{n} + \Delta t/2, \boldsymbol{b}_{n})) \\
+     &+ [-4\boldsymbol{I} - 3\Delta t\boldsymbol{L} - (\Delta\boldsymbol{L})^{2} + e^{\boldsymbol{L}\Delta t}(4\boldsymbol{I} - \Delta t\boldsymbol{L})]\boldsymbol{N}(t_{n}+\Delta t, \boldsymbol{c}_{n})\big)
+\end{split}
+\end{equation}
+
+
+
+\section{Solutions to the Matrix Exponential}
+When obtaining solutions based on exponential time differencing or integrating factor methods, an exponential of a matrix needs to be computed. There are multiple computational methods for solving for the matrix exponential, many of them are developed specifically to evaluate $e^{\boldsymbol{A}}$ or $e^{\boldsymbol{A}}\boldsymbol{v}$. One evaluates the matrix exponential directly and the other calculates the action of the exponential on a vector. When $\boldsymbol{A}$ is dense or has a low to moderate size (few hundreds) methods such as Pad\'e approximation or Chebyshev rational approximation can be employed. For large sparse matrices, Kraylov subspace methods offer more efficient calculations \cite{exokit}. In situations when the matrix $\boldsymbol{A}$ is diagonal, computing the matrix exponential becomes,
+
+$$
+e^{\boldsymbol{A}} = 
+\begin{bmatrix}
+a_{1,1} & 0 & 0 & \hdots & 0 \\
+0 & a_{2,2} & 0 & \hdots & 0 \\
+0 & 0 & a_{3,3} & \hdots & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots\\
+0 & 0 & 0 & \hdots & a_{m,m} \\
+\end{bmatrix}
+=
+\begin{bmatrix}
+e^{a_{1,1}} & 0 & 0 & \hdots & 0 \\
+0 & e^{a_{2,2}} & 0 & \hdots & 0 \\
+0 & 0 & e^{a_{3,3}} & \hdots & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots\\
+0 & 0 & 0 & \hdots & e^{a_{m,m}} \\
+\end{bmatrix}
+.
+$$
+
+\noindent
+These sort of situations arise when solving PDEs using spectral methods \cite{ash2009} \cite{cox2002} \cite{kazimi1990}. In this chapter multiple methods for evaluating the matrix exponential are presented. Each of these methods come with various advantages and disadvantages and specific matrix properties that are required for computation. 
+
+
+\subsection{Taylor Series Expansion}
+Formally,  matrix exponential is defined using an infinite Taylor series \cite{exokit} \cite{moler2003} \cite{pusa2010}. 
+\begin{equation}
+    e^{\boldsymbol{A}} = \sum_{k = 0}^{\infty}\frac{1}{k!}\boldsymbol{A}^{k}
     \label{eq:power_series_exp}
 \end{equation}
 
-When $\boldsymbol{S}$ is not equal to zero, the transition matrix $\boldsymbol{A}$ can be modified to $\hat{\boldsymbol{A}}$ by adding a dummy species to hold constant source terms \cite{isotalo2015}. 
+\noindent Therefor, a straight forward way to calculate the matrix exponential is using its formal definition. This method however, is not commonly used in application for either the matrix or the scalar case. The number of terms required to achieve convergence can be large and produce computational inefficiency. This method is also suffers from numerical round off errors from cancellation for large values of $k$ \cite{moler2003}. 
 
-For molten salt reactors, these depletion calculations involve solving scalar linear partial differential equations (PDEs) using matrix exponential methods for high time domain accuracy. This method involves first discretizing the spatial dependence of a PDE to a system of coupled ODEs. The resulting set of ODEs will have the same form of Equation \ref{eq:burnup} with the addition of new coefficients in $\boldsymbol{A}$ representing the approximation of spatial dependence. 
+
+\subsection{Pad\'e Approximation}
+The Pad\'e approximation represents a function by expanding it as a ratio of two power series. A ($p,q$) Pad\'e approximation for $e^{\boldsymbol{A}}$ is defined by \cite{moler2003}, 
+
+\begin{equation}
+    R_{p,q}(\boldsymbol{A}) = \frac{N_{p,q}(\boldsymbol{A})}{D_{p,q}(\boldsymbol{A})}
+    \label{eq:padeApprox}
+\end{equation}
+
+\noindent where
+
+\begin{equation*}
+    N_{p,q}(\boldsymbol{A}) = \sum_{j=0}^{P}\frac{(p + q - j)!p!}{(p + q)!j!(p - j)!}\boldsymbol{A}^{j}
+\end{equation*}
+
+\begin{equation*}
+    D_{p,q}(\boldsymbol{A}) = \sum_{j=0}^{P}\frac{(p + q - j)!q!}{(p + q)!j!(q - j)!}(-\boldsymbol{A})^{j}.
+\end{equation*}
+
+\noindent The error associated with the previous Pad\'e approximation is demonstrated by \cite{higham2005}
+
+\begin{equation}
+    e^{\boldsymbol{A}} - R_{p,q}(\boldsymbol{A}) = (-1)^{q}\frac{p!q!}{(p+q)!(p+q+1)!}\boldsymbol{A}^{p+q+1} + \mathcal{O}(\boldsymbol{A}^{p+q+2}).
+\end{equation}
+
+Pad\'e methods are similar to Taylor series as they approximate a function using a series solution, however, Pad\'e series usually out preform Taylor series. Series solutions methods, such as Pad\'e are also more accurate near the origin, meaning that the matrix norm $||A||$ must be sufficiently small for the approximation to be accurate \cite{pusa2010}. Yet another problem arises when $\boldsymbol{A}$ has a wide spread of eigenvalues, causing an ill-conditioned linear system  \cite{exokit} \cite{moler2003}.  
+
+When applying the Pad\'e approximation it is often adventitious to set $p$ and $q$ equal to one another, this is referred to as diagonal approximations. Setting $q = p$ requires about the same amount of work if $q > p$ for the same $q$, but would result in a approximation that is of order $2p > p + q$. Another reason to set $q=p$ comes from examining the spectrum of $\boldsymbol{A}$. If the eigenvalues of $\boldsymbol{A}$ are located on the left hand side of the complex plane, then $e^{\boldsymbol{A}t}$ goes to zero as $t$ goes to infinity. With $q > p$, $R_{pq}(\boldsymbol{A}t)$ is bounded, but if $q < p$, $R_{pq}(\boldsymbol{A}t)$ is unbounded \cite{moler2003}. 
+
+
+Instead of directing using Equation \ref{eq:padeApprox}, Horners rule can be applied to the numerator and denominator to reduce the number of operations. This result is shown in Equation \ref{eq:hornerPadeApprox}. 
+
+\begin{equation}
+    R_{pp}(\boldsymbol{A})=
+    \begin{cases}
+        1+2\frac{\boldsymbol{A}\sum_{k=0}^{p/2-1}c_{2k+1}\boldsymbol{A}^{2k}}{\sum_{k=0}^{p/2}c_{2k}\boldsymbol{A}^{2k}-\boldsymbol{A}\sum_{k=0}^{p/2-1}c_{2k+1}\boldsymbol{A}^{2k}} & p \text{ even}\\[1em]
+        
+        -1-2\frac{\sum_{k=0}^{(p-1)/2}c_{2k}\boldsymbol{A}^{2k}}{\boldsymbol{A}\sum_{k=0}^{(p-1)/2}c_{2k+1}\boldsymbol{A}^{2k}-\sum_{k=0}^{(p-1)/2}c_{2k}\boldsymbol{A}^{2k}} & p \text{ odd}
+    \end{cases}
+    \label{eq:hornerPadeApprox}
+\end{equation}
+
+\noindent where
+
+\begin{equation*}
+    c_{k} = c_{k-1}\frac{p+1-k}{(2p+1-k)k}
+\end{equation*}
+
+\noindent with $c_{0} = 1$. This evaluates Equation \ref{eq:padeApprox} with half the number of operations \cite{exokit}. Figure \ref{fig:PadeApproxError} shows the error of the Pad\'e approximation on the real axis for orders 6, 12 and 24. As the values approach the origin the Pad\'e approximation exponentially decays and oscillates at machine precision. This is because the Pad\'e approximation is more accurate around the origin. 
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=5in]{images/padeError.png}\\
+  \caption{$\log_{10}|R(x)-e^{x}|$ for the Pad\'e approximation of orders 6, 12 and 24}
+  \label{fig:PadeApproxError}
+\end{figure} 
+
+
+\subsection{Scaling and Squaring}
+Both Taylor and Pad\'e methods fail to approximate the matrix exponential when $||\boldsymbol{A}||$ or the spread of the eigenvalues is large. This problem is exacerbated when computing $e^{\boldsymbol{A}t}$ for sufficiently large values of $t$. The scaling and squaring method works to fixed these problem by exploiting the property
+
+\begin{equation*}
+    e^{\boldsymbol{A}} = \big( e^{\boldsymbol{A}/m}\big)^{m}
+    \label{eq:scalingAndSquaring},
+\end{equation*}
+
+\noindent $m$ is a scalar chosen to be $2^{\alpha}$ where $\alpha$ is the number of times the matrix is squared \cite{moler2003}. This property is commonly used for methods based on the Pad\'e approximation. Plugging Equation \ref{eq:scalingAndSquaring} into the Pad\'e approximation gives,
+
+\begin{equation}
+    e^{\boldsymbol{A}} = (e^{2^{-\alpha}\boldsymbol{A}})^{2^{\alpha}} \approx R_{p,q}(2^{-\alpha}\boldsymbol{A})^{2^{\alpha}}
+\end{equation}
+
+Moler and Van Loan \cite{moler2003} derived an error analysis for choosing the proper value of $\alpha$ based on $||\boldsymbol{A}||$. As noted by Higham \cite{higham2005}, this derivation contained weaknesses. Moler assumed that the matrix norm needed to be less than one half ($||\boldsymbol{A}|| < 1/2$) but Higham proved that this was not the case. Higham further showed that the required minimal matrix norm is different for each order of the Pad\'e implementation. Above this norm, a higher order Pad\'e approximation would be required, or matrix scaling would need to be take place. One other weakness was the derivation of their error bound. It was designed to be easily computable, which resulted in their error bound not being sharp \cite{higham2005}. When the error bound is not sharp, then it is possible to overscale the matrix, resulting in a loss of accuracy. Higham described two algorithms to resolve the overscaling problem found in \cite{higham2005} and \cite{higham2009}. Reference \cite{higham2009} is an updated algorithm to the one described in reference \cite{higham2005}, which works to fix the overscaling problem. 
+
+%\begin{table}[t]
+%   \caption{\label{tab:scalingSquaringOptimalValues} Summary of optimal Pad\'e orders and required matrix multiplications \cite{higham2005}}
+%   \centering
+%   \begin{tabular}{c| cccccccccc}
+%   \hline
+%   $m$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10\\
+%   \hline 
+%    $\theta_{m}$ & 3.7e-8 & 5.3e-4 & 1.5e-2 & 8.5e-2 & 2.5e-1 & 5.4e-1 & 9.5e-1 & 1.5e0 & 2.1e0 & 2.8e0 \\
+%   \hline
+%   $\pi_{m}$ & 0 & 1 & 2 & 3 & 3 & 4 & 4 & 5 & 5 & 6 \\
+%   \hline
+%   \end{tabular}
+
+%   \vspace*{4 mm}
+   
+%   \begin{tabular}{c| ccccccccccc}
+%   \hline
+%   $m$ & 11 & 12 & 13 & 14 & 15 & 16 & 17 & 18 & 19 & 20 & 21\\
+%   \hline 
+%    $\theta_{m}$ & 3.6e0 & 4.5e0 & 5.4e0 & 6.3e0 & 7.3e0 & 8.4e0 & 9.4e0 & 1.1e1 & 1.2e1 & 1.3e1 & 1.4e1 \\
+%   \hline
+ %  $\pi_{m}$ & 6 & 6 & 6 & 7 & 7 & 7 & 7 & 8 & 8 & 8 & 8 \\
+ %  \hline
+ %  \end{tabular}
+%\end{table}
+
+
+
+\subsection{Solutions Based on the Cauchy Integral Formula}
+This method is based on transforming the matrix exponential into the complex plane using the Cauchy integral formula.  The matrix exponential becomes,
+
+\begin{equation}
+	e^{\boldsymbol{A}} = \frac{1}{2\pi i}\int_{\Gamma} e^{z}(z\boldsymbol{I} - \boldsymbol{A})^{-1}dz,
+	\label{eq:cauchyExp}
+\end{equation}
+
+\noindent where $\boldsymbol{A}$ is analytic inside the closed contour $\Gamma$ that winds once around the eigenvalues of $\boldsymbol{A}$ \cite{pusaThesis} \cite{pusa2011} \cite{Trefethen2006}. In practice, it is often required to evaluate the action of the matrix exponential on vector $\boldsymbol{v}$, this leads to evaluating,
+
+\begin{equation}
+	e^{\boldsymbol{A}}\boldsymbol{v} = \frac{1}{2\pi i}\int_{\Gamma} e^{z}(z\boldsymbol{I} - \boldsymbol{A})^{-1}\boldsymbol{v}dz.
+	\label{eq:cauchyExpVector}
+\end{equation}
+
+\noindent When evaluating Equations \ref{eq:cauchyExp} or \ref{eq:cauchyExpVector} it is vital to select a contour that encloses the spectrum of $\boldsymbol{A}t$. If this is not done, then the approximation is inaccurate. There are a number of ways to solve Equations \ref{eq:cauchyExp} or \ref{eq:cauchyExpVector} which involve knowing the nature of the spectrum of the transition matrix $\boldsymbol{A}t$. 
+
+\subsubsection{Direct Implementation of a Contour Function}
+If one knows the eigenvalue of the transition matrix then one can choose a contour $\Gamma$ that encloses them. The simplest choice would be a circle of radius $R$ centered at point $z_{0}$ \cite{ash2009}.
+
+\begin{equation}
+    \phi(\theta) = z_{0} + Re^{i\theta}: 0 \leq \theta \leq 2\pi 
+\end{equation}
+
+\noindent Making the substitution $dz = \phi' d\theta$ and making the substitution into Equation \ref{eq:cauchyExp} yields,
+
+\begin{equation}
+\begin{split}
+    e^{\boldsymbol{A}} 
+    & = \frac{1}{2\pi i}\int_{0}^{2\pi} e^{z_{0}-Re^{i\theta}}(z\boldsymbol{I}-\boldsymbol{A})Rie^{i\theta}d\theta \\[3ex]
+    & = \frac{1}{2\pi}\int_{0}^{2\pi}(\phi(\theta)-z_{0})(z\boldsymbol{I}-\boldsymbol{A})e^\phi(\theta)d\theta.
+\end{split}
+\end{equation}
+
+\noindent The integral can then be calculated using a quadrature method. A numerical investigation was conducted by A.H. Ashi et al \cite{ash2009} using the above them by employing a periodic trapezoidal rule. 
+
+\begin{equation*}
+    \int_{0}^{2\pi}f(\theta)d\theta \approx \frac{2\pi}{N}\sum_{j=1}^{N}f(\theta_{j}), \quad \theta_{j} = \frac{2\pi j}{N}.
+\end{equation*}
+
+\noindent Ashi obtained the following formula for approximating the matrix exponential with $N$ quadrature points, 
+
+\begin{equation}
+    e^{\boldsymbol{A}} \approx \frac{1}{N}\sum_{j=1}^{N}(\phi(\theta_{j}) - z_{0})(\phi(\theta_{j})\boldsymbol{I} - \boldsymbol{A})^{-1}e^{\phi(\theta_{j})}.
+    \label{eq:ashContour}
+\end{equation}
+
+
+It is important to note that when evaluating Equation \ref{eq:ashContour} that $N$ matrix inversions need to be calculated. However this can be rewritten in the form where the action of the matrix exponential on a vector is calculated. Evaluating Equation \ref{eq:ashContour} would then require solve $N$ number of linear systems, which is generally more adventitious. When the norm of $\boldsymbol{A}t$ becomes larger as you increase $t$ the contour needs to increase to enclose all of the eigenvalues. This leads to increasing the number of quadrature points to maintain accuracy, thus increasing the computational cost \cite{ash2009}. 
+
+\subsubsection{Rational Approximation}
+A more generalized method for evaluating the contour integral can be accomplished by choosing an analytic function $\phi(\theta)$ that maps a real line onto the contour. Because the function $e^{\phi(\theta)}$ decreases exponentially as $|\theta| \rightarrow \infty$ the approximation can be truncated to a finite number of quadrature points. When the spectrum of the transition matrix falls on the left hand side of the complex plane close to the real axis then the contour $\Gamma$ denotes a Hankel like contour that winds from $-\infty-0i$ on the lower half-plane and $\infty+0i$ on the upper half-plane. \cite{Trefethen2006}. This allows for the definition of a general contour function that will enclose the eigenvalues on the left hand side of the complex plane around the negative real axis. 
+
+The idea is to solve the contour integral of the form,
+
+\begin{equation}
+    I = \frac{1}{2\pi i}\int_{-\infty}^{\infty}e^{\phi(\theta)}f(\phi(\theta))\phi'(\theta)d\theta.
+    \label{eq:generalContourIntegral}
+\end{equation}
+
+\noindent The trapezoidal approximation with $N$ points to Equation \ref{eq:generalContourIntegral} becomes,
+
+\begin{equation}
+    I_{N} = \frac{-i}{N}\sum_{k=1}^{N}e^{z_{k}}f(z_{k})w_{k},
+    \label{eq:generalContourIntegralNPoints}
+\end{equation}
+
+\noindent where $z_{k} = \phi(\theta_{k})$ and  $w_{k} = \phi'(\theta_{k})$ \cite{Trefethen2006}. It can be shown that Equation \ref{eq:generalContourIntegralNPoints} can be written in the form,
+
+\begin{equation}
+    I_{N} = \frac{1}{2\pi i}\int_{C}r(z)f(z)dz, \quad r(z) = \sum_{k=1}^{N}\frac{c_{k}}{z-z_{k}}, \quad c_{k} = iN^{-1}e^{z_{k}}w_{k},
+\end{equation}
+
+\noindent where $C$ is a contour that winds around each point $z_{k}$ \cite{Trefethen2006}. The points $z_{k}$ and $c_{k}$ are interpreted as the poles and residues of the rational function. Equation for $r(z)$ is a good approximation to $e^{z}$ near the negative real axis. The error of the quadrature estimate is,
+
+\begin{equation}
+    I - I_{N} = \frac{1}{2\pi i}\int_{\Gamma'} \big(e^{z} - r(z)\big)f(z)dz.
+\end{equation}{}
+
+\noindent For a contour function $\phi(\theta)$ the goal is to find the rational function $r(z)$ that minimizes the error. 
+
+Trefethen noted three contour functions to $\Gamma$, two of the three are presented here \cite{Trefethen2006}. The simplest contour function is a parabola defined by, 
+
+\begin{equation}
+    \phi = N[0.1309 - 0.1194\theta^{2} + 0.2500i\theta]
+    \label{eq:parabolicContour}
+\end{equation}
+
+\noindent which has a convergence rate of $\mathcal{O}(2.85^{-N} )$. Accuracy of about 14 or more digits can be achieved with N = 32. The approximation of $e^{z}$ on the complex plane is shown in Figure \ref{fig:complexRationalApproxParabola}. The second contour function is that of a hyperbola defined by, 
+
+\begin{equation}
+    \phi = 2.246N[1 - \sin(1.1721 - 0.3443i\theta)]
+    \label{eq:hyperbolicContour}
+\end{equation}
+
+\noindent which has a convergence rate of $\mathcal{O}(3.20^{-N} )$, with an accuracy of about 16 or more digits with N = 32. The same approximation for $e^{z}$ on the complex plane is shown in Figure \ref{fig:complexRationalApproxHyperbola}. Both Figures \ref{fig:complexRationalApproxParabola} and \ref{fig:complexRationalApproxHyperbola} show high levels of accuracy not only on the negative real access but also for a wide region of the left hand side of the complex plane. 
+
+Applying these approximations to real valued scalars or matrices requires half the amount of computational cost, this is because the poles of a rational function with real valued coefficients form conjugate pairs \cite{pusa2011}. For a real scalar, the rational approximation is,
+
+\begin{equation}
+    e^{x} \approx r(x) = 2Re\bigg(\sum_{k=1}^{N/2}\frac{c_{k}}{x - z_{k}}\bigg).
+\end{equation}
+
+%\FloatBarrier
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=5in]{images/RationApproxParabolicError32.png}\\
+  \caption{$\log_{10}|r(z)-e^{z}|$ for N = 32 where the contour is defined by a parabola, Equation \ref{eq:parabolicContour}. Quadrature points are denoted with x's}
+  \label{fig:complexRationalApproxParabola}
+\end{figure} 
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=5in]{images/RationApproxHyperbolicError32.png}\\
+  \caption{$\log_{10}|r(z)-e^{z}|$ for N = 32 where the contour is defined by a hyperbola, Equation \ref{eq:hyperbolicContour}. Quadrature points are denoted with x's}
+  \label{fig:complexRationalApproxHyperbola}
+\end{figure} 
+
+%\FloatBarrier
+
+
+
+
+\noindent When applying the rational function to a real valued matrix, the approximation becomes,
+
+\begin{equation}
+    e^{\boldsymbol{A}} \approx r(\boldsymbol{A}) = 2Re\bigg(\sum_{k=1}^{N/2}c_{k}(\boldsymbol{A} - z_{k}\boldsymbol{I})^{-1}\bigg),
+\end{equation}
+
+\noindent requiring $N/2$ matrix inversions. If instead the action on the matrix exponential on a vector $v$ is calculated, the approximation becomes,
+
+\begin{equation}
+    e^{\boldsymbol{A}}\boldsymbol{v} \approx r(\boldsymbol{A})\boldsymbol{v} = 2Re\bigg(\sum_{k=1}^{N/2}c_{k}(\boldsymbol{A} - z_{k}\boldsymbol{I})^{-1}\boldsymbol{v}\bigg),
+\end{equation}
+
+\noindent requiring $N/2$ solves of the linear system $\boldsymbol{x} = (\boldsymbol{A} - z_{k}\boldsymbol{I})^{-1}c_{k}\boldsymbol{v}$. It is important to note that each of these linear systems or matrix inversions are independent of one another and can be done in parallel. 
+
+\subsubsection{Best Approximations}
+A different approach is to choose a function $r(z)$ that is the best approximation of the exponential function on the negative real axis, doing this bypasses the need for a contour function \cite{pusaThesis} \cite{Trefethen2006}. This method is known as the Chebychev Rational Approximation Method (CRAM) and is done by finding a unique rational function $\hat{r}_{k,k} = \hat{p}_{k}(x)/\hat{q}_{k}(x)$ satisfying 
+
+\begin{equation}
+    \epsilon_{k,k} \equiv \sup_{x \in \mathbb{R}_{-}} |\hat{r}_{k,k}(x) - e^{x}| = \inf_{r_{k,k} \in \pi_{k,k}}\bigg\{ \sup_{x \in \mathbb{R}_{-}} |r_{k,k}(x) - e^{x}|\bigg\}.
+\end{equation}
+
+\noindent Applying this definition leads to the follows form on the rational approximation,
+
+\begin{equation}
+    e^{z} \approx r(z) = c_{0} + \sum_{k=1}^{N}\frac{c_{k}}{z - z_{k}}
+\end{equation}
+
+
+\noindent where $c_{0}$ is the limit at infinity. This formation is the same as the rational approximation with $c_{0} = 0$. The convergence rate for CRAM is of the order $\mathcal{O}(9.28903^{-N} )$, which is remarkably faster than those previously shown. With $N=16$ quadrature points CRAM gives about 15 or more digits of accuracy. Thus the same order of accuracy can be achieved with half the number of quadrature points than the rational approximations defined by contour functions. For a more detailed explanation the CRAM algorithm please refer to Reference \cite{pusaThesis}. 
+
+The difficulty with using the CRAM approximation is finding the coefficient for the rational approximation. For CRAM of order 14 and 16 the rational coefficient can be found in Reference \cite{pusa2011} up to 20 digits. Figure \ref{fig:complexRationalApproxCRAM} shows the accuracy of CRAM to the function $e^{z}$ on the complex plane. Because the rational function was built in such a way to be the best approximation on the negative real axis, the accuracy of CRAM is in a more narrow range of the real axis. For a real values matrix the CRAM algorithm leads to the following solution,
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=5in]{images/RationApproxCRAMError16.png}\\
+  \caption{$\log_{10}|r(z)-e^{z}|$ for CRAM with N = 16. Quadrature points are denoted with x's}
+  \label{fig:complexRationalApproxCRAM}
+\end{figure} 
+
+\begin{equation}
+    e^{\boldsymbol{A}} \approx r(\boldsymbol{A}) = c_{0} + 2Re\Bigg( \sum_{k=1}^{N/2}c_{k}(\boldsymbol{A} - z_{k}\boldsymbol{I})^{-1}\Bigg), 
+\end{equation}
+
+\noindent and for the action of the matrix on a vector,
+
+\begin{equation}
+    e^{\boldsymbol{A}}\boldsymbol{v} \approx r(\boldsymbol{A})\boldsymbol{v} = c_{0}\boldsymbol{v} + 2Re\Bigg( \sum_{k=1}^{N/2}c_{k}(\boldsymbol{A}t - z_{k}\boldsymbol{I})^{-1}\boldsymbol{v}\Bigg).
+    \label{eq:CRAMVector}
+\end{equation}
+
+
+
+
+\subsubsection{Krylov Subspace Method}
+Krylov subpace approximations are a class of popular methods utilized in sparse matrix algorithms. The idea of Krylov subspace methods is to project the sparse $n \times n$ $\boldsymbol{A}$ matrix into a lower-dimensional subspace. The new lower dimension projection is of size $m \times m$ where $m < n$. Because the matrix is of lower dimension, calculating its matrix exponential becomes much faster. It is important to note that Krylov subspace methods can only be used as an operation on a vector, the direct calculation of the matrix exponential is not possible \cite{saad1992}.  
+
+Consider we want to approximate the matrix exponential as a polynomial of order $m-1$, this takes the form,
+
+\begin{equation}
+    e^{\boldsymbol{A}}\boldsymbol{v} \approx p_{m-1}(A)\boldsymbol{v}.
+    \label{eq:expPolynomailForm}
+\end{equation}
+
+\noindent This approximation is an element of the Krylov subspace defined by,
+
+\begin{equation}
+    K_{m} = \text{span}\{\boldsymbol{v}, \boldsymbol{A}\boldsymbol{v}, \boldsymbol{A}^{2}\boldsymbol{v}, ... ,\boldsymbol{A}^{m-1}\boldsymbol{v}\}.
+\end{equation}
+
+\noindent For a general non-symmetric matrix the Arnoldi algorithm can be utilized in building the Krylov space \cite{saad1992} \cite{saad1989}. Algorithm \ref{alg:arnoldi} constructs an orthonormal bases $\boldsymbol{V}_{m} = [\boldsymbol{v}_{1}, \boldsymbol{v}_{2}, ... \boldsymbol{v}_{m}]$ of the Krylov subspace, and an $m \times m$ upper Hessenberg matrix. The Arnoldi algorithm produces the following relation,
+
+\begin{equation}
+    \boldsymbol{A}\boldsymbol{V}_{m} = \boldsymbol{V}_{m}\boldsymbol{H}_{m} + h_{m+1,m}\boldsymbol{v}_{m+1}\boldsymbol{e}^{T}_{m}
+    \label{eq:arnoldiResult}
+\end{equation}
+
+\begin{algorithm}
+	\caption{Arnoldi} 
+	\begin{algorithmic}[1]
+	    \State Compute $\boldsymbol{v}_{1} = \boldsymbol{v}/||\boldsymbol{v}||_{2}$
+		\For {$j=1,2,\ldots m$}
+            \State Compute $\boldsymbol{w} = \boldsymbol{A}\boldsymbol{v}_{j}$
+            \For{$i=1,2,\ldots j$}
+                \State Compute $h_{i,j} = (\boldsymbol{w},\boldsymbol{v}_{i})$
+                \State Compute $\boldsymbol{w} = \boldsymbol{w} - h_{i,j}\boldsymbol{v}_{i}$
+            \EndFor
+            \State Compute $h_{j+1, j} = ||\boldsymbol{w}||_{2}$ and $\boldsymbol{v}_{j+1} = \boldsymbol{w}/h_{j+1,j}$
+		\EndFor
+	\end{algorithmic} 
+	\label{alg:arnoldi}
+\end{algorithm}
+
+\noindent where $\boldsymbol{H}_{m} = \boldsymbol{V}^{T}_{m}\boldsymbol{A}\boldsymbol{V}_{m}$. The Hessenberg matrix $\boldsymbol{H}_{m}$ represents the projection of $\boldsymbol{A}$ on to the Krylov subspace. The approximation in Krylov space is known to be, 
+
+\begin{equation}
+    e^{\boldsymbol{A}}\boldsymbol{v} \approx \beta \boldsymbol{V}_{m}e^{\boldsymbol{H}_{m}}\boldsymbol{e}_{1}
+    \label{eq:krylovApproxEXP}
+\end{equation}
+
+\noindent where $\beta = ||v||_{2}$ \cite{saad1989}. The computation of $e^{
+\boldsymbol{H}_{m}}$ becomes much easier because $\boldsymbol{H}_{m}$ is dense and smaller than $\boldsymbol{A}$. After the Krylov approximation is made, a typical method for solving the matrix exponential is used on $e^{\boldsymbol{H}_{m}}$. The quality of this this approximation is exact when $n = m$. This comes from the fact that at step $m$, $h_{m+1,m} = 0$ and Equation \ref{eq:arnoldiResult} becomes,
+
+\begin{equation}
+    \boldsymbol{A}\boldsymbol{V}_{m} = \boldsymbol{V}_{m}\boldsymbol{H}_{m}.
+\end{equation}
+
+\noindent The Arnoldi process with be exact after $m$ steps when $m$ is greater to or equal to the degree of the minimal polynomial in Equation \ref{eq:expPolynomailForm}. At this point Equation \ref{eq:expPolynomailForm} is exact, however this is unlikely to happen until $m=n$ \cite{saad1992} \cite{saad1989}. 
+
+ The general error associated with applying the approximation in Equation \ref{eq:krylovApproxEXP} can be proven to be,
+ 
+ \begin{equation}
+     ||e^{\boldsymbol{A}}\boldsymbol{v} - \beta \boldsymbol{V}_{m}e^{\boldsymbol{H}_{m}}\boldsymbol{e}_{1}||_{2} \leq 2\beta \frac{\rho^{m}e^{\rho}}{m!},
+ \end{equation}
+ 
+ \noindent where $\rho = ||A||_{2}$ \cite{saad1992}. The error bounds derived by Saad in \cite{saad1992} can be computed but might not be sharp, especially when the norm of the matrix is large. In practice, a more useful posteriori error can be used to determine the error for applying the Arnoldi algorithm. This error is found after applying the Arnoldi algorithm and is defined by,
+ 
+\begin{equation}
+    ||e^{\boldsymbol{A}}\boldsymbol{v} - \beta \boldsymbol{V}_{m}e^{\boldsymbol{H}_{m}}\boldsymbol{e}_{1}||_{2} \approx h_{m+1,m}|\boldsymbol{e}_{m}^{T}\phi(\boldsymbol{H}_{m})\beta \boldsymbol{e}_{1}|,
+\end{equation}
+
+\noindent where $\phi(\boldsymbol{A}) = \boldsymbol{A}^{-1}[e^{\boldsymbol{A}} - \boldsymbol{I}]$. This error estimate was found to be sufficient enough for practical applications \cite{saad1992}. 
+
+Krylov subpsace methods are good for approximating the largest eigenvalues of a matrix because of the continued multiplication of $\boldsymbol{A}$ when computing the orthonormal basis \cite{akio2007}. As the spread of the eigenvalues for $\boldsymbol{A}$ increases the accuracy of the Krylove subspace decreases, even as you increase the dimension of the subspace \cite{pusa2010}. 

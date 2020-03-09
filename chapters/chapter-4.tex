@@ -1,2 +1,618 @@
-\chapter{Implementation in Libowski}\label{ch:implimentationt}
+\chapter{Application of Matrix Exponential Methods to Burnup Calculations}\label{ch:application}
 
+Chapter \ref{ch:matrixEXPMethods} laid out the fundamental mathematical framework on which Libowski is built. Using this framework, the chemical species transport equation is solved for the time dependent solution of radionuclides in liquid fueled molten salt reactors. This chapter explains the practical application of such methods described in Chapter \ref{ch:matrixEXPMethods} along with the method of lines, to solve the species transport equation. First, the traditional nuclear burnup equations for LWRs are presented, along with their modern day solution in existing reactor depletion codes. Second, the method of lines is presented and used to transform a PDE into a system of coupled ODE's. Finally, some general analysis is conducted on this new governing set of ODE's, to better understand their behavior. This behavior is especially important when choosing one of the matrix exponential solvers described in Chapter \ref{ch:matrixEXPMethods}. 
+
+
+\section{Application to the Traditional Nuclear Burnup Equations}
+ There are many production level software packages which are used to solve these equations, such as SCALE and Serpent. Both of these codes rely on the CRAM method, the reason for this will be described in further detail. 
+
+Nuclear burnup calculations involve solving a set of first order linear ODEs of the form,
+
+\begin{equation}
+    \frac{dn_{i}}{dt} = \sum_{j=1}^{N}\bigg(b_{j\rightarrow i}\lambda_{j} + 
+    \sum_{k=1}^{K}\gamma_{j\rightarrow i,k}\sigma_{k,j}\phi \bigg)n_{j}(t) - \bigg(\lambda_{i} + \phi\sum_{k=1}^{K} \sigma_{k,i}\bigg)n_{i}(t),
+\end{equation}
+
+\noindent which can be written in matrix vector form,
+
+\begin{equation}
+    \frac{d\boldsymbol{n}}{dt} = \boldsymbol{A}\boldsymbol{n}, \quad \boldsymbol{n}(t_{0}) = \boldsymbol{n}_{0}, 
+    \label{eq:burnup}
+\end{equation}
+
+\noindent where, $\boldsymbol{n}(t)$ is the nuclide concentration vector, $\boldsymbol{A}$ is the transition matrix and $\boldsymbol{n}_{0}$ is the initial condition vector. Equation \ref{eq:burnup} has the solution $\boldsymbol{n}(t) = e^{\boldsymbol{A}t}\boldsymbol{n}_{0}$ where $e^{\boldsymbol{A}t}$ was defined in Chapter \ref{ch:matrixEXPMethods}. The transition matrix contains the decay and transmutation coefficients, 
+
+\begin{equation}
+    a_{i,i} = -\bigg(\lambda_{i} + \phi\sum_{k=1}^{K} \sigma_{k,i}\bigg),
+    \label{eq:diagonalCoeffsTraditionalBurnup}
+\end{equation}
+
+\begin{equation}
+    a_{i,j\neq i} = b_{j\rightarrow i}\lambda_{j} + 
+    \sum_{k=1}^{K}\gamma_{j\rightarrow i,k}\sigma_{k,j}\phi.
+    \label{eq:offdiagonalCoeffsTraditionalBurnup}
+\end{equation}
+
+\noindent While it is possible to order index the nuclides in any order, the transition matrix becomes nearly upper triangular if the nuclides are indexed by ascending order by their ZAI index defined by $ZAI = 10000Z + 10A + I$, where $Z$ is the atomic number, $A$ is the mass number and $I$ is the isomeric state \cite{pusa2013}.
+
+There are two major matrix properties which influence the accuracy of the matrix exponential algorithms described in Chapter \ref{ch:matrixEXPMethods}, these are the matrix norm and the location of the eigenvalues of the matrix. Series approximations such as Pad\'e are most accurate around the origin, meaning that he norm of the matrix must be small. How small the norm must be depends on the order of the Pad\'e approximation. The $\ell-1$ norm the for $\boldsymbol{A}t$ is known to be,
+
+\begin{equation}
+    ||\boldsymbol{A}t||_{1} = |t|\hspace{1mm}||\boldsymbol{A}||_{1} \geq |t|\hspace{1mm}\text{max}|a_{i,j}|, 
+\end{equation}
+
+\noindent meaning that the norm must be greater than or equal to the absolute value of the max matrix element multiplied by the absolute value of time. Of course, as $t \rightarrow \infty$ the matrix norm does so as well. If one includes half lives on the order of $10^{-6}$s, this would produces a coefficient on the order of $10^{5}$, resulting in $||\boldsymbol{A}t|| \geq 10^{5}$. Because burnup calculations are often taken over long time steps and include isotopes which can greatly increase the the norm of the matrix, Pad\'e approximations suffer from complications. In order to utilize these approximations, the matrix needs to be scaled a number of times to reduce the norm to a suitable value. 
+
+Solutions based on the Cauchy integral formula do not have a requirement on the norm of the matrix, but do on the eigenvalues. In particular the eigenvalues of the transition matrix need to fall in a region enclosed by the contour function. It was noted by Pusa that the eigenvalues of the transition matrix are clustered around the negative real axis \cite{pusa2010}. This makes the CRAM algorithm well suited to solve the system in Equation \ref{eq:burnup}. There are a number of papers discussing the accuracy of CRAM vs many commonly used matrix exponential methods for depletion calculations \cite{isotalo2011} \cite{pusa2010}. Both of these papers showed that CRAM out performed the methods that were tested.
+
+Utilizing the CRAM algorithm to solve Equation \ref{eq:burnup} requires the evaluation of $N/2$ independent systems of equations, where $N$ is the CRAM order. In order to accurately and efficiently solve these linear systems, the mathematical characteristics of the burnup matrix must be understood. If no nuclides are excludes from the calculation then size of the matrix would be about $2,000 \times 2,000$, depending on the library. For example, the SCALE code uses libraries based on ENDF/B-VII.1 which include data for over 2,200 nuclides \cite{scaleManual}. The number of nuclides makes the system large, however it is sparse with the matrix density only a few percent \cite{pusa2013}. 
+
+The half lives and microscopic cross sections for nuclides can vary significantly causing the magnitude coefficients in the transition matrix to vary from zero to $10^{21}$ \cite{pusa2013}. For example, radioactive decay results in half lives ranging from $10^{-24}$ seconds to billions of years \cite{pusaThesis}. Many integrative solvers with have difficulty dealing with the rounding errors introduced by the coefficients. The resulting system will also have eigenvalues with extremely small and large eigenvalues. Iterative solves that rely on Krylov subspace methods become disadvantageous for solving such systems, because of the spectral properties of the matrix \cite{pusa2013}. In order to achieve high order of accuracy and stability, direct solvers are chosen over iterative ones. Such solvers include SuperLU or sparse Gaussian elimination with partial pivoting.
+
+\section{Application to MSR Burnup Calculations}
+Molten salt reactor depletion calculations differ greatly from traditional nuclear reactors due to the fact that the fuel salt travels throughout the reactor loop. The MSR depletion equation is a special form of the species transport equations that involves nuclear reactions and possibly nonlinear chemical kinetics. These chemical interactions can come from reactions within in the salt, reactions with fission products and reactor loop materials, phase transitions and sparging operations. Equation \ref{eq:MSRDepletion} is rewritten by moving all terms to the right hand side and by adding a term for the chemical kinetics.
+
+\begin{equation}
+\begin{split}
+    \frac{\partial \rho_{i}}{\partial t}
+    = -\nabla \cdot \rho_{i}(r,t)\boldsymbol{v}
+    - &\nabla \cdot j_{i}(r)
+    +
+    \sum_{j=1}^{N}\frac{M_{i}}{M_{j}}\bigg(b_{j\rightarrow i}\lambda_{j} + 
+    \sum_{k=1}^{K}\gamma_{j\rightarrow i,k}\sigma_{k,j}(r)\phi(r,t) \bigg)\rho_{j}(r,t)\\
+    &- \bigg(\lambda_{i} + \phi(r,t)\sum_{k=1}^{K} \sigma_{k,i}(r)\bigg)\rho_{i}(r,t) +  f_{c}(\boldsymbol{\rho}, r, T).
+\end{split}
+    \label{eq:MSRDepletionChemKinetics}
+\end{equation}
+
+\noindent where $f_{c}(\boldsymbol{\rho}, r, T)$ is a function that represents the generation of chemical species \textit{i}. This generation can include linear and/or nonlinear terms and is a function of chemical species vector $\boldsymbol{\rho}$, space $r$ and temperature $T$. 
+
+The implementation of Equation \ref{eq:MSRDepletionChemKinetics} is done on a finite volume basis. Each finite volume element is considered a depletion zone, meaning that the neutron flux and microscopic cross sections that were applied to Equation \ref{eq:LWRDepletion} are also applied here. For simplicity, we will assume that $f_{c} = 0$. After applying the volume average species density Equation \ref{eq:MSRDepletionChemKinetics} results in,
+
+\begin{equation}
+\begin{split}
+    \frac{\partial \overline{\rho}_{i}}{\partial t}
+    = \frac{-1}{V}\int_{V}\bigg(\nabla \cdot \rho_{i}(r,t)\boldsymbol{v}
+    + &\nabla \cdot j_{i}(r)\bigg)dV
+    +
+    \sum_{j=1}^{N}\frac{M_{i}}{M_{j}}\bigg(b_{j\rightarrow i}\lambda_{j} + 
+    \sum_{k=1}^{K}\gamma_{j\rightarrow i,k}\overline{\sigma}_{k,j}\overline{\phi} \bigg)\overline{\rho}_{j}(t)\\
+    &- \bigg(\lambda_{i} + \overline{\phi}\sum_{k=1}^{K} \overline{\sigma}_{k,i}\bigg)\overline{\rho}_{i}(t).
+\end{split}
+\end{equation}
+
+\noindent Each of the transport terms are more complicated and will be treated with the method of lines by discritizing the spacial variables with a 2D finite volume method.
+
+
+\subsection{Method of Lines}
+The method of lines (MOL) is a general technique for solving PDE's which transforms the spacial dependence into an approximate algebraic expression. All but one dimension is discritized, resulting in a system of ODE's. In many physical problems, the undiscritized variable is time. After MOL is applied then normal analytic or numerical integration techniques can be used to solve the system of ODE's. MOL is a generic scheme and can be applied using methods such as finite difference or finite volume \cite{hamdi2007}. 
+
+The finite volume method is a discritization technique which divides the initial spacial domain into smaller volumes. In each volume (cell), the dependent variable is averaged and assumed to be constant. Each volume connects to one another and allows the species to transport between cells. Volumetric generation terms from nuclear and chemical reactions will be a function of the averaged species concentration, neutron flux and microscopic cross sections in that cell. Next each of the transport operators discritized using a 2-D finite volume method. Each cell volume is fixed and of equal size. A visual representation of an internal finite volume cell is shown in Figure \ref{fig:2DFiniteVolume}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=4in]{images/2DFiniteVoluem.png}\\
+  \caption{2-D finite volume cell}
+  \label{fig:2DFiniteVolume}
+\end{figure} 
+ 
+\subsubsection{Diffusion}
+The diffusive flux is assumed to follow Fick's law of diffusion for an ideal mixture,
+
+\begin{equation}
+    j_{i,x} = -D_{i}\frac{d\rho_{i}}{dx}.
+\end{equation}
+
+\noindent In a 2-D system, the diffusion terms results in,
+
+\begin{equation}
+    -\int_{V}\nabla \cdot j_{i}dV = -\int_{V}\frac{\partial }{\partial x}\bigg( -D_{i}\frac{\partial \rho_{i}}{\partial x}\bigg)dV - \int_{V}\frac{\partial }{\partial y}\bigg( -D_{i}\frac{\partial \rho_{i}}{\partial y}\bigg)dV.
+\end{equation}
+
+\noindent The volume element on a 2-D surface is $dv = dxdy$. To define the diffusive flux into cell P, the diffusion term must be integrated from the West to East wall in the x-direction and from South to North wall in the y-direction \cite{versteeg2007}. This yields,
+
+\begin{equation}
+\begin{split}
+    \int_{s}^{n}\int_{w}^{e}\frac{\partial }{\partial x}\bigg( D_{i}\frac{\partial \rho_{i}}{\partial x}\bigg)dxdy + \int_{w}^{e}\int_{s}^{n}\frac{\partial }{\partial y}\bigg( D_{i}\frac{\partial \rho_{i}}{\partial y}\bigg)dydx \\ 
+    \\
+    = D_{e,i}\bigg(\frac{\partial \rho_{i}}{\partial x}\bigg)_{e}\Delta y -D_{w,i}\bigg(\frac{\partial \rho_{i}}{\partial x}\bigg)_{w}\Delta y
+    + D_{n,i}\bigg(\frac{\partial \rho_{i}}{\partial y}\bigg)_{n}\Delta x - D_{s,i}\bigg(\frac{\partial \rho_{i}}{\partial y}\bigg)_{s}\Delta x.
+\end{split}
+\end{equation}
+
+\noindent Each of the first order spacial derivatives are assumed to linearly vary between the cell centered points. The diffusion coefficient are defined to be the average between each of pair of points,
+
+\begin{equation}
+    D_{w} =\frac{D_{W} + D_{P}}{2}, \quad D_{e} =\frac{D_{P} + D_{E}}{2}, \quad D_{s} =\frac{D_{S} + D_{P}}{2}, \quad D_{n} =\frac{D_{P} + D_{N}}{2}. 
+\end{equation}
+
+\noindent The species diffusive flux across each phase are defined as,
+
+\begin{equation}
+\begin{split}
+    D_{e,i}\bigg(\frac{\partial \rho_{i}}{\partial x}\bigg)_{e}\Delta y &\approx
+    D_{e,i}\bigg(\frac{\rho_{E,i} - \rho_{P,i}}{\delta x}\bigg)\Delta y +
+    \mathcal{O}(\Delta x),
+    \\
+    D_{w,i}\bigg(\frac{\partial \rho_{i}}{\partial x}\bigg)_{w}\Delta y &\approx
+    D_{w,i}\bigg(\frac{\rho_{P,i} - \rho_{W,i}}{\delta x}\bigg)\Delta y + \mathcal{O}(\Delta x),
+    \\
+    D_{n,i}\bigg(\frac{\partial \rho_{i}}{\partial y}\bigg)_{n}\Delta x &\approx
+    D_{n,i}\bigg(\frac{\rho_{N,i} - \rho_{P,i}}{\delta y}\bigg)\Delta x +
+    \mathcal{O}(\Delta y),
+    \\
+    D_{s,i}\bigg(\frac{\partial \rho_{i}}{\partial y}\bigg)_{s}\Delta x &\approx
+    D_{s,i}\bigg(\frac{\rho_{P,i} - \rho_{S,i}}{\delta y}\bigg)\Delta x +
+    \mathcal{O}(\Delta y).
+\end{split}
+\end{equation}
+
+\noindent Plugging these into the diffusion term in the MSR depletion equation gives,
+
+\begin{equation}
+\begin{split}
+    \frac{1}{V}\int_{V}\nabla \cdot j_{i} &\approx \frac{D_{e,i}}{\Delta x}\bigg(\frac{\rho_{E,i} - \rho_{P,i}}{\delta x}\bigg) - \frac{D_{w,i}}{\Delta x}\bigg(\frac{\rho_{P,i} - \rho_{W,i}}{\delta y}\bigg) \\ \\
+    &+ \frac{D_{n,i}}{\Delta y}\bigg(\frac{\rho_{N,i} - \rho_{P,i}}{\delta y}\bigg) - \frac{D_{s,i}}{\Delta y}\bigg(\frac{\rho_{P,i} - \rho_{S,i}}{\delta y}\bigg).
+    \label{eq:diffusionApproximationMSRDepletion}
+\end{split}
+\end{equation}
+
+\noindent Even though each of the derivative approximations for the flux across each surface where first order, the over all order for the diffusion term at point P is second. It can be shown that the approximation to the second order diffusion term used here, is equivalent to the central difference approximation to the second derivative from a finite difference scheme.
+
+Equation \ref{eq:diffusionApproximationMSRDepletion} can be rearranged into a form which represents the coefficients for an interior node of the transition matrix. For species \textit{i} the coefficients representing diffusion are written as, 
+
+\begin{equation}
+    \frac{d \rho_{P}}{dt} = a^{D}_{E}\rho_{E} + a^{D}_{S}\rho_{S} + a^{D}_{P}\rho_{P} + a^{D}_{W}\rho_{W} + a^{D}_{N}\rho_{N},
+\end{equation}
+
+\noindent where,
+
+\begin{equation*}
+    a^{D}_{E} = \frac{D_{e}}{\Delta x \delta x}, \quad 
+    a_{S} = \frac{D_{s}}{\Delta y \delta y}, \quad
+    a_{W} = \frac{D_{w}}{\Delta x \delta x}, \quad
+    a_{N} = \frac{D_{n}}{\Delta y \delta y},
+\end{equation*}
+
+\begin{equation*}
+    a^{D}_{P} = - (a^{D}_{E} + a^{D}_{S} + a^{D}_{W} + a^{D}_{N}).
+\end{equation*}
+
+\subsubsection{Convection}
+Convection-diffusion problems are difficult to mathematically model because of the relative strengths each of the operators has on the species transport. These relative strengths can be illustrated by the non-dimensional Peclet number \cite{versteeg2007},
+
+\begin{equation}
+    Pe = \frac{\text{Convection}}{\text{Diffusion}} = \frac{\rho v}{D/\delta x}.
+\end{equation}
+
+\noindent As convective forces grow relative to the diffusive, the Peclet number gets larger and larger approaching infinity. On the other hand, if the diffusive forces grow at a rate larger than the convective, the Peclet number approaches zero. 
+
+The convective transport term is more complicated and harder to deal with than the diffusion term. Diffusion has no primary direction of flow, it simply cause a species to evenly distribute through a medium through a concentration gradient. Convection on the other hand, has a primary flow direction that is driven by a pressure gradient. One of the major drawbacks of the central differencing scheme is the inability to identify flow direction. In addition to the neglect in identifying the flow direction, the central differencing scheme will cause numerical instability problems for flows with high Peclet number \cite{versteeg2007}. To combat these numerical problems and to handle flow direction, the upwind differencing scheme can be used. 
+
+There are a number of classical upwind differencing schemes such as, first order, power law, and QUICK, each of these will have different orders of accuracy and stability regions. Convection schemes of third order or higher can lead to undershooting or overshooting and applying boundary conditions can be problematic \cite{versteeg2007}. Because of the issues that higher order schemes can have, much development has been done into deriving a class of second-order schemes called total variation diminishing (TVD) that avoid stability and oscillation issues. TVD schemes have the property of preserving monotonicity, meaning that it must not create local extrema and the value of an existing local minimum must be non-decreasing and that of a local maximum must be non-increasing \cite{versteeg2007}. One other consequence of monotonicity preserving scheme is that the total variation of the solution should diminish or remain the same with time. 
+
+The convection term is discritized and represented using a general second order term. First, flow is defined to be positive from cells West to East and South to North and negative in the opposite directions. For positive and negative flows, the convection operators in the x and y-directions are,
+
+\begin{equation}
+    \frac{-1}{V}\int_{V}\frac{\partial}{\partial x}(\rho_{i}v) \approx \frac{-1}{\Delta x} \big[ v_{e}\rho_{e,i} - v_{w}\rho_{w,i} \big],
+\end{equation}
+    
+\begin{equation}
+    \frac{-1}{V}\int_{V}\frac{\partial}{\partial y}(\rho_{i}v) \approx \frac{-1}{\Delta y} \big[ v_{n}\rho_{n,i} - v_{s}\rho_{s,i} \big].
+\end{equation}
+
+\noindent Plugging these in to the convective flux gives,
+
+\begin{equation}
+    \frac{-1}{V}\int_{V}\nabla \cdot \rho_{i}(r,t)\boldsymbol{v} \approx 
+    \frac{1}{\Delta x} \big[ v_{w}\rho_{w,i} - v_{e}\rho_{e,i} \big] + \frac{1}{\Delta y} \big[ v_{s}\rho_{s,i} - v_{n}\rho_{n,i} \big]
+\end{equation}
+
+\noindent These equations remain constant no matter the direction of flow, the change in flow direction is taken into account with the generalized species concentration defined at each cell face. The definitions for the concentrations at each cell face are,
+
+\begin{equation}
+\begin{split}
+    \text{East Face} \\ 
+    \rho_{e} &= \rho_{P} + \frac{1}{2}\Psi(r_{e}^{+})(\rho_{E} - \rho_{P}), \quad v_{e}, v_{w} > 0 \\
+    \rho_{e} &= \rho_{E} + \frac{1}{2}\Psi(r_{e}^{-})(\rho_{P} - \rho_{E}), \quad v_{e}, v_{w} < 0 \\
+    \label{eq:eastFaceFlux}
+\end{split}
+\end{equation}
+
+\vspace{-2cm}
+
+\begin{equation}
+\begin{split}
+    \text{West Face} \\
+    \rho_{w} &= \rho_{W} + \frac{1}{2}\Psi(r_{w}^{+})(\rho_{P} - \rho_{W}), \quad v_{e}, v_{w} > 0 \\
+    \rho_{w} &= \rho_{P} + \frac{1}{2}\Psi(r_{w}^{-})(\rho_{W} - \rho_{P}), \quad v_{e}, v_{w} < 0 \\
+    \label{eq:westFaceFlux}
+\end{split} 
+\end{equation}
+
+\vspace{-2cm}
+
+\begin{equation}
+\begin{split}
+    \text{North Face} \\ 
+    \rho_{n} &= \rho_{P} + \frac{1}{2}\Psi(r_{n}^{+})(\rho_{N} - \rho_{P}), \quad v_{n}, v_{s} > 0 \\
+    \rho_{n} &= \rho_{N} +
+    \frac{1}{2}\Psi(r_{n}^{-})(\rho_{P} - \rho_{N}), \quad v_{n}, v_{s} < 0 \\
+    \label{eq:northFaceFlux}
+\end{split}
+\end{equation}
+
+\vspace{-2cm}
+
+\begin{equation}
+\begin{split}
+    \text{South Face} \\
+    \rho_{s} &= \rho_{S} + \frac{1}{2}\Psi(r_{s}^{+})(\rho_{P} - \rho_{S}), \quad v_{n}, v_{s} > 0 \\
+    \rho_{s} &= \rho_{P} + \frac{1}{2}\Psi(r_{s}^{-})(\rho_{S} - \rho_{P}), \quad v_{n}, v_{s} < 0 
+    \label{eq:southFaceFlux}
+\end{split}
+\end{equation}
+
+\noindent where $\Psi$ is the flux limiter function and $r$ is the ratio of the upwind side gradient and the downwind side gradient \cite{versteeg2007}. For each cell face, the ratios for positive ($r^{+}$) and negative ($r^{-}$) flows are defined by,
+
+\begin{equation}
+    r_{e}^{+} = \bigg( \frac{\rho_{P} - \rho_{W}}{\rho_{E} - \rho_{P}}\bigg), \quad \quad r_{e}^{-} = \bigg( \frac{\rho_{EE} - \rho_{E}}{\rho_{E} - \rho_{P}}\bigg),
+\end{equation}
+
+\begin{equation}
+    r_{w}^{+} = \bigg( \frac{\rho_{W} - \rho_{WW}}{\rho_{P} - \rho_{W}}\bigg), \quad \quad r_{w}^{-} = \bigg( \frac{\rho_{E} - \rho_{P}}{\rho_{P} - \rho_{W}}\bigg),
+\end{equation}
+
+\begin{equation}
+    r_{n}^{+} \bigg( \frac{\rho_{P} - \rho_{S}}{\rho_{N} - \rho_{P}} \bigg), \quad \quad r_{n}^{-} = \bigg( \frac{\rho_{NN} - \rho_{N}}{\rho_{N} - \rho_{P}} \bigg),
+\end{equation}
+
+\begin{equation}
+    r_{s}^{+} = \bigg( \frac{\rho_{S} - \rho_{SS}}{\rho_{P} - \rho_{S}}\bigg), \quad \quad r_{s}^{-} = \bigg(\frac{\rho_{N} - \rho_{P}}{\rho_{P} - \rho_{S}} \bigg).
+\end{equation}
+
+The criteria for a scheme to be TVD was derived by Sweby \cite{sweby1984} using the $\Psi - r$ relationship,
+
+\begin{equation}
+\begin{split}
+    0 < r < 1, &\quad \Psi(r) \leq 2r \\
+    r \geq 1, &\quad  \Psi (r) \leq 2.
+\end{split}
+\end{equation}
+
+\noindent There are a number of flux limiters which can be applied to Equations \ref{eq:eastFaceFlux} - \ref{eq:southFaceFlux}: some of the most popular limiter functions are, Van Leer, Van Albada, Min-Mod, SUPERBEE, QUICK and UMIST. Figure \ref{fig:fluxlimiter} shows the grey shaded region for a second order scheme to be TVD, along with common flux limiter functions. In Figure \ref{fig:fluxlimiter} many of the limiter functions overlap. For the region of $r > 1$ QUICK and UMIST are the exact same and for $r > 5$ UMIST, QUICK and SUPERBEE are the same. 
+
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=5.5in]{images/CFLlimiterFunctions.png}\\
+  \caption{Flux limiter functions on the $\Psi - r$ plane}
+  \label{fig:fluxlimiter}
+\end{figure} 
+
+TVD schemes can become unstable due to negative main coefficients and they are often reformulated in a different way to maintain numerical stability. One of the ways in which TVD schemes can be reformulated is by deferred corrections. This is an iterative method which breaks apart the convective flux coefficients into its first order upwind difference component and the second order component. The upwind dirrerenceing components will still appear in the usual matrix element however, the second order approximations are moved into a source term. The source term for step $n$ is calculated using species densities from step $n-1$. In this way the source term is differed and the convection flux is corrected.  
+
+Coefficients for the convection flux can also be rewritten in the same way that was done for the diffusion coefficients. The differed corrections are placed in a source term coefficient. For an interior node of species \textit{i}, the transition matrix will have coefficients representing,
+
+\begin{equation}
+    \frac{d \rho_{P}}{dt} = a^{C}_{E}\rho_{E} + a^{C}_{S}\rho_{S} + a^{C}_{P}\rho_{P} + a^{C}_{W}\rho_{W} + a^{C}_{N}\rho_{N} + S^{C},
+\end{equation}
+
+\noindent where,
+
+\begin{equation*}
+    S^{C} = S_{E}^{C} + S_{S}^{C} + S_{W}^{C} + S_{N}^{C}
+\end{equation*}
+
+\begin{equation*}
+    a^{C}_{E} = \max\bigg(\frac{-v_{e}}{\Delta x}, 0\bigg), \quad 
+    a^{C}_{S} = \max\bigg(\frac{v_{s}}{\Delta y}, 0\bigg), \quad 
+    a^{C}_{W} = \max\bigg(\frac{v_{w}}{\Delta x}, 0\bigg), \quad
+    a^{C}_{N} = \max\bigg(\frac{-v_{n}}{\Delta y}, 0\bigg), \quad 
+\end{equation*}
+
+\begin{equation*}
+    a_{P}^{C} = -(a_{E}^{C} + a_{S}^{C} + a_{W}^{C} + a_{N}^{C})
+\end{equation*}
+
+\begin{equation*}
+    S^{C}_{E} = \frac{v_{e}}{2\Delta x}\bigg[(1-\alpha_{e})\Psi(r_{e}^{-}) - \alpha_{e}\Psi(r_{e}^{+})\bigg](\rho_{E} - \rho_{P}), \quad \substack{\alpha_{e} = 0, \quad v_{e} < 0\\
+    \\
+    \alpha_{e} = 1, \quad v_{e} > 0}
+\end{equation*}
+
+\begin{equation*}
+    S^{C}_{S} = \frac{v_{s}}{2\Delta y}\bigg[(1-\alpha_{s})\Psi(r_{s}^{-}) - \alpha_{s}\Psi(r_{s}^{+})\bigg](\rho_{S} - \rho_{P}), \quad \substack{\alpha_{s} = 0, \quad v_{s} < 0\\
+    \\
+    \alpha_{s} = 1, \quad v_{s} > 0}
+\end{equation*}
+
+\begin{equation*}
+    S^{C}_{W} = \frac{v_{w}}{2\Delta x}\bigg[(1-\alpha_{w})\Psi(r_{w}^{-}) - \alpha_{w}\Psi(r_{w}^{+})\bigg](\rho_{W} - \rho_{P}), \quad \substack{\alpha_{w} = 0, \quad v_{w} < 0\\
+    \\
+    \alpha_{w} = 1, \quad v_{w} > 0}
+\end{equation*}
+
+\begin{equation*}
+    S^{C}_{N} = \frac{v_{n}}{2\Delta y}\bigg[(1-\alpha_{n})\Psi(r_{n}^{-}) - \alpha_{n}\Psi(r_{n}^{+})\bigg](\rho_{N} - \rho_{P}), \quad \substack{\alpha_{n} = 0, \quad v_{n} < 0\\
+    \\
+    \alpha_{n} = 1, \quad v_{n} > 0}
+\end{equation*}
+
+
+
+\subsection{Linear Source Terms}
+Source terms considered thus far are for nuclear reactions. In this transition matrix they are the same as for traditional nuclear burnup equations and the coefficients were shown in Equations \ref{eq:diagonalCoeffsTraditionalBurnup} and \ref{eq:offdiagonalCoeffsTraditionalBurnup}. Diagonal coefficients correspond to the depletion of a species while off diagonal elements are generation terms. For species \textit{i} is interior cell \textit{P} the coefficients of the transition matrix for linear sources are,
+
+\begin{equation}
+    \frac{d \rho_{P,i}}{dt} = a_{P,i}^{LS}\rho_{P,i} + \sum_{j=1, j \neq i}^{N}a_{P,j}\rho_{P, j}
+\end{equation}
+
+\noindent where,
+
+\begin{equation*}
+    a^{LS}_{P,i} = \lambda_{i} + \overline{\phi}\sum_{k=1}^{K} \overline{\sigma}_{k,i}, \quad 
+    a^{LS}_{P,j} = \frac{M_{i}}{M_{j}}\bigg(b_{j\rightarrow i}\lambda_{j} +
+    \sum_{k=1}^{K}\gamma_{j\rightarrow i,k}\overline{\sigma}_{k,j}(r)\overline{\phi} \bigg).
+\end{equation*}
+
+\noindent These source terms will also include the differed corrections from a second order upwind flux approximation. 
+
+
+\subsection{Treatment of Boundary Conditions}
+Dirichlet and Neumann boundary conditions can be easily implemented by the use of "ghost" cells. Ghost cells are cell which are placed outside the boundary of our domain and will allow for a scalar value or the derivative of a scalar value to be set at the boundary of the domain. For example, take a 2-D example of the species transport equation. The differential equation for node $P$ would be,
+
+\begin{equation}
+    \frac{d\rho}{dt} = a_{E}\rho_{E} + a_{S}\rho_{S} + a_{P}\rho_{P} + a_{N}\rho_{N} + a_{W}\rho_{W} + S
+\end{equation}
+
+\noindent If $P$ was at the East boundary then a Dirichlet boundary condition means that the value at the cell boundary is fixed $(\rho_{e} = \rho_{b,r}$). Because there is a ghost cell to the East of cell $P$, the boundary value can be implemented using a difference across the two cells,
+
+\begin{equation}
+    \rho_{e} = \rho_{b} \approx \frac{\rho_{P} + \rho_{E}}{2}.
+\end{equation}
+
+\noindent The species concentration for the East cell is solved for and plugged back in to the differential equation to yield new coefficients for the matrix elements. This same method is used for the top, bottom, left, right and the corners. Let the subscript \textit{b} denotes a boundary condition value and let \textit{r}, \textit{l}, \textit{t} and \textit{b} denote the right, left, top and bottom boundaries. Table \ref{tab:dirichletBoundaries} shows the modified coefficients for Dirichlet boundary conditions. 
+
+Neumann boundary conditions are applied in a similar way by approximating the derivative at the boundary using a second order central difference approximation at the boundary. For a the bottom boundary this leads to,
+
+\begin{equation}
+    \rho_{b}' \approx \frac{\rho_{P} - \rho_{S}}{\delta y}.
+\end{equation}
+
+\noindent The concentration in the south boundary cell is solved for and plugged back into the differential equation. A similar process is done for the top, left, right and corners. The results are shown in Table \ref{tab:newmannBoundaries} for the modified coefficients. A mixture of both of these boundary conditions can be used for each side, although special care needs to be taken with the corners if the boundary conditions are mixed. 
+
+Periodic boundary conditions are applied on either the top and bottom or the left and right. This type of boundary condition can be thought of as folding the the rectangular domain creating a cylinder. These are implemented by pointing the cell at one boundary next to the cell at the opposite side. For example, if periodic boundary conditions are applied on the top and bottom and the flow is positive, then what comes out the top enters at the bottom. In this way, flow loops can be modeled.
+
+\begin{table}[h]
+    \caption{\label{tab:dirichletBoundaries} Modified Coefficients for Dirichlet Boundaries}
+    \centering
+    \begin{tabular}{c|c|c|c|c|c|c}
+    \hline
+    \textbf{Boundary location} & \textbf{$a_{E}^{*}$} & \textbf{$a_{S}^{*}$} & \textbf{$a_{P}^{*}$} & \textbf{$a_{N}^{*}$} & \textbf{$a_{W}^{*}$} & \textbf{$S^{*}$} \\ [0.5ex]
+    \hline
+    \hline
+    Bottom & $a_{E}$ & $0$ & $a_{P} - a_{S}$ & $a_{N}$ & $a_{W}$ & $S + 2a_{S}\rho_{bb}$\\ \hline
+    Top & $a_{E}$ & $a_{S}$ & $a_{P} - a_{N}$ & $0$ & $a_{W}$ & $S + 2a_{N}\rho_{bt}$ \\ \hline 
+    Left & $a_{E}$ & $a_{S}$ & $a_{P} - a_{W}$ & $a_{N}$ & $0$ & $S + 2a_{W}\rho_{bl}$  \\ \hline
+    Right & $0$ & $a_{S}$ & $a_{P} - a_{E}$ & $a_{N}$ & $a_{W}$ & $S + 2a_{E}\rho_{br}$  \\ \hline
+    Bottom left corner & $a_{E}$ & $0$ & $a_{P} - a_{S} - a_{W}$ & $a_{N}$ & $0$ & $S + 2a_{S}\rho_{bb} + 2a_{W}\rho_{bl}$ \\ \hline
+    Bottom right corner & $0$ & $0$ & $a_{P} - a_{S} - a_{E}$ & $a_{N}$ & $a_{w}$ & $S + 2a_{S}\rho_{bb} + 2a_{E}\rho_{br}$ \\ \hline
+    Top left corner & $a_{E}$ & $a_{S}$ & $a_{P} - a_{N} - a_{W}$ & $0$ & $0$ & $S + 2a_{N}\rho_{bt} + 2a_{W}\rho_{bl}$ \\ \hline
+    Top right corner & $0$ & $a_{S}$ & $a_{P} - a_{N} - a_{E}$ & $0$ & $a_{W}$ & $S + 2a_{N}\rho_{bt} + 2a_{E}\rho_{br}$ \\ \hline
+    \end{tabular}
+\end{table}
+
+\begin{table}[t]
+    \caption{\label{tab:newmannBoundaries} Modified Coefficients for Newmann Boundaries}
+    \centering
+    \begin{tabular}{c|c|c|c|c|c|c}
+    \hline
+    \textbf{Boundary location} & \textbf{$a_{E}^{*}$} & \textbf{$a_{S}^{*}$} & \textbf{$a_{P}^{*}$} & \textbf{$a_{N}^{*}$} & \textbf{$a_{W}^{*}$} & \textbf{$S^{*}$} \\ [0.5ex]
+    \hline
+    \hline
+    Bottom & $a_{E}$ & $0$ & $a_{P} + a_{S}$ & $a_{N}$ & $a_{W}$ & $S - a_{S}\rho_{bb}'\delta y$\\ \hline
+    Top & $a_{E}$ & $a_{S}$ & $a_{P} + a_{N}$ & $0$ & $a_{W}$ & $S - a_{N}\rho_{bt}'\delta y$ \\ \hline 
+    Left & $a_{E}$ & $a_{S}$ & $a_{P} + a_{W}$ & $a_{N}$ & $0$ & $S - a_{W}\rho_{bl}'\delta x$  \\ \hline
+    Right & $0$ & $a_{S}$ & $a_{P} + a_{E}$ & $a_{N}$ & $a_{W}$ & $S - a_{E}\rho_{br}'\delta x$  \\ \hline
+    Bottom left corner & $a_{E}$ & $0$ & $a_{P} + a_{S} + a_{W}$ & $a_{N}$ & $0$ & $S - a_{S}\rho_{bb}'\delta y - a_{W}\rho_{bl}'\delta x$ \\ \hline
+    Bottom right corner & $0$ & $0$ & $a_{P} + a_{S} + a_{E}$ & $a_{N}$ & $a_{w}$ & $S - a_{S}\rho_{bb}'\delta y - a_{E}\rho_{br}'\delta x$ \\ \hline
+    Top left corner & $a_{E}$ & $a_{S}$ & $a_{P} + a_{N} + a_{W}$ & $0$ & $0$ & $S - a_{N}\rho_{bt}'\delta y - a_{W}\rho_{bl}'\delta x$ \\ \hline
+    Top right corner & $0$ & $a_{S}$ & $a_{P} + a_{N} + a_{E}$ & $0$ & $a_{W}$ & $S - a_{N}\rho_{bt}'\delta y - a_{E}\rho_{br}'\delta x$ \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Application of Matrix Exponential Solvers}
+Five different matrix exponential solver are implemented in libowski with the added ability to use the Krylov subspace approximation. Each of these methods were discussed in Chapter \ref{ch:matrixEXPMethods} and there algorithms are presented in this section. These methods include three based on Cauchys integral formula and two based on Pad\'e's approximation with scaling and squaring. Because of the  various magnitudes of the transition matrix coefficients, a direct solver is used to solve the linear systems \cite{pusa2013}. The direct solver is Eigens sparse LU decomposition which is based on the SuperLU library \cite{eigen} \cite{superlu99}. 
+
+\subsubsection{CRAM}
+The biggest problem with using CRAM is obtaining the coefficients for the partial fraction decomposition. These coefficients for order 14 and 16 can be found in Reference \cite{pusa2011}, only order 16 is implemented in libowski. As discussed earlier for Cauchy method of order $N$, $N/2$ number of complex linear systems need to be solved. The general algorithm for a method based on contour integrals in partial fraction decomposition form is shown in Algorithm \ref{alg:cauchy}. Both the Parabolic and Hyperbolic methods used this same algorithm but with different poles and residues. It should be noted that notation for the residues where changed from $c_{k}$ to $\alpha_{k}$ and the residues from $z_{k}$ to $\theta_{k}$. For complex matrices and scalars $\alpha$ and $\theta$ would need to be the same size as the approximation order. Real valued matrices and scalars require half of these coefficients. Because all the matrices here are real, $\alpha$ and $\theta$ are all of size $N/2$. 
+
+\begin{algorithm}
+	\caption{Matrix Exponential Approximation from Contour Integrals} 
+	\begin{algorithmic}[1]
+		\Procedure{cauchySolveMatrixExponential}{$\boldsymbol{A}$, $\boldsymbol{v}_{0}$, $t$, $\theta$, $\alpha$}
+		\State $At = \boldsymbol{A}$*$t$
+		\State $\text{identity} = \text{setIdentity}(At.\text{rows}(), At.\text{cols}()) $\Comment{Builds the identity matrix}
+		\State $\text{LUSolver}.\text{analyzePattern}(At)$ \Comment{Analyze the sparsity pattern}
+		\State $S = \theta.\text{size}()$
+		\For{$k=1,2,\ldots S$}
+		    \State $\text{tempAt} = At - \theta_{k}$*$\text{identity}$
+		    \State $\text{tempB} = \alpha_{k}$*$\boldsymbol{v}_{0}$
+		    \State LUSolver.factorize(tempAt) \Comment{Compute LU decomposition}
+		    \State v = v + LUSolver.solve(tempB) \Comment{Solve linear systems}
+		\EndFor
+		\State v = 2*v.real()
+		\State v = v + $\alpha_{0}$*$v_{0}$ \Comment{Add limit at infinity}
+		\State ${\text{\textbf{return}}}$ v
+		\EndProcedure
+	\end{algorithmic} 
+	\label{alg:cauchy}
+\end{algorithm}
+
+
+\subsubsection{Parabolic and Hyperbolic}
+Solutions with the parabolic and hyperbolic contours use Algorithm \ref{alg:cauchy} but with different poles and residues. While methods for evaluating the coefficients for CRAM take a long time and need to be precalculated, the poles and residues for contour functions can be computed when the solver is initialized. Calculating the coefficients requires the contour function ($\phi$), the function derivative ($\phi'$) and the order of the approximation ($N$) Algorithms \ref{alg:parabolicCoeffs} and \ref{alg:hyperbolicCoeffs} show the functions computing the arrays for $\alpha$ and $\theta$ with parabolic and hyperbolic contours.
+
+\begin{algorithm}
+	\caption{Parabolic Contour Coefficients} 
+	\begin{algorithmic}[1]
+		\Procedure{parabolicContourCoeffs}{$N$}
+		\State i = 1 \Comment{Index counter for $\theta$ array}
+		\For{$k=1,3,5,7,\ldots N-1$} \Comment{Builds array of quadrature points}
+		    \State $\theta_{i} = \pi k/N$
+		    \State i = i+1
+		\EndFor
+		\State $\phi = N(0.1309 - 0.1194\theta^{2} + 0.2500\theta i$ \Comment{Calculate $\phi$ array}
+		\State $\phi'$ = N(-2*0.1194$\theta$ + 0.2500i) \Comment{Calculate $\phi'$ array}
+		\State $\alpha$ = i/N*ElementWiseExp($\phi$)*$\phi'$ \Comment{Calculate $\alpha$ array}
+		\State $\alpha_{0} = 0$
+		\State ${\text{\textbf{return}}}$ $\theta$, $\alpha$, $\alpha_{0}$
+		\EndProcedure
+	\end{algorithmic} 
+	\label{alg:parabolicCoeffs}
+\end{algorithm}
+
+\begin{algorithm}
+	\caption{Hyperbolic Contour Coefficients} 
+	\begin{algorithmic}[1]
+		\Procedure{hyperbolicContourCoeffs}{$N$} 
+		\State i = 1  \Comment{Index counter for $\theta$ array}
+		\For{$k=1,3,5,7,\ldots N-1$} \Comment{Builds array of quadrature points}
+		    \State $\theta_{i} = \pi k/N$
+		    \State i = i+1
+		\EndFor
+		\State $\phi = 2.246N(1 - \sin(1.1721 - 0.3443i\theta))$ \Comment{Calculate $\phi$ array}
+		\State $\phi' = N\cos((3443i\theta) /10000 - 11721/10000)3866489i/5000000$ \Comment{Calculate $\phi'$ array}
+		\State $\alpha$ = i/N*ElementWiseExp($\phi$)*$\phi'$ \Comment{Calculate $\alpha$ array}
+		\State $\alpha_{0} = 0$
+		\State ${\text{\textbf{return}}}$ $\theta$, $\alpha$, $\alpha_{0}$
+		\EndProcedure
+	\end{algorithmic} 
+	\label{alg:hyperbolicCoeffs}
+\end{algorithm}
+
+\subsubsection{Pad\'e - Method 1}
+The first method bast on the Pad\'e approximation was developed by Nicholas J. Higham and can be found in Reference \cite{higham2005}. Higham developed this algorithm in a similar manner which was done before by Moler and Van Loan \cite{moler2003} by choosing the optimal number of matrix scalings required for the Pad\'e of a certain order. Higham noted that the backward error analysis done by Moler and Van Loan was simple and elegant, however not sharp. Instead of only developing an algorithm based on a numerical error bound, Highman also considered computational cost. The resulting algorithm developed by Highman can be found in Reference \cite{higham2005} and the reader should refer to Highman's paper for further detail in its development. Algorithm \ref{alg:method1} is the algorithm that was developed in the paper, and shows its implementation in libowski. From now it shall be referred to as Pad\'e Method 1. Pad\'e Method's 1 and 2 both rely on functions that are shown in Appendix \ref{appen:padeFunctions}. Unlike methods based on contour functions, the Pa\'e method directly computes the matrix exponential. 
+
+\begin{algorithm}
+	\caption{Pad\'e Method 1} 
+	\begin{algorithmic}[1]
+		\Procedure{padeMethod1}{$\boldsymbol{A}$, $t$}
+		\State $\alpha = 0$ \Comment{Number of times to square the matrix}
+		\State A = $\boldsymbol{A}$*t 
+		\State norm = $||\text{A}||_{1}$ \Comment{Compute the $l_{1}$ norm of the matrix}
+		\State A2 = A$^{2}$ 
+        \If{norm $<$ 1.495585217958292e-002}
+        \State U, V = pade3(A, A2) \Comment{Compute terms to build pade order 3}
+        \ElsIf{norm $<$ 2.539398330063230e-001}
+        \State A4 = A2*A2
+        \State  U, V = pade5(A, A2, A4) \Comment{Compute terms to build pade order 5}
+        \ElsIf{norm $<$ 9.504178996162932e-001}
+        \State A4 = A2*A2
+        \State A6 = A4*A2
+        \State U, V = pade7(A, A2, A4, A6) \Comment{Compute terms to build pade order 7}
+        \ElsIf{norm $<$ 2.097847961257068}
+        \State A4 = A2*A2
+        \State A6 = A4*A2
+        \State A8 = A6*A2
+        \State U, V = pade9(A, A2, A4, A6, A8) \Comment{Compute terms to build pade order 9}
+        \Else 
+        \State maxnorm = 5.371920351148152
+        \State $\alpha = \max(0, \lceil(\log_{2}(\text{norm}/\text{maxnorm})\rceil)$ \Comment{Calculate number of squarings}
+        \State A = A/$2^{\alpha}$ \Comment{Scale the matrix}
+        \State A2 = A*A
+        \State A4 = A2*A2
+        \State A6 = A4*A2
+        \State U, V = pade13(A, A2, A4, A6) \Comment{Compute terms to build pade order 13}
+        \EndIf
+        \State denominator = -U + V \Comment{Build the denominator}
+        \State numerator = U + V \Comment{Build the numerator}
+        \State LUSolver.analyzePattern(denominator) \Comment{Analyze sparsity patern}
+        \State LUSolver.factorize(denominator) \Comment{Compute LU factorization}
+        \State R = LUSolver.solve(numerator) \Comment{Solve for the matrix exponential}
+        \For{k=1,2,3$\ldots \alpha$} \Comment{Unscale the matrix}
+            \State R = R*R
+        \EndFor
+        \State ${\text{\textbf{return}}}$ R
+		\EndProcedure
+	\end{algorithmic} 
+	\label{alg:method1}
+\end{algorithm}
+
+
+
+
+\subsubsection{Pad\'e - Method 2}
+The second Pad\'e method is a modification of the first Pad\'e method that addresses the weakness in overscaling. Overscaling occurs when a large matrix norm causes a larger than necessary $\alpha$ to be used, leading to decreased accuracy \cite{higham2009}. Al-Mohy and Higham developed this algorithm by inroducing a new sharper truncation error bound, which is likely to help correct the overscaling problem. More information on the new algorithm can be found in Referenence \cite{higham2009}. Algorithm 6.1 from said reference is implemented in libowski and is shown in Algorithm \ref{alg:method2}. There are two helper functions that are used in Algorithm \ref{alg:method2}, these function are defined Appendix \ref{appen:padeFunctions}. 
+
+\begin{algorithm}
+	\caption{Pad\'e Method 2} 
+	\begin{algorithmic}[1]
+		\Procedure{padeMethod2}{$\boldsymbol{A}$, $t$}
+		\State $\alpha = 0$ \Comment{Number of times to square the matrix}
+		\State A = $\boldsymbol{A}$*t 
+		\State norm = $||\text{A}||_{l_{1}}$ \Comment{Compute the $l_{1}$ norm of the matrix}
+		\State A2 = A$^{2}$ 
+		\State d6 = normest(A2,3)$^{1/6}$,  $\eta_{1} = \max(\text{normest(A2,3)}^{1/4}, \text{d6})$
+        \If{$\eta_{1} <$ 1.495585217958292e-002 \textbf{and} ell(A,3) = 0} \Comment{Try Pad\'e 3}
+            \State U, V = pade3(A, A2)
+            \State Evaluate R using lines 29-33 of Algorithm Pad\'e Method 1
+            \State \textbf{return} R
+        \EndIf
+        \State A4 = A2*A2
+        \State d4 = $||\text{A4}||_{l_{1}}^{1/4}$, $\eta_{2} = \max(\text{d4, d6})$
+        \If{$\eta_{2} < $ 2.539398330063230e-001 \textbf{and} ell(A,5) = 0} \Comment{Try Pad\'e 5}
+            \State U, V = pade5(A, A2, A4)
+            \State Evaluate R using lines 29-33 of Algorithm Pad\'e Method 1
+            \State \textbf{return} R
+        \EndIf
+        \State A6 = A4*A2
+        \State d6 = $||\text{A6}||_{l_{1}}^{1/6}$, d8 = $\text{normest(A2,2)}^{1/8}$, $\eta_{3} = \max(d6,d8)$
+        \If{$\eta_{3} < $ 9.504178996162932e-001 \textbf{and} ell(A, 7) = 0} \Comment{Try Pad\'e 7}
+            \State U, V = pade7(A, A2, A4, A6)
+            \State Evaluate R using lines 29-33 of Algorithm Pad\'e Method 1
+            \State \textbf{return} R
+        \EndIf 
+        \If{$\eta_{3} < $ 2.097847961257068e+000 \textbf{and} ell(A, 9) = 0} \Comment{Try Pad\'e 9}
+            \State A8 = A6*A2
+            \State U, V = pade9(A, A2, A4, A6, A8)
+            \State Evaluate R using lines 29-33 of Algorithm Pad\'e Method 1
+            \State \textbf{return} R
+        \EndIf 
+        \State d10 = normest(A4, A6)$^{1/10}$
+        \State $\eta_{4} = \max(\text{d8, d10})$
+        \State $\eta_{5} = \min(\eta_{3}, \eta_{4})$
+        \State $\alpha = \max(\lceil \log_{2}(\eta_{5}/4.25)\rceil, 0)$
+        \State $\alpha = \alpha + $ell(A/$s^{\alpha}$) \Comment{Compute the number of squarings}
+        \State A = A/$s^{\alpha}$, A2 = A2/$s^{2\alpha}$, A4 = A4/$s^{4\alpha}$, A6 = A6/$s^{6\alpha}$
+        \State U, V = pade13(A, B2, B4, B6) \Comment{Compute Pad\'e 13}
+        \State Evaluate R using lines 29-33 of Algorithm Pad\'e Method 1
+        \For{k=1,2,3$\ldots \alpha$} \Comment{Unscale the matrix}
+            \State R = R*R
+        \EndFor
+        \State ${\text{\textbf{return}}}$ R
+		\EndProcedure
+	\end{algorithmic} 
+	\label{alg:method2}
+\end{algorithm}
+
+
+
+\subsection{Time Marching Schemes}
+\label{sec:timeMarchingSchemes}
+There are two different approaches to evaluating the solution as a function of time. Each of these schemes will have different impacts on the error and computation time. The first scheme involves evaluating the solution at each time step starting from the initial condition. In this case the step length is not constant and the length is equal to the time at the time step assuming that the solution begins from $t_{0} = 0$. The solution for this time marching scheme is,
+
+\begin{equation}
+    \boldsymbol{\rho}(t_{n+1}) = e^{\boldsymbol{A}\Delta t}\boldsymbol{\rho}(t_{0}), \quad \Delta t = t_{n+1} - 0, \quad \text{Time stepping method 1}.
+\end{equation}
+
+\noindent One of the advantages of this time marching scheme is that the error is based on the error for a single time step because the initial condition is considered exact. As $\Delta t$ becomes larger then the norm of $\boldsymbol{A}\Delta t$ also grows, this can becomes a problem for methods based on Pad\'e. One other consequence is that the eigenvalues of the transition matrix will grow and possibly spread apart, causing problems with some of the numerical methods previously discussed. If the eigenvalue has a large imaginary part and a small real part then any $\Delta t > 1$ could move then eigenvalue into a region where Cauchy's solution will be inaccurate. Krylov subspace methods will also not work well if the eigenvalues are spread apart.
+
+The second method involves calculating the solution at $t_{n+1}$ is calculated using the $\rho(t_{n})$ as the initial condition where $\rho(t_{n})$ was calculated from the previous time step and thus not the exact solution. The solution for this time marching scheme is, 
+
+\begin{equation}
+    \boldsymbol{\rho}(t_{n+1}) = e^{\boldsymbol{A}\Delta t}\boldsymbol{\rho}(t_{n}), \quad \Delta t = t_{n+1} - t_{n}, \quad \text{Time stepping method 2}
+\end{equation}
+
+\noindent The error with this calculation will be larger because of the compounding errors from taking multiple time steps instead of one. Solutions using matrix exponential methods do not behave in the same way that normal numerical integration methods i.e. its not guaranteed that smaller time steps give more accurate solutions. There are however, a few of advantages to this scheme. The first is that it has been shown that the accuracy of CRAM is increased by dividing long depletion steps into smaller substeps if the species concentration diminishes significantly during a single time step \cite{isotalo2016}. If methods based on pad\'e are used, then dividing the total depletion length into smaller time steps will help with the size of the matrix norm. Another consequence of the Pad\'e method can be exploited if time steps of constant size are taken. Because Pad\'e methods compute the matrix exponential and not the action on a vector, the matrix exponential will not change for constant time steps. This is not true in the case where other elements such as flow or reactions rates change moving from each time step. 
