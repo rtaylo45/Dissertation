@@ -3,12 +3,12 @@ Over the life time of a nuclear reactor the composition of the fuel changes from
 
 A complete depletion calculation would involve the simultaneous solution of the neutron transport equation along with the isotopic evolution of thousands of fission products and fissile material depletion. This is not possible in practice and approximations to these calculations must be done. The neutron transport and fuel depletion calculations are done separately and their coupling is often done with predictor corrector methods. During neutron transport calculations fuel composition is assumed to be constant. For depletion, reaction rates are assumed to be constant. This process is repeated until a stopping criteria is reached. 
 
-In traditional LWRs, fuel elements are housed in fuel rod bundles, which are not allowed to move during operation. Because molten salt reactors are liquid fueled, they can be refueled and have fission products processed online. In addition to online processing, fissial material circulates through the reactor loop. These unique design features of molten salt reactors produce new challenges for fuel depletion calculations. The following sections discuss the nuclear reactions involved in the production of radionuclides, neutron transport and the burnup equations.
+In traditional light water reactors, fuel elements are housed in fuel rod bundles, which are not allowed to move during operation. Because molten salt reactors are liquid fueled, they can be refueled and have fission products processed online. In addition to online processing, fissial material circulates through the reactor loop. These unique design features of molten salt reactors produce new challenges for fuel depletion calculations. The following sections discuss the nuclear reactions involved in the production of radionuclides, neutron transport and the burnup equations.
 
 \section{Nuclear Reactions}
 
 \subsection{Radioactive Decay}
-When the nucleus of an atomic element is unstable it can undergo spontaneous transformation into a different element by the emission of energy and or particles \cite{duderstadt1976}. The most relevant modes for decay in burnup calculations are $\alpha$ decay, proton emission(is this really that common?), neutron emission, $\beta^{-}$ and $\beta^{+}$. A summary of these decay modes are shown in Table \ref{tab:decayModes} \cite{pusaThesis}. The rate at which a nuclide i changes as a function of time is proportional to its decay constant $\lambda_{i}$ and the decay of other nuclides which contribute as a source to nuclide i  \cite{duderstadt1976}, 
+When the nucleus of an atomic element is unstable it can undergo spontaneous transformation into a different element by the emission of energy and or particles \cite{duderstadt1976}. The most relevant modes for decay in burnup calculations are $\alpha$ decay, proton emission, neutron emission, $\beta^{-}$ and $\beta^{+}$. A summary of these decay modes are shown in Table \ref{tab:decayModes} \cite{pusaThesis}. The rate at which a nuclide $i$ changes as a function of time is proportional to its decay constant $\lambda_{i}$ and the decay of other nuclides which contribute as a source to nuclide $i$  \cite{duderstadt1976}, 
 
 \begin{equation}
     \frac{dn_{i}}{dt} = \sum_{j=1}^{N} \lambda_{j\rightarrow i}n_{j}(t) -\lambda_{i} n_{i}(t).
@@ -23,7 +23,7 @@ When the nucleus of an atomic element is unstable it can undergo spontaneous tra
 
 \noindent As the half life of the isotope decreases, its decay constant increases. 
 
-Some nuclides have more than one mode of decay. Some of these decay modes compete with one another such as $\beta^{+}$ and electron capture. When nuclide \textit{i} has more than one decay mode, its decay constant is a summation of all k decay modes,
+Some nuclides have more than one mode of decay. Some of these decay modes compete with one another such as $\beta^{+}$ and electron capture. When nuclide \textit{i} has more than one decay mode, its decay constant is a summation of all $k$ decay modes,
 
 \begin{equation}
     \lambda_{i} = \lambda_{i,1} + \lambda_{i,2} + \lambda_{i,3} ... = \sum_{k} \lambda_{i,k}.
@@ -78,7 +78,7 @@ Neutron induced reactions follow the schematic shown in Figure \ref{fig:nuclearR
   \label{fig:nuclearReaction}
 \end{figure} 
 
-The frequency of a reaction is governed by the probability at which it can occur. This probability related to the  cross section. The microscopic cross section is a factor that characterizes the probability of a neutron-nuclear reaction with an atomic nucleus \cite{duderstadt1976}. Specifically, the formal definition of the microscopic cross section is,
+The frequency of a reaction is governed by the probability at which it can occur. This probability is related to the  cross section. The microscopic cross section is a factor that characterizes the probability of a neutron-nuclear reaction with an atomic nucleus \cite{duderstadt1976}. Specifically, the formal definition of the microscopic cross section is,
 
 \begin{equation}
     \sigma = \frac{\text{Number of reactions} / \text{nucleus} / \text{sec}}{\text{Number of incident neutrons} / \text{cm}^{2} / \text{sec}} = \frac{(R/N_{i})}{\phi},
@@ -97,7 +97,7 @@ Absorption reactions are those in which a neutron is absorbed by the atomic nucl
     \label{eq:neutronIndecedReaction}
 \end{equation}
 
-\noindent where $\gamma_{j\rightarrow i,k}$ is the fraction of nuclide \textit{i} from nuclide \textit{j} through reaction \textit{k}. The first term in Equation  \ref{eq:neutronIndecedReaction} is the generation from the reaction of nuclide. First each nuclide is summed over, followed by a summation of each reaction for nuclide \textit{j}. If reaction \textit{k} results in generating nuclide \textit{i}, then $\sigma_{k,j}$ and $\gamma_{j\rightarrow i,k}$ are both none zero. The second term in Equation \ref{eq:neutronIndecedReaction} is the loss of nuclide \textit{i} from reaction \textit{k}. For each nuclide \textit{i} a summation is taken over all possible neutron induced reactions. 
+\noindent where $\gamma_{j\rightarrow i,k}$ is the fraction of nuclide \textit{i} from nuclide \textit{j} through reaction \textit{k}. The first term in Equation  \ref{eq:neutronIndecedReaction} is the generation from the reaction of nuclide. First each nuclide is summed over, followed by a summation of each reaction for nuclide \textit{j}. If reaction \textit{k} results in generating nuclide \textit{i}, then $\sigma_{k,j}$ and $\gamma_{j\rightarrow i,k}$ are both nonzero. The second term in Equation \ref{eq:neutronIndecedReaction} is the loss of nuclide \textit{i} from reaction \textit{k}. For each nuclide \textit{i} a summation is taken over all possible neutron induced reactions. 
 
 The microscopic cross section characterizes the probability that a neutron will have a reaction with a single nucleus. Often it is required to understand how neutrons will interact with macroscopic chunk of the material \cite{duderstadt1976}. The macroscopic cross section provides the ability to compute how a large portion of material will react under a flux of particles or energy. This macroscopic cross section is the computation of the atomic number density multiplied by the microscopic cross section. For a material consisting of multiple atomic elements, the macroscopic cross section of reaction $x$ is computed by,
 
@@ -172,13 +172,13 @@ $\begin{aligned}
 
 \vspace{0.5cm}
 
-\noindent Starting from the left hand side of Equation \ref{eq:angularNeutronTransport} we have the the change in neutron density with time, neutron streaming and neutron removal from reaction. On the right hand side is the source from a neutron scattering in from and different energy and angle, followed by the source from nuclear fission. The source for the scattering term must be integrated over all angles and energy and the same for the fission source. The angular neutron flux cannot be directly used in the neutron induced reaction equations presented before. These equations require the scalar flux, which is the integral over all angles for the angular neutron flux,
+\noindent Starting from the left hand side of Equation \ref{eq:angularNeutronTransport} we have the change in neutron density with time, neutron streaming and neutron removal from reaction. On the right hand side is the source from a neutron scattering in from and different energy and angle, followed by the source from nuclear fission. The source for the scattering term must be integrated over all angles and energy and the same for the fission source. The angular neutron flux cannot be directly used in the neutron induced reaction equations presented before. These equations require the scalar flux, which is the integral over all angles for the angular neutron flux,
 
 \begin{equation}
     \phi(r,E) = \int \varphi(r,E,\Omega)d \Omega.
 \end{equation}
 
-Angular dependence for the scattering source can be handled through the use of Legendre expansions or spherical harmonics. Spacial angular dependence is often treated with Gauss-Legenre quadratures such as the Sn or Pn equations, such methods are out of the scope of this work \cite{millerCompTransport}. The energy dependence in Equation \ref{eq:angularNeutronTransport} is almost always handled using the multigroup approximation. This approximation works by dividing up the energy dependence in groups by applying an energy interval for each group and integrating over that interval. The group cross sections are defined in a way to conserve the reaction rates. The multigroup constants are defined by \cite{millerCompTransport} \cite{duderstadt1976},
+Angular dependence for the scattering source can be handled through the use of Legendre expansions or spherical harmonics. Spacial angular dependence is often treated with Gauss-Legendre quadratures such as the Sn or Pn equations, such methods are out of the scope of this work \cite{millerCompTransport}. The energy dependence in Equation \ref{eq:angularNeutronTransport} is almost always handled using the multigroup approximation. This approximation works by dividing up the energy dependence in groups by applying an energy interval for each group and integrating over that interval. The group cross sections are defined in a way to conserve the reaction rates. The multigroup constants are defined by \cite{millerCompTransport} \cite{duderstadt1976},
 
 \begin{equation}
     \Sigma_{s}^{gg'} = \frac{\int_{g}^{g-1}\int_{g'}^{g'-1}\Sigma_{s}(r,E'\rightarrow E,t)\varphi(r,E',t) dE'dE}{\int_{g}^{g-1}\varphi(r,E,t) dE},
@@ -200,7 +200,7 @@ Angular dependence for the scattering source can be handled through the use of L
     \varphi^{g} = \int_{g}^{g-1}\varphi(r,E,t) dE.
 \end{equation}
 
-The time variance in Equation \ref{eq:angularNeutronTransport} is most often neglected for reactor analysis. Instead the problem is transformed into an eigenvalue problem. Although there are multiple different eigenvalue formulations, the $\lambda$ (k-effictive, criticality) eigenvalue is the most common \cite{millerCompTransport}. If Equation \ref{eq:angularNeutronTransport} is written in matrix vector form, then the criticality equation is,
+The time variance in Equation \ref{eq:angularNeutronTransport} is most often neglected for reactor analysis. Instead the problem is transformed into an eigenvalue problem. Although there are multiple different eigenvalue formulations, the $\lambda$ (k-effective, criticality) eigenvalue is the most common \cite{millerCompTransport}. If Equation \ref{eq:angularNeutronTransport} is written in matrix vector form, then the criticality equation is,
 
 \begin{equation}
     \boldsymbol{A}\boldsymbol{\varphi} = \frac{1}{\lambda}\boldsymbol{B}\boldsymbol{\varphi}.
@@ -210,7 +210,7 @@ The time variance in Equation \ref{eq:angularNeutronTransport} is most often neg
 
 
 \section{Burnup Equations}
-Nuclear burnup calculations solve a set of first order ODE's which aim to simulate the isotopic concentrations of radionuclides in a nuclear reactor. These equations important in reactor calculations because the neutronic properties and neutron distributions in the reactor is dependent on composition of the environments material. After a neutron transport solve, the cross sections and scalar neutron flux are collapsed into a single energy group. Because of the manner in which the groups are collapsed, the reaction rates from the multigroup equations equal the reaction rates for the single group. Over a single burn up calculation step all cross sections and the scalar neutron flux is assumed to be constant. When solving the depletion equations, the reactor is often subdivide into finite volume depletion zones. Each depletion zone with have different material, and differing neutron flux, this results in the reaction rates varying between each region. Using volume average operators and the multigroup approximation, the neutron flux and microscopic cross section is collapsed into single values for each depletion zone \cite{aarnoThesis},
+Nuclear burnup calculations solve a set of first order ODE's which aim to simulate the isotopic concentrations of radionuclides in a nuclear reactor. These equations are important in reactor calculations because the neutronic properties and neutron distributions in the reactor is dependent on composition of the environments material. After a neutron transport solve, the cross sections and scalar neutron flux are collapsed into a single energy group. Because of the manner in which the groups are collapsed, the reaction rates from the multigroup equations equal the reaction rates for the single group. Over a single burn up calculation step all cross sections and the scalar neutron flux is assumed to be constant. When solving the depletion equations, the reactor is often subdivided into finite volume depletion zones. Each depletion zone with have different material, and differing neutron flux, this results in the reaction rates varying between each region. Using volume average operators and the multigroup approximation, the neutron flux and microscopic cross section is collapsed into single values for each depletion zone \cite{aarnoThesis},
 
 \begin{equation}
     \overline{\sigma}_{k,j} = \frac{\int_{V}\int_{0}^{\infty}\sigma_{k,j}(r,E)\phi(r,E) dEdV}{\int_{V}\int_{0}^{\infty}\phi(r,E) dEdV},
@@ -232,12 +232,12 @@ Nuclear burnup calculations solve a set of first order ODE's which aim to simula
     \label{eq:LWRDepletion}
 \end{equation}
 
-There are multiple methods for solving the isotopic concentrations in nuclear reactors \cite{isotalo2011} \cite{pusa2010} \cite{akio2007}. Normal numerical integration techniques such as Runge Kutta face complications because of the various orders of magnitude for the decay constants of short and long lived nuclides. This results in a stiff system of ODE's, which are difficulty and costly to solve. Recently, matrix exponential methods have become popular for depletion calculations because of there high level of accuracy \cite{pusaThesis} \cite{aarnoThesis}. 
+There are multiple methods for solving the isotopic concentrations in nuclear reactors \cite{isotalo2011} \cite{pusa2010} \cite{akio2007}. Normal numerical integration techniques such as Runge Kutta face complications because of the various orders of magnitude for the decay constants of short and long lived nuclides. This results in a stiff system of ODE's, which are difficulty and costly to solve. Recently, matrix exponential methods have become popular for depletion calculations because of their high level of accuracy \cite{pusaThesis} \cite{aarnoThesis}. 
 
 \subsection{Extension to Molten Salt Reactors}
-Traditional nuclear reactors contain their fuel in a solid form that is unable to move during operation. These fuel elements are housed in pellets which are loaded in fuel rods. These rods are collected into fuel bundles which are then loaded into the reactor core for operation. Loading the reactor core with fuel in this form does not allow the material to transport through the reactor loop. Molten salt reactors work with a liquid form of the fuel that is dissolved in a molten salt. This liquid form of the fuel allows it to transport through the reactor loop during operation. Thus the depletion equations used in traditional reactors no longer holds true for molten salt reactors. Equation \ref{eq:LWRDepletion} must be modified to include the change in nuclide concentration with fluid movement: convection and diffusion. 
+Traditional nuclear reactors contain their fuel in a solid form that is unable to move during operation. These fuel elements are housed in pellets which are loaded in fuel rods. These rods are collected into fuel bundles which are then loaded into the reactor core for operation. Loading the reactor core with fuel in this form does not allow the material to transport through the reactor loop. Molten salt reactors work with a liquid form of the fuel that is dissolved in a molten salt. This liquid form of the fuel allows it to transport through the reactor loop during operation. Thus the depletion equations used in traditional reactors no longer hold true for molten salt reactors. Equation \ref{eq:LWRDepletion} must be modified to include the change in nuclide concentration with fluid movement: convection and diffusion. 
 
-Depletion calculations in MSRs can be better represented by the multicomponent chemical species transport equation. The species transport equation is derived by a conservation of mass basis which accounts for change is time, convective and diffusion transport and rate of generation from reaction \cite{bird2006}. Equation \ref{eq:speciesTransportEquation} is the species transport equation for species \textit{i}. 
+Depletion calculations in MSRs can be better represented by the multicomponent chemical species transport equation. The species transport equation is derived by a conservation of mass basis which accounts for change in time, convective and diffusion transport and rate of generation from reaction \cite{bird2006}. Equation \ref{eq:speciesTransportEquation} is the species transport equation for species \textit{i}. 
 
 \begin{equation}
     \underbrace{\frac{\partial \rho_{i}}{\partial t}}_{\substack{\text{Change in} \\
@@ -273,10 +273,10 @@ Equation \ref{eq:LWRDepletion} is simply the rate of generation for nuclide spec
     \label{eq:MSRDepletion}
 \end{equation}
 
-The MSR depletion equation represents the change in an isotopes density via fluid transport, mass diffusion and nuclear reactions. Equation \ref{eq:MSRDepletion} is a nonlinear PDE, first order in time and second order in space. It should be noted that Equation \ref{eq:LWRDepletion} was already discritized in space. For completeness $\sigma_{k,j}$ and $\phi$ are also functions are space and time in Equation \ref{eq:MSRDepletion} however, the scalar flux is for a single energy group. Solving Equation \ref{eq:MSRDepletion} is the primary topic and will be discussed through out the remainder of the dissertation.
+The MSR depletion equation represents the change in an isotopes density via fluid transport, mass diffusion and nuclear reactions. Equation \ref{eq:MSRDepletion} is a nonlinear PDE, first order in time and second order in space. It should be noted that Equation \ref{eq:LWRDepletion} was already discretized in space. For completeness $\sigma_{k,j}$ and $\phi$ are also functions of space and time in Equation \ref{eq:MSRDepletion} however, the scalar flux is for a single energy group. Solving Equation \ref{eq:MSRDepletion} is the primary topic and will be discussed through out the remainder of the dissertation.
 
 \subsection{Boundary Conditions}
-Mathematically, there are three types of boundary conditions for Eqaution \ref{eq:MSRDepletion}: Dirichlet, Neumann and Robin. Each of these boundary conditions are implemented in a way that permit inlet and outlet flow. Dirichlet boundary conditions specify a single constant value at the boundary. A Neumann boundary condition specifies the gradient normal to the boundary surface to be constant. The Robin boundary condition includes both the dependent variable and gradient are included. Table \ref{tab:boundaryConditions} summarizes each of the boundary conditions.
+Mathematically, there are three types of boundary conditions for Equation \ref{eq:MSRDepletion}: Dirichlet, Neumann and Robin. Each of these boundary conditions are implemented in a way that permit inlet and outlet flow. Dirichlet boundary conditions specify a single constant value at the boundary. A Neumann boundary condition specifies the gradient normal to the boundary surface to be constant. The Robin boundary condition includes both the dependent variable and gradient are included. Table \ref{tab:boundaryConditions} summarizes each of the boundary conditions.
 
 \begin{table}[h]
     \caption{\label{tab:boundaryConditions} Boundary Conditions}

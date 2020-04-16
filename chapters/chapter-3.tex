@@ -9,7 +9,7 @@ Many methods exist for solving systems of first order differential equations. In
 \end{equation}{}
 
 \noindent
-where $\boldsymbol{y}$, $\boldsymbol{f}(t,\boldsymbol{y})$ and $\boldsymbol{y}_{0}$ are column vectors and $\boldsymbol{f}(t,\boldsymbol{t})$ can contain linear and nonlinear terms. 
+where $\boldsymbol{y}$, $\boldsymbol{f}(t,\boldsymbol{y})$ and $\boldsymbol{y}_{0}$ are column vectors and $\boldsymbol{f}(t,\boldsymbol{y})$ can contain linear and nonlinear terms. 
 
 $$
 \boldsymbol{y}(t) = 
@@ -37,7 +37,7 @@ $$
 
 There are many popular methods to solve these equations including Euler, Runge–Kutta and multistep. These methods involve dividing the time domain into discrete lengths and stepping through the domain by approximating each time step from the previous steps solution and a slope between the points. When the function vector $\boldsymbol{f}(t,\boldsymbol{y})$ contains terms that are stiff, these methods become computationally expensive and inaccurate for larger time steps \cite{ash2009} \cite{ODECh82011}.
 
-A more adventitious method for solving Equation \ref{eq:ODE_matrix_form} is the use of exponential time differencing  \cite{ash2009} \cite{cox2002} \cite{bratsos2019}. To explain this method, Equation \ref{eq:ODE_matrix_form} is rewritten in a form that decomposes $\boldsymbol{f}(t,\boldsymbol{y})$ into two operators, one representing a constant linear operator and one for the nonlinear operator. Equation \ref{eq:ODE_matrix_linear_nonlinear_form} shows this separation with $\boldsymbol{L}$ being the linear operator and $\boldsymbol{N}$ being the nonlinear.
+A more advantageous method for solving Equation \ref{eq:ODE_matrix_form} is the use of exponential time differencing  \cite{ash2009} \cite{cox2002} \cite{bratsos2019}. To explain this method, Equation \ref{eq:ODE_matrix_form} is rewritten in a form that decomposes $\boldsymbol{f}(t,\boldsymbol{y})$ into two operators, one representing a constant linear operator and one for the nonlinear operator. Equation \ref{eq:ODE_matrix_linear_nonlinear_form} shows this separation with $\boldsymbol{L}$ being the linear operator and $\boldsymbol{N}$ being the nonlinear.
 
 
 \begin{equation}
@@ -173,7 +173,7 @@ Evaluating the integral in Equation \ref{eq:ETDMethodExact} can be done using tr
 
 
 \section{Solutions to the Matrix Exponential}
-When obtaining solutions based on exponential time differencing or integrating factor methods, an exponential of a matrix needs to be computed. There are multiple computational methods for solving for the matrix exponential, many of them are developed specifically to evaluate $e^{\boldsymbol{A}}$ or $e^{\boldsymbol{A}}\boldsymbol{v}$. One evaluates the matrix exponential directly and the other calculates the action of the exponential on a vector. When $\boldsymbol{A}$ is dense or has a low to moderate size (few hundreds) methods such as Pad\'e approximation or Chebyshev rational approximation can be employed. For large sparse matrices, Kraylov subspace methods offer more efficient calculations \cite{exokit}. In situations when the matrix $\boldsymbol{A}$ is diagonal, computing the matrix exponential becomes,
+When obtaining solutions based on exponential time differencing or integrating factor methods, an exponential of a matrix needs to be computed. There are multiple computational methods for solving for the matrix exponential, many of them are developed specifically to evaluate $e^{\boldsymbol{A}}$ or $e^{\boldsymbol{A}}\boldsymbol{v}$. One evaluates the matrix exponential directly and the other calculates the action of the exponential on a vector. When $\boldsymbol{A}$ is dense or has a low to moderate size (few hundreds) methods such as Pad\'e approximation or Chebyshev rational approximation can be employed. For large sparse matrices, Krylov subspace methods offer more efficient calculations \cite{exokit}. In situations when the matrix $\boldsymbol{A}$ is diagonal, computing the matrix exponential becomes,
 
 $$
 e^{\boldsymbol{A}} = 
@@ -206,7 +206,7 @@ Formally,  matrix exponential is defined using an infinite Taylor series \cite{e
     \label{eq:power_series_exp}
 \end{equation}
 
-\noindent Therefor, a straight forward way to calculate the matrix exponential is using its formal definition. This method however, is not commonly used in application for either the matrix or the scalar case. The number of terms required to achieve convergence can be large and produce computational inefficiency. This method is also suffers from numerical round off errors from cancellation for large values of $k$ \cite{moler2003}. 
+\noindent Therefore, a straight forward way to calculate the matrix exponential is using its formal definition. This method however, is not commonly used in application for either the matrix or the scalar case. The number of terms required to achieve convergence can be large and produce computational inefficiency. This method is also suffers from numerical round off errors from cancellation for large values of $k$ \cite{moler2003}. 
 
 
 \subsection{Pad\'e Approximation}
@@ -227,7 +227,7 @@ The Pad\'e approximation represents a function by expanding it as a ratio of two
     D_{p,q}(\boldsymbol{A}) = \sum_{j=0}^{P}\frac{(p + q - j)!q!}{(p + q)!j!(q - j)!}(-\boldsymbol{A})^{j}.
 \end{equation*}
 
-\noindent The error associated with the previous Pad\'e approximation is demonstrated by \cite{higham2005}
+\noindent The error associated with the previous Pad\'e approximation is demonstrated by \cite{higham2005} \textcolor{red}{need to fix this}
 
 \begin{equation}
     e^{\boldsymbol{A}} - R_{p,q}(\boldsymbol{A}) = (-1)^{q}\frac{p!q!}{(p+q)!(p+q+1)!}\boldsymbol{A}^{p+q+1} + \mathcal{O}(\boldsymbol{A}^{p+q+2}).
@@ -235,10 +235,10 @@ The Pad\'e approximation represents a function by expanding it as a ratio of two
 
 Pad\'e methods are similar to Taylor series as they approximate a function using a series solution, however, Pad\'e series usually out preform Taylor series. Series solutions methods, such as Pad\'e are also more accurate near the origin, meaning that the matrix norm $||A||$ must be sufficiently small for the approximation to be accurate \cite{pusa2010}. Yet another problem arises when $\boldsymbol{A}$ has a wide spread of eigenvalues, causing an ill-conditioned linear system  \cite{exokit} \cite{moler2003}.  
 
-When applying the Pad\'e approximation it is often adventitious to set $p$ and $q$ equal to one another, this is referred to as diagonal approximations. Setting $q = p$ requires about the same amount of work if $q > p$ for the same $q$, but would result in a approximation that is of order $2p > p + q$. Another reason to set $q=p$ comes from examining the spectrum of $\boldsymbol{A}$. If the eigenvalues of $\boldsymbol{A}$ are located on the left hand side of the complex plane, then $e^{\boldsymbol{A}t}$ goes to zero as $t$ goes to infinity. With $q > p$, $R_{pq}(\boldsymbol{A}t)$ is bounded, but if $q < p$, $R_{pq}(\boldsymbol{A}t)$ is unbounded \cite{moler2003}. 
+When applying the Pad\'e approximation it is often advantageous to set $p$ and $q$ equal to one another, this is referred to as diagonal approximations. Setting $q = p$ requires about the same amount of work if $q > p$ for the same $q$, but would result in a approximation that is of order $2p > p + q$. Another reason to set $q=p$ comes from examining the spectrum of $\boldsymbol{A}$. If the eigenvalues of $\boldsymbol{A}$ are located on the left hand side of the complex plane, then $e^{\boldsymbol{A}t}$ goes to zero as $t$ goes to infinity. With $q > p$, $R_{pq}(\boldsymbol{A}t)$ is bounded, but if $q < p$, $R_{pq}(\boldsymbol{A}t)$ is unbounded \cite{moler2003}. 
 
 
-Instead of directing using Equation \ref{eq:padeApprox}, Horners rule can be applied to the numerator and denominator to reduce the number of operations. This result is shown in Equation \ref{eq:hornerPadeApprox}. 
+Instead of directly using Equation \ref{eq:padeApprox}, Horners rule can be applied to the numerator and denominator to reduce the number of operations. This result is shown in Equation \ref{eq:hornerPadeApprox}. 
 
 \begin{equation}
     R_{pp}(\boldsymbol{A})=
@@ -267,7 +267,7 @@ Instead of directing using Equation \ref{eq:padeApprox}, Horners rule can be app
 
 
 \subsection{Scaling and Squaring}
-Both Taylor and Pad\'e methods fail to approximate the matrix exponential when $||\boldsymbol{A}||$ or the spread of the eigenvalues is large. This problem is exacerbated when computing $e^{\boldsymbol{A}t}$ for sufficiently large values of $t$. The scaling and squaring method works to fixed these problem by exploiting the property
+Both Taylor and Pad\'e methods fail to approximate the matrix exponential when $||\boldsymbol{A}||$ or the spread of the eigenvalues is large. This problem is exacerbated when computing $e^{\boldsymbol{A}t}$ for sufficiently large values of $t$. The scaling and squaring method works to fix these problem by exploiting the property
 
 \begin{equation*}
     e^{\boldsymbol{A}} = \big( e^{\boldsymbol{A}/m}\big)^{m}
@@ -328,7 +328,7 @@ This method is based on transforming the matrix exponential into the complex pla
 \noindent When evaluating Equations \ref{eq:cauchyExp} or \ref{eq:cauchyExpVector} it is vital to select a contour that encloses the spectrum of $\boldsymbol{A}t$. If this is not done, then the approximation is inaccurate. There are a number of ways to solve Equations \ref{eq:cauchyExp} or \ref{eq:cauchyExpVector} which involve knowing the nature of the spectrum of the transition matrix $\boldsymbol{A}t$. 
 
 \subsubsection{Direct Implementation of a Contour Function}
-If one knows the eigenvalue of the transition matrix then one can choose a contour $\Gamma$ that encloses them. The simplest choice would be a circle of radius $R$ centered at point $z_{0}$ \cite{ash2009}.
+\textcolor{red}{Fix this derivation} If one knows the eigenvalue of the transition matrix then one can choose a contour $\Gamma$ that encloses them. The simplest choice would be a circle of radius $R$ centered at point $z_{0}$ \cite{ash2009}.
 
 \begin{equation}
     \phi(\theta) = z_{0} + Re^{i\theta}: 0 \leq \theta \leq 2\pi 
@@ -361,7 +361,7 @@ If one knows the eigenvalue of the transition matrix then one can choose a conto
 It is important to note that when evaluating Equation \ref{eq:ashContour} that $N$ matrix inversions need to be calculated. However this can be rewritten in the form where the action of the matrix exponential on a vector is calculated. Evaluating Equation \ref{eq:ashContour} would then require solve $N$ number of linear systems, which is generally more adventitious. When the norm of $\boldsymbol{A}t$ becomes larger as you increase $t$ the contour needs to increase to enclose all of the eigenvalues. This leads to increasing the number of quadrature points to maintain accuracy, thus increasing the computational cost \cite{ash2009}. 
 
 \subsubsection{Rational Approximation}
-A more generalized method for evaluating the contour integral can be accomplished by choosing an analytic function $\phi(\theta)$ that maps a real line onto the contour. Because the function $e^{\phi(\theta)}$ decreases exponentially as $|\theta| \rightarrow \infty$ the approximation can be truncated to a finite number of quadrature points. When the spectrum of the transition matrix falls on the left hand side of the complex plane close to the real axis then the contour $\Gamma$ denotes a Hankel like contour that winds from $-\infty-0i$ on the lower half-plane and $\infty+0i$ on the upper half-plane. \cite{Trefethen2006}. This allows for the definition of a general contour function that will enclose the eigenvalues on the left hand side of the complex plane around the negative real axis. 
+A more generalized method for evaluating the contour integral can be accomplished by choosing an analytic function $\phi(\theta)$ that maps the real line onto the contour. Because the function $e^{\phi(\theta)}$ decreases exponentially as $|\theta| \rightarrow \infty$ the approximation can be truncated to a finite number of quadrature points. When the spectrum of the transition matrix falls on the left hand side of the complex plane close to the real axis then the contour $\Gamma$ denotes a Hankel like contour that winds from $-\infty-0i$ on the lower half-plane and $\infty+0i$ on the upper half-plane. \cite{Trefethen2006}. This allows for the definition of a general contour function that will enclose the eigenvalues on the left hand side of the complex plane around the negative real axis. 
 
 The idea is to solve the contour integral of the form,
 
@@ -440,7 +440,7 @@ Applying these approximations to real valued scalars or matrices requires half t
     e^{\boldsymbol{A}} \approx r(\boldsymbol{A}) = 2Re\bigg(\sum_{k=1}^{N/2}c_{k}(\boldsymbol{A} - z_{k}\boldsymbol{I})^{-1}\bigg),
 \end{equation}
 
-\noindent requiring $N/2$ matrix inversions. If instead the action on the matrix exponential on a vector $v$ is calculated, the approximation becomes,
+\noindent requiring $N/2$ matrix inversions. If instead the action on the matrix exponential on a vector $\boldsymbol{v}$ is calculated, the approximation becomes,
 
 \begin{equation}
     e^{\boldsymbol{A}}\boldsymbol{v} \approx r(\boldsymbol{A})\boldsymbol{v} = 2Re\bigg(\sum_{k=1}^{N/2}c_{k}(\boldsymbol{A} - z_{k}\boldsymbol{I})^{-1}\boldsymbol{v}\bigg),
@@ -526,15 +526,15 @@ Consider we want to approximate the matrix exponential as a polynomial of order 
 	\label{alg:arnoldi}
 \end{algorithm}
 
-\noindent where $\boldsymbol{H}_{m} = \boldsymbol{V}^{T}_{m}\boldsymbol{A}\boldsymbol{V}_{m}$. The Hessenberg matrix $\boldsymbol{H}_{m}$ represents the projection of $\boldsymbol{A}$ on to the Krylov subspace. The approximation in Krylov space is known to be, 
+\noindent where $\boldsymbol{H}_{m} = \boldsymbol{V}^{T}_{m}\boldsymbol{A}\boldsymbol{V}_{m}$ and $\boldsymbol{e}_{m}$ is the unit vector of dimention $m$. The Hessenberg matrix $\boldsymbol{H}_{m}$ represents the projection of $\boldsymbol{A}$ on to the Krylov subspace. The approximation in Krylov space is known to be, 
 
 \begin{equation}
     e^{\boldsymbol{A}}\boldsymbol{v} \approx \beta \boldsymbol{V}_{m}e^{\boldsymbol{H}_{m}}\boldsymbol{e}_{1}
     \label{eq:krylovApproxEXP}
 \end{equation}
 
-\noindent where $\beta = ||v||_{2}$ \cite{saad1989}. The computation of $e^{
-\boldsymbol{H}_{m}}$ becomes much easier because $\boldsymbol{H}_{m}$ is dense and smaller than $\boldsymbol{A}$. After the Krylov approximation is made, a typical method for solving the matrix exponential is used on $e^{\boldsymbol{H}_{m}}$. The quality of this this approximation is exact when $n = m$. This comes from the fact that at step $m$, $h_{m+1,m} = 0$ and Equation \ref{eq:arnoldiResult} becomes,
+\noindent where $\beta = ||\boldsymbol{v}||_{2}$ \cite{saad1989}. The computation of $e^{
+\boldsymbol{H}_{m}}$ becomes much easier because $\boldsymbol{H}_{m}$ is dense and smaller than $\boldsymbol{A}$. After the Krylov approximation is made, a typical method for solving the matrix exponential is used on $e^{\boldsymbol{H}_{m}}$. The quality of this approximation is exact when $n = m$. This comes from the fact that at step $m$, $h_{m+1,m} = 0$ and Equation \ref{eq:arnoldiResult} becomes,
 
 \begin{equation}
     \boldsymbol{A}\boldsymbol{V}_{m} = \boldsymbol{V}_{m}\boldsymbol{H}_{m}.
