@@ -3,7 +3,17 @@ Presented here are a number of test cases which access the accuracy of the matri
 
 As a comparison, the classical numerical ODE integration method backward differentiation formula (BDF) of various orders are also used to solve the practice problems. BDF integrators are a class of implicit multistep methods used for stiff differential equations. 
 
-\section{Problem 1}
+\section{TVD Convective Flux}
+Implementation of the deferred corrections second order flux for a number of flux limiting function is assessed with a number of test problems. Each of these problems consist of solving the following PDE,
+
+\begin{equation}
+    \frac{\partial \rho}{\partial t} = -v\frac{\partial \rho}{\partial x},
+\end{equation}
+
+\noindent with various initial and boundary conditions. 
+
+\section{Matrix Exponential Accuracy}
+\subsection{Problem 1}
 This test contains two variations of the same three isotope decay problem shown in Equation \ref{eq:problem1}. In each problem, the decay constants are changed to induce different eigenvalues.
 
 \begin{equation}
@@ -108,7 +118,7 @@ Results for time marching scheme 2 are shown in Figure \ref{fig:errorProblem1bTi
 
 \FloatBarrier
 
-\section{Problem 2}
+\subsection{Problem 2}
 Problem 2 is a 1D, two species reaction-diffusion problem shown in Equation \ref{eq:problem2Eqs} \cite{ching2007},
 
 \begin{equation}
@@ -225,7 +235,7 @@ Solutions with the BDF solvers was done by varying the time step size with a fix
 \FloatBarrier
 
 
-\section{Problem 3}
+\subsection{Problem 3}
 This problem examines a convection driven flow with the 6 neutron precursor groups shown in Equation \ref{eq:problem3}. Coefficients for system are shown in Table \ref{tab:problem3Coeffs}. 
 
 \begin{equation}
