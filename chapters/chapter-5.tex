@@ -1,125 +1,153 @@
 \chapter{Results}\label{ch:results}
-Presented here are a number of test cases which access the accuracy of the matrix exponential solvers in libowski. The majority of analysis thus far is done on what is known as Problem 1. Two major properties which influence the accuracy of each method are exploited, matrix norm and eigenvalues with both time stepping methods. There are also verification problems for diffusion and convection problems to test the spatial and temporal accuracy. Finally there is a neutron precursor problem showing the application in a nuclear reactor type test problem. 
 
-As a comparison, the classical numerical ODE integration method backward differentiation formula (BDF) of various orders are also used to solve the practice problems. BDF integrators are a class of implicit multistep methods used for stiff differential equations. 
+In chapters \ref{ch:burnupEquations}, \ref{ch:matrixEXPMethods}, \ref{ch:application} the theoretical framework and application for solving mass transport problems in MSRs were developed on a finite volume mesh. Components of the solution strategy are broken in to three general categories:
 
-\section{TVD Convective Flux}
-Implementation of the deferred corrections second order flux for a number of flux limiting function is assessed with a number of test problems. Each of these problems consist of solving the following PDE,
+\begin{enumerate}
+    \item Diffusion operator
+    \item Convection operator
+    \item Time integration
+\end{enumerate}
 
-\begin{equation}
-    \frac{\partial \rho}{\partial t} = -v\frac{\partial \rho}{\partial x},
-\end{equation}
+\noindent The first two categories deal with the spatial discretization of the PDE. The third involves the time variance in the solution as its ability to handle volumetric source terms. A number of test are conducted to access the numerical solution of libowski with these three key features in mind. These test aim to explore the accuracy of the libowski and the computation time required to solve such problems. A set of progression problems are defined which explore, diffusion, convection, linear source terms and the combination of each. After this small case studies are performed with a nuclear reactor design in mind which looks at libowskis' ability to handle the types of problems which arrive in the field. These problems include the set of neutron precursors as well as depletion and mass transport with a small selection of radio nuclides. 
 
-\noindent with various initial and boundary conditions. 
+In order to test the validity of libowski, the problems which are conducted must have reference solutions to test against. Many of the problems do in fact have analytical solutions while some do not. For those that do not MATLAB is utilized in generating the reference solution. In these cases the transition matrix and initial condition that is generated in libowski is save to a CSV file and read by a MATLAB script. This script then uses the Symbolic tool box to calculate the exponential of the transition matrix using variable precision arithmetic with 64 digits of accuracy. The solution is then converted to IEEE double precision and read in to libowski as the reference solution. While this method is not able to test the accuracy of the diffusion or convection operators, it is able to access the time integration thus overall accuracy of the matrix exponential algorithms. 
 
-\section{Matrix Exponential Accuracy}
+Many of the case studies involve a set of isotopes that are referred to as the small and medium sets. These set of isotopes were chosen based on their inclusion in TRITON for cross section evaluation with depletion \cite{scaleManual}. The small case corresponds to \textit{addnux} = -2 and the medium case to \textit{addnux} = 2. Additional isotopes are added to both of these sets to fully include the initial condition for the MSRE salt \cite{MSREbenchmark}. The list of isotopes for the small and medium cases are shown in Appendix , Tables  . One important note about these tables is that indicate which species will have addition mass transport models for wall depositon and gas sparging. In some cases no mass transport is included, resulting in a subset of nuclides which do not include the additional isotopes required to model addition mass transport models. For example if one were to model three species, ${}^{235}$U, ${}^{135}$Xe and ${}^{109}$Ag with no mass transport then the system would only contain these three isotopes. If wall deposition and gas sparging is added for Ag and Xe then the system would contain two addition species ${}^{135}$XeGas and ${}^{109}$AgWall. Making the total number of species five. 
+
+All problems show an error based on a reference solution. For the following results the relative errors are defined as:
+
+\begin{equation*}
+    l_{\infty} = \max\bigg(\hat{u}_{i} - u_{i}\bigg) \quad \text{For } i = 1, 2, ..., N,
+\end{equation*}
+
+\begin{equation*}
+    l_{1} = \frac{1}{N}\sum_{i=1}^{N}\hat{u}_{i} - u_{i}, \quad \quad l_{2} = \frac{1}{N}\sum_{i=1}^{N}\bigg(\hat{u}_{i} - u_{i}\bigg)^{2},
+\end{equation*}
+
+\noindent where $N$ is the number of elements in the solution domain. Some times it is more meaningful to shown an absolute error instead of a relative error. It is explicitly stated in the results weather a relative or absolute difference is used. Run time is also reported for some test and is reported as the wall time for calling the \textit{solve} function. This includes the time to build the matrix, run the solution algorithm and unpack the solution. For problems where multiple time steps are taken, the matrix is rebuilt before each time step to update the deferred correction source term. While these run times are reported with no standard deviation, some changes are to be expected by running the problems multiple times or on different machines. 
+
+Earlier, it was discussed that substepping can increase the accuracy of Cauchy based solvers. For all results shown, unless other wise noted, no substeps are used for either the CRAM, Parabolic or Hyperbolic solvers. For some of the reaction-diffusion-convection problems, substepping does not play a role in increasing the accuracy of the solution but will increase the run time. Exceptions to this will be further discussed in the results. The default orders for the CRAM, Hyperbolic and Parabolic solvers in libowski are 16, 32 and 32 respectively. 
+
+\section{Progression Problems}
 \subsection{Problem 1}
-This test contains two variations of the same three isotope decay problem shown in Equation \ref{eq:problem1}. In each problem, the decay constants are changed to induce different eigenvalues.
+The first diffusion problem consist of a 2-D system shown as:
 
 \begin{equation}
-\begin{split}
-    \frac{dN_{1}}{dt} &= \lambda_{3}N_{3} - \lambda_{1}N_{1}, \quad N_{1}(0) = 10000\\
-    \frac{dN_{2}}{dt} &= \lambda_{1}N_{1} - \lambda_{2}N_{2}, \quad N_{2}(0) = 0\\
-    \frac{dN_{3}}{dt} &= \lambda_{2}N_{2} - \lambda_{3}N_{3}, \quad N_{3}(0) = 0
-\end{split}
-    \label{eq:problem1}
+    \frac{\partial U}{\partial t} = k\frac{\partial^{2}U}{\partial x^{2}} + k\frac{\partial^{2}U}{\partial y^{2}},
 \end{equation}
 
-Problem 1a induces only real eigenvalues $[0, -0.02, -0.025]$ and $||A||_{l_{1}} =0.06$ when $t=1$ and linearly increases to $36$ when $t_{end}=600$. The corresponding decay constants are $[\lambda_{1}, \lambda_{2}, \lambda_{3}] = [0.1, 0.005, 0.03]$. Both time marching methods are tested against an analytical solution which was generated in Matlab. 
+\noindent on the domain $x \in [0,1]$, $y \in [0,1]$, subject to periodic boundary conditions and initial condition,
 
 
-Results for time marching scheme 1 were generated by taking one time step to $t_{end} = 600$. Table \ref{tab:results1a} shows that the Hyperbolic solver outperforms all other solvers for isotopes 2 and 3 while performs as well as the CRAM solver for isotope 1. Both Pad\'e methods gives the same $l_{\infty}$ error for each isotope and is only slightly larger than the minimum error for isotope 1. The Parabolic solver has the worst error for all isotopes. 
+\begin{equation}
+    U(x,y,0) = \sin(2\pi x)\sin(2\pi y),
+\end{equation}
 
-Test are conducted with time marching scheme 2 at various time steps for each solver. The $l_{\infty}$ error for each isotope are is shown in Figure \ref{fig:errorProblem1aTimeMarchingScheme2} for the exponential solvers and Figure \ref{fig:errorProblem1aTimeMarchingScheme2Int} for the BDF solvers. Error for each of the Cauchy solvers exponentially decays as you decrease the number of substeps (increase the time step size) you take as your march to $t_{end}=600$. Because the isotope concentrations do not sharply decrease as steady state is reached, substeping a Cauchy solver will not increase the accuracy. The reason the accuracy decreases was described in Section \ref{sec:timeMarchingSchemes}. In general, the Pad\'e solvers also follow this trend although it is not as sharp as the Cauchy solvers. Pad\'e-Method 1 shows a sharp increase in error after the first time step size then tends to decrease with few small increases in error between a number of time steps. These small increases might be caused by the matrix norm increases but not enough to jump to a higher order Pad\'e function. When the norm increases over that Pad\'e orders threshold, the error sharply jumps down because a higher order Pad\'e method is used to approximation the matrix exponential. After a point the matrix norm becomes too large, and squaring a scaling takes place. 
+\noindent and solution,
 
-In general, the BDF solvers show sporadic behavior for large time steps with very high error. BDF of orders greater than 2 are not A-stable which might answer why some of the errors are quite large for the larger time steps with high order BDF's. In BDF orders 2, 3, 5 and 6 the first few points have lower error where the number of points corresponds to the BDF order - 1. This behavior comes from the way in which the initial points are calculated to start the BDF solver. For example, BDF5 requires 5 previous solutions to compute the next point, therefore 4 previous solutions need to be calculated to start the solver. These previous solutions are calculated with a much finer time step size and with lower order BDF's, to not introduce error at the beginning of the solution. After the number of steps increases to the order of the requested BDF method then the actual BDF method kicks in and starts to compute the solution. After each solver begins running with higher and higher time steps, you can see the slope of the error vs time step size corresponding to the order of each solver. As you increase the BDF order the slope increases, showing faster convergence for higher order methods. What is most notable about comparing the BDF solvers with the exponential ones is the difference in relative accuracy. The worst preforming exponential solver beat the best preforming BDF method and their accuracy vs time step size are inversely proportional to one another. Meaning that the exponential solvers preform better with a single time step than with multiple, which was discussed earlier. The take away from this comparison is that the exponential solvers far outpreformed the BDF methods. 
+\begin{equation}
+    U(x,y,t) = e^{-t}\sin(2\pi x)\sin(2\pi y),
+\end{equation}
 
-\begin{table}[b]
-    \caption{\label{tab:results1a} Problem 1a $l_{\infty}$ Error for Time Marching Scheme 1}
-    \centering
-    %\begin{tabular}{c|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}}
-    \begin{tabular}{c|c|c|c}
-    \hline
-     & $N_{1}$ & $N_{2}$ & $N_{3}$ \\
-    \hline
-    \hline
-    CRAM & 7.28E-12 & 5.46E-12 & 2.39E-12 \\
-    \hline
-    Parabolic & 6.37E-11 & 6.46E-11 & 2.40E-11 \\
-    \hline
-    Hyperbolic & 7.28E-12 & 4.09E-12 & 1.40E-12 \\
-    \hline
-    Pad\'e Method 1 & 7.73E-12 & 1.27E-11 & 2.16E-12 \\
-    \hline
-    Pad\'e Method 2 & 7.73E-12 & 1.27E-11 & 2.16E-12 \\
-    \hline
-    \end{tabular}
-\end{table}
+\noindent with $k = 1/(8\pi^{2}$). The Problem is ran for a total time of 2.0 seconds with the number of cells in the x and y direction being the same [10, 20, 40, 80]. These results are shown in Table \ref{tab:diffusion_problem1_results}. These results show good convergence rates for the $l_{\infty}$ and $l_{1}$ error functions previous described, but not $l_{2}$. While each of the solvers maintained the same error, the run times were drastically different. Run times for each of the solvers is shown in Figure (\ref{fig:runtime_diffusion_one}).
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=6.5in]{images/problem1aMethod2.png}\\
-  \caption{Error for Problem 1a Using Time Marching Scheme 2 with Exponential Solvers}
-  \label{fig:errorProblem1aTimeMarchingScheme2}
-\end{figure} 
+From Figure (\ref{fig:runtime_diffusion_one}) each of the solvers show a monomial relation between the problem size and run time. Both the Parabolic and Hyperbolic solvers have almost the exact same solve time. This is because they have to solve the same number of linear systems. The CRAM solver requires half the number of linear solves, making it about twice as fast. For this example the Taylor solver is the fastest but only slightly beats each of the Cauchy solvers. The Pad\'e solvers scale much more poorly than the other ones. Starting out each of the solvers have a similar run time but as the problem size increases, the Pad\'e methods run times grow at a faster rate. Each of these solvers maintain the same numerical error do the the error being dominated by the spatial discretization error of the diffusion operator. 
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=6.5in]{images/problem1aMethod2Int.png}\\
-  \caption{Error for Problem 1a Using Time Marching Scheme 2 with BDF Solvers}
-  \label{fig:errorProblem1aTimeMarchingScheme2Int}
-\end{figure} 
+The eigenvalues for this problem were found to be clustered on the negative real axis with zero imaginary parts. For the 400 x 400 case, the eigenvalues are shown in Figure \ref{fig:eigenvalues_diffusion_one}.  On exception to this is a positive eigenvalue which is very close to the origin at 6.0396e-14. This positive value only appears in the 400 x 400 case. The other discretizations show the same behavior with the eigenvalues being clustered on the negative real axis but do not show the positive valued eigenvalue a the origin. Due to the relatively long solve times, particularly for the Pad\'e solvers, the Krylov subspace approximation was used to analyze the error and run time. For a spatial resolution of 160 cells in both the x and y direction, results for various subspace dimensions $M$ are shown in Table \ref{tab:diffusion_problem1_results_krylov}. Interestingly, the error associated with reducing the overall dimension of the problem did not change, even though the run time drastically decreased leading to the conclusion that the dimension of the true space is much smaller. 
+
 
 \FloatBarrier
 
-
-
-Problem 1b modifies the decay constants to produce eigenvalues with imaginary parts [2.05e-19, -1.5e-02+0.00707107i, -1.5e-02-0.00707107i] with $||A||_{l_{1}} = 0.03$ when $t=1$ and linearly increases to 18 when $t_{end} = 600.$ The corresponding decay constants are $[\lambda_{1}, \lambda_{2}, \lambda_{3}] = [0.1, 0.005, 0.105]$. Again, the solution was generated in Matlab. 
-
-Results for time marching scheme 1 were generated by taking one time step to $t_{end} = 600$. Table \ref{tab:results1b} shows that CRAM was the worst preforming solver. This is not surprising considering the magnitude of the imaginary parts of the eigenvalues, CRAM is most accurate around the negative real axis. Both Parabolic and Hyperbolic solvers cover a wider range on the imaginary axis, which shows in the results. Each of these solvers are many orders of magnitude more accurate than CRAM. The Pad\'e solvers both give the same solution, this is not surprising because there are situations in Pad\'e Method 2 which will run as Method 1. Again the Hyperbolic solver is the most accurate.
-
-Results for time marching scheme 2 are shown in Figure \ref{fig:errorProblem1bTimeMarchingScheme2} and shows one of the advantages of substepping. As the time step length increases, so do the placement of the eigenvalues on the complex plane. If the time step is too large, the eigenvalues can shift into a region which decreases the accuracy of Cauchy methods; this behavior is most prevalent in CRAM. Both the Parabolic and Hyperbolic solvers also show a slight bump in error after time steps on the order of 100, after the error starts to decline again and bottoms out at the last point. The last point corresponds to taking a single time step. Both of the Pad\'e solvers show the same general trend as with problem 1a. The matrix norm for this problem is slightly lower than with problem 1a, leading to lower error. Figure \ref{fig:errorProblem1bTimeMarchingScheme2Int} shows the error for the BDF methods. The error for each order shows the same general behavior as with problem 1b. A notable exception to this is BDF4, which shows greater accuracy for low number of time steps. Again, the exponential methods out preform the BDF integrators. 
-
-\begin{table}[b]
-    \caption{\label{tab:results1b} Problem 1b $l_{\infty}$ Error for Time Marching Scheme 1}
-    \centering
-    %\begin{tabular}{c|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}}
-    \begin{tabular}{c|c|c|c}
-    \hline
-     & $N_{1}$ & $N_{2}$ & $N_{3}$ \\
-    \hline
-    \hline
-    CRAM & 5.73E-9 & 4.37E-9 & 1.36E-9 \\
-    \hline
-    Parabolic & 8.64E-11 & 9.09E-12 & 1.26E-10 \\
-    \hline
-    Hyperbolic & 9.09E-13 & 9.09E-13 & 6.82E-13 \\
-    \hline
-    Pad\'e Method 1 & 1.36E-12 & 9.09E-13 & 2.27E-13 \\
-    \hline
-    Pad\'e Method 2 & 1.36E-12 & 9.09E-13 & 2.27E-13 \\
-    \hline
-    \end{tabular}
+\begin{table}[htbp]
+   \caption{\label{tab:diffusion_problem1_results} Convergence Rate for Diffusion Problem 1  with Absolute Error}
+   \centering
+    \scalebox{0.85}{
+   \begin{tabular}{cllllllll}
+   \hline
+    Solver & Cells & $l_{\infty}$ Rate & $l_{1}$ Rate & $l_{2}$ Rate &$l_{\infty}$ Error &$l_{1}$ Error & $l_{2}$ Error & Solve Time (sec)\\
+   \hline
+   CRAM & 100 & - & - & - & 4.39e-03 & 1.84e-03 & 1.17e-02 & 1.54e-02 \\
+   - & 400 & 2.02 & 2.02 & 0.05 & 1.08e-03 & 4.53e-04 & 1.13e-02 & 9.84e-02 \\
+   - & 1600 & 1.97 & 2.01 & 0.01 & 2.76e-04 & 1.23e-04 & 1.12e-02 & 1.06e+00\\
+   - & 6400 & 1.99 & 2.00 & 0.00 & 6.94e-05 & 2.82e-05 & 1.12e-02 & 1.10e+01\\
+   \hline
+   Parabolic & 100 & - & - & - & 4.39e-03 & 1.84e-03 & 1.17e-02 & 2.12e-02 \\
+   - & 400 & 2.02 & 2.02 & 0.05 & 1.08e-03 & 4.53e-04 & 1.13e-02 & 1.94e-01\\
+   - & 1600 & 1.97 & 2.01 & 0.01 & 2.76e-04 & 1.23e-04 & 1.12e-02 & 2.10e+00\\
+   - & 6400 & 1.99 & 2.00 & 0.00 & 6.94e-05 & 2.82e-05 & 1.12e-02 & 2.18e+01\\
+   \hline
+   Hyperbolic & 100 & - & - & - & 4.39e-03 & 1.84e-03 & 1.17e-02 & 2.12e-02 \\
+   - & 400 & 2.02 & 2.02 & 0.05 & 1.08e-03 & 4.53e-04 & 1.13e-02 & 1.94e-01\\
+   - & 1600 & 1.97 & 2.01 & 0.01 & 2.76e-04 & 1.23e-04 & 1.12e-02 & 2.10e+00\\
+   - & 6400 & 1.99 & 2.00 & 0.00 & 6.94e-05 & 2.82e-05 & 1.12e-02 & 2.18e+01\\
+   \hline
+   Pad\'e-Method 1 & 100 & - & - & - & 4.34e-03 & 1.84e-03 & 1.17e-02 & 5.76e-03\\
+   - & 400 & 2.02 & 2.02 & 0.05 & 1.08e-03 & 4.53e-04 & 1.13e-02 & 4.32e-01\\
+   - & 1600 & 1.97 & 2.01 & 0.01 & 2.76e-04 & 1.23e-04 & 1.12e-02 & 6.78e+01\\
+   - & 6400 & 1.99 & 2.00 & 0.00 & 6.94e-05 & 2.82e-05 & 1.12e-02 & 5.50e+03\\
+   \hline
+   Pad\'e-Method 2 & 100 & - & - & - & 4.39e-03 & 1.83e-03 & 1.17e-02 & 1.52e-02\\
+   - & 400 & 2.02 & 2.02 & 0.05 & 1.08e-03 & 4.53e-04 & 1.13e-02 & 9.39e-01\\
+   - & 1600 & 1.97 & 2.01 & 0.01 & 2.76e-04 & 1.23e-04 & 1.12e-02 & 1.19e+02\\
+   - & 6400 & 1.99 & 2.00 & 0.00 & 6.94e-05 & 2.82e-05 & 1.12e-02 & 9.42e+03\\
+   \hline
+   Taylor & 100 & - & - & - & 4.39e-03 & 1.84e-03 & 1.17e-02 & 4.15e-03\\
+   - & 400 & 2.02 & 2.02 & 0.05 & 1.08e-03 & 4.53e-04 & 1.13e-02 & 2.31e-02\\
+   - & 1600 & 1.97 & 2.01 & 0.01 & 2.76e-04 & 1.23e-04 & 1.12e-02 & 1.13e-01\\
+   - & 6400 & 1.99 & 2.00 & 0.00 & 6.94e-05 & 2.82e-05 & 1.12e-02 & 1.07e+00\\
+   \hline
+   \end{tabular}
+   }
 \end{table}
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=6.5in]{images/problem1bMethod2.png}\\
-  \caption{Error for Problem 1b Using Time Marching Scheme 2 with Exponential Solvers}
-  \label{fig:errorProblem1bTimeMarchingScheme2}
-\end{figure} 
+\FloatBarrier
+\newpage
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=6.5in]{images/problem1bMethod2Int.png}\\
-  \caption{Error for Problem 1b Using Time Marching Scheme 2 with BDF Solvers}
-  \label{fig:errorProblem1bTimeMarchingScheme2Int}
-\end{figure} 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=3.9in]{images/chapter-5/diffusionProblem1Runtime.png}
+    \caption{Run time performance for diffusion problem one}
+    \label{fig:runtime_diffusion_one}
+\end{figure}
+
+\begin{figure}[hb]
+    \centering
+    \includegraphics[width=3.9in]{images/chapter-5/eigenvaluesDiffusion1-20.png}
+    \caption{Eigenvalues for the 400 x 400 case in diffusion problem one}
+    \label{fig:eigenvalues_diffusion_one}
+\end{figure}
+
+\begin{table}[ht!]
+   \caption{\label{tab:diffusion_problem1_results_krylov} Error and Run Times for Different Krylov Subspace Dimensions}
+   \centering
+   \begin{tabular}{cllllll}
+   \hline
+   Solver & M & $l_{\infty}$ Error & $l_{1}$ Error & $l_{2}$ Error & Run time (sec)\\
+   \hline
+   Pad\'e-method 1 &   5 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 1.13e-02 \\
+   - &  10 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 1.47e-02 \\
+   - &  25 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 3.31e-02 \\
+   - &  50 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 9.27e-02 \\
+   - & 100 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 3.33e-01 \\
+   - & 150 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 7.30e-01 \\
+   - & 200 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 1.33e+00 \\
+   Pad\'e-method 2 &   5 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 9.15e-03 \\
+   - &  10 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 1.18e-02 \\
+   - &  25 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 2.96e-02 \\
+   - &  50 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 8.95e-02 \\
+   - & 100 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 3.28e-01 \\
+   - & 150 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 8.20e-01 \\
+   - & 200 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 1.55e+00 \\
+   \hline
+   \end{tabular}
+\end{table}
+
 
 \FloatBarrier
+\clearpage
 
 \subsection{Problem 2}
-Problem 2 is a 1D, two species reaction-diffusion problem shown in Equation \ref{eq:problem2Eqs} \cite{ching2007},
+In the second example, a 1D reaction-diffusion problem was modeled. This problem was taken from work performed by Chou et al. (\cite{ching2007}). The partial differential equations (PDEs) are as follows:
 
 \begin{equation}
 \setlength{\jot}{15pt}
@@ -131,162 +159,485 @@ Problem 2 is a 1D, two species reaction-diffusion problem shown in Equation \ref
     \label{eq:problem2Eqs}
 \end{equation}
 
-\noindent on the domain from $0$ to $\pi/2$. The system is subject to the following boundary conditions, 
+\noindent on the domain $x \in [0, \pi/2]$. The system is subject to the following boundary conditions: 
 
 \begin{equation}
     \frac{\partial U}{\partial x}(0,t) = 0, \quad \frac{\partial V}{\partial x}(0,t) = 0, \quad U(\frac{\pi}{2}, t) = 0, \quad V(\frac{\pi}{2}, t)= 0,
 \end{equation}
 
-\noindent with initial condition,
+\noindent with the following initial condition:
 
 \begin{equation}
     U(x,0) = 2\cos(x), \quad V(x,0) = (a-b)\cos(x).
 \end{equation}
 
-\noindent The exact solution is given by,
-
-\begin{equation}
-    U(x,t) = \bigg( e^{-(a+d)t} + e^{-(b+d)t}\bigg)\cos(x), \quad V(x,t) = (a - b) e^{-(b+d)t}\cos(x).
-\end{equation}
-
-The same three test problems that were conducted in Reference \cite{ching2007} are also done in libowski. These test correspond to changes in coefficients $[a, b, d]$ which produce a diffusion dominated system, a reaction dominated system and a stiff reaction system. Each test case is run with one time step to $t = 1$, so $\Delta t = 1$. The number of cells in the x-direction is varied from 100 to 1000. In addition to the five matrix exponential solvers that are tested, the Krylov subspace approximation is applied to both of the Pad\'e solvers with the aim to reduce the solve time. 
-
-Results for each of the five solvers are shown in Figures \ref{fig:errorProblem2CRAM} to \ref{fig:errorProblem2padeM2}. The errors for each of the test cases is almost the same for each of the solvers. What is most interesting is that the error for $U$ remains pretty constant for each test case however, the error for $V$ drastically changes. Test case one is a diffusion dominating problem were $V$ is weakly dependent on $U$. The error in $V$ for this case is an order of magnitude lower than $U$. In test case two, the coupling between the two species is the came order of magnitude and is reflected in the error. In this case the problem is reaction dominated. The third test case is also reaction dominated but with stiff reaction rates. Species $U$ decays at a rate that is 2 orders of magnitude greater than in test case two. This is reflected not in the $U$ solution but in the $V$ solution which is about two orders of magnitude more error. 
-
-The most notable difference between the solvers is their run time. Each of the Cauchy solvers have run times of less than $0.1$ seconds, even for the smallest $dx$, corresponding to a 2000 x 2000 matrix. Both the Parabolic and Hyperbolic solvers require twice as many linear solves as CRAM, resulting in about twice the run time. The run time for Cauchy class solvers also scales by about 2 orders of magnitude from the largest $dx$ to the smallest $dx$. Both of the Pad\'e solvers have much larger differences in run time as $dx$ scales down in size, corresponding to 5 about orders of magnitude in solve time. At the problems highest spatial resolution, Pad\'e solvers take about 100 seconds to solve vs 0.05 seconds for Caunchy solvers. 
-
-The Krylov subspace method is applied to the Pad\'e solvers to reduce their computation time. Testing each case was accomplished by selecting a base discritization resulting from 800 cells in the x-direction. Next, Krylov subspaces of various dimensions are built from the original 1600 x 1600 matrix. Results for each of the Pad\'e solvers are shown in Figures \ref{fig:errorProblem2padeM1Krylov} and \ref{fig:errorProblem2padeM2Krylov}. In each test case, a Krylov dimension is reached where the original base error from the 1600 x 1600 matrix. In the diffusion dominated case this optimal Krylov dimension is 50, meaning that the original 1600 x 1600 problem can be reduced to a 50 x 50 matrix and solved with the same solution error. For case one, this reduces the computation time from $\sim35$ seconds to $\sim 10^{-2}$ seconds. The benefit from the Krylov subpsace method is even more prevalent in the reaction dominated cases. In both of these cases, a subpsace dimension of only 3 is required to reach the same base error for the 1600 x 1600 matrix. This reduces the computation time from $\sim 35$ seconds to $\sim 5\times 10^{-4}$ seconds. 
-
-Solutions with the BDF solvers was done by varying the time step size with a fixed spatial discritization of 500 cells. As a reference, the matrix exponential solutions are also plotted and can be thought of as being the "best" solution. The "best" solution being the most accurate solution at this spacial discretization. Figures \ref{fig:errorProblem2BDF1and2}, \ref{fig:errorProblem2BDF3and4} and \ref{fig:errorProblem2BDF5and6} show the errors for each of the BDF solvers. In Figure \ref{fig:errorProblem2BDF1and2}, the solutions do not reach the asymptotic solution from the exponential solvers, but the second order BDF method does approach it at a faster rate. Figure \ref{fig:errorProblem2BDF3and4} show faster convergence rates which reach the asymptotic solution. BDF3 shows oscillatory behavior for the reaction dominated and stiff reaction dominated cases. BDF4 shows this same behavior for the diffusion dominated case. The stiff reaction case shows some interesting behavior for the $U$ solution. BDF4 shows what seems to be instability or oscillatory behavior before converging to the matrix exponential solution. Both BDF5 and BDF6 methods converge to the asymptotic solutions much faster than lower orders for the diffusion and reaction dominated cases. Each of these methods shows some oscillations when converging to the solution. Like BDF4, BDF5 and BDF6 show strange behavior for the U solution for the stiff reaction case. These higher order BDF methods converge to the asymptotic solution at a lower dt than BDF4 and each show increasing oscillatory behavior as they approach. It is unclear as to what is causing this behavior. The difference between the BDF methods and the exponential methods is easily seen in the cost of the exponential method vs the ability to obtain the "best" solution in a single step. 
-
-\FloatBarrier
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=5.75in]{images/CRAMproblem2.png}\\
-  \caption{Error for Problem 2 Using CRAM}
-  \label{fig:errorProblem2CRAM}
-\end{figure} 
-
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=5.75in]{images/parabolicproblem2.png}\\
-  \caption{Error for Problem 2 Using Parabolic}
-  \label{fig:errorProblem2parabolic}
-\end{figure} 
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=5.75in]{images/hyperbolicproblem2.png}\\
-  \caption{Error for Problem 2 Using Hyperbolic}
-  \label{fig:errorProblem2hyperbolic}
-\end{figure} 
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=5.75in]{images/pade-Method1problem2.png}\\
-  \caption{Error for Problem 2 Using Pade-Method1}
-  \label{fig:errorProblem2padeM1}
-\end{figure} 
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=5.75in]{images/pade-Method2problem2.png}\\
-  \caption{Error for Problem 2 Using Pade-Method2}
-  \label{fig:errorProblem2padeM2}
-\end{figure} 
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=5.75in]{images/pade-Method1KrylovProblem2.png}\\
-  \caption{Krylov Approximation for Problem 2 Using Pade-Method1}
-  \label{fig:errorProblem2padeM1Krylov}
-\end{figure} 
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=5.75in]{images/pade-Method2KrylovProblem2.png}\\
-  \caption{Krylov Approximation for Problem 2 Using Pade-Method2}
-  \label{fig:errorProblem2padeM2Krylov}
-\end{figure} 
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=5.75in]{images/BDF1BDF2problem2.png}\\
-  \caption{BDF Solution for Problem 2 for Orders 1 and 2}
-  \label{fig:errorProblem2BDF1and2}
-\end{figure} 
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=5.75in]{images/BDF3BDF4problem2.png}\\
-  \caption{BDF Solution for Problem 2 for Orders 3 and 4}
-  \label{fig:errorProblem2BDF3and4}
-\end{figure} 
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=5.75in]{images/BDF5BDF6problem2.png}\\
-  \caption{BDF Solution for Problem 2 for Orders 5 and 6}
-  \label{fig:errorProblem2BDF5and6}
-\end{figure} 
-
-\FloatBarrier
-
-
-\subsection{Problem 3}
-This problem examines a convection driven flow with the 6 neutron precursor groups shown in Equation \ref{eq:problem3}. Coefficients for system are shown in Table \ref{tab:problem3Coeffs}. 
+\noindent The exact solution is given by
 
 \begin{equation}
 \setlength{\jot}{15pt}
 \begin{split}
-    \frac{\partial \rho_{k}}{\partial t} = -v_{y}\frac{\partial \rho_{k}}{\partial y} - \lambda_{k}\rho_{k}& + \frac{M_{k}}{N_{A}}\gamma_{k}\Sigma_{f,k}\phi\sin\bigg(\frac{\pi}{L}\bigg), \quad k = 1, 2, \ldots 6
+    U(x,t) = \bigg( e^{-(a+d)t} + e^{-(b+d)t}\bigg)\cos(x), \text{ and} \\
+    V(x,t) = (a - b) e^{-(b+d)t}\cos(x).
 \end{split}
+\end{equation}
+
+The same three test problems that were conducted in the work by Chou et al. (\cite{ching2007}) were also conducted in libowski. These test results correspond to changes in coefficients $[a, b, d]$, which produced a diffusion-dominated system [0.1, 0.01, 1.0], a reaction-dominated system [2.0, 1.0, 0.001], and a stiff reaction system [100, 1.0, 0.001]. Each test case was run with one time step to $t = 1$, so $\Delta t = 1$. The number of cells in the x direction was varied from 10 to 320. Results for the spatial convergence for the CRAM solver for the diffusion-dominated, reaction-dominated and stiff reaction--dominated cases are shown in Tables \ref{tab:diffusion_spatial_convergence_diffusion_dom}, \ref{tab:diffusion_spatial_convergence_reaction_dom}, and \ref{tab:diffusion_spatial_convergence_stiff_reaction_dom}. Each solver produced the same error at up to five decimal places for this set of $n$ values; therefore, only the CRAM results are shown. Full results for these test are shown in Appendix \ref{appen:results} Tables \ref{tab:diffusion_diffusion_dom_problem2_results}, \ref{tab:diffusion_reaction_dom_problem2_results} and \ref{tab:diffusion_stiff_reaction_dom_problem2_results}. As expected, the convergence rate for this problem is second order for each of the error metrics. This is even true for the $l_{2}$ error, which was not second order in the previous example. While there is little difference between the errors from these solvers for this first problem, there is a notable difference in run times for the Pad\'e and Taylor solvers. The $l_{\infty}$ error and run time for each sub-problem is shown in Figures \ref{fig:problem2_diffusion_dom}, \ref{fig:problem2_reaction_dom} and \ref{fig:problem2_stiff_reaction_dom}. 
+
+Figures \ref{fig:problem2_diffusion_dom}-\ref{fig:problem2_stiff_reaction_dom} show that CRAM is the fastest solver, followed by the parabolic and hyperbolic solvers. Both of the Pad\'e solvers had drastically much longer run times for the diffusion-dominated cases, with Method 2 being the longest. Interestingly, the Taylor solver showed dramatically different run times based on the physical process dominating the problem. In the diffusion-dominated cases, the Taylor solver took the longest, but in the reaction-dominated cases, the run time was on the order of the CRAM, parabolic, and hyperbolic solvers. 
+
+The Krylov subspace approximation was applied to each sub-problem with 1,000 cells in the x direction. The Krylov dimensions were varied from 2 to 100, and the results are shown in Figure \ref{fig:problem2_krylov} . Unlike the previous diffusion example, a much larger Krylov dimension was required to reach a converged error in the diffusion-dominated case. Each solver showed the same error behavior, but with slightly different converged errors due to numerical accuracy in the algorithms. Each solver also showed similar behavior, with run time scaling as a function of the Krylov dimension; however, each axis was scaled differently. Applying the Krylov subspace to each Pad\'e solver reduced the many orders of magnitude, but it failed to reduce the run time of the Taylor solver to the same order in the diffusion-dominated case. For each of the reaction-dominated cases, the Krylov subspace dimension required to reach a converged solution is much smaller than the diffuion-dominated case. 
+
+\clearpage
+
+\begin{table}[h]
+   \caption{\label{tab:diffusion_spatial_convergence_diffusion_dom} Convergence Rate for Diffusion-Dominated Problem Using Absolute Error}
+   \centering
+   \begin{tabular}{lllllll}
+   \hline
+    n & $l_{\infty}$ Rate & $l_{1}$ Rate & $l_{2}$ Rate &$l_{\infty}$ Error &$l_{1}$ Error & $l_{2}$ Error\\
+   \hline
+   20 & 2.00 & 2.00 & 2.07 & 1.87e-04 & 1.19e-04 & 2.99e-06  \\
+   40 & 2.00 & 2.00 & 2.03 & 4.69e-05 & 2.99e-05 & 7.31e-07 \\
+   80 & 2.00 & 2.00 & 2.02 & 1.17e-05 & 7.46e-06 & 1.81e-07 \\
+   160 & 2.00 & 2.00 & 2.01 & 2.93e-06 & 1.87e-06 & 4.48e-08 \\
+   320 & 2.00 & 2.00 & 2.00 & 7.33e-07 & 4.67e-07 & 1.12e-08 \\
+   \hline
+   \end{tabular}
+\end{table}
+
+\begin{table}[h]
+   \caption{\label{tab:diffusion_spatial_convergence_reaction_dom} Convergence Rate for Reaction-Dominated Problem Using Absolute Error}
+   \centering
+   \begin{tabular}{lllllll}
+   \hline
+    n & $l_{\infty}$ Rate & $l_{1}$ Rate & $l_{2}$ Rate &$l_{\infty}$ Error &$l_{1}$ Error & $l_{2}$ Error\\
+   \hline
+   20 & 2.00 & 2.00 & 2.07 & 2.23e-04 & 1.42e-04 & 4.24e-06 \\
+   40 & 2.00 & 2.00 & 2.04 & 5.58e-05 & 3.55e-05 & 1.04e-06 \\
+   80 & 2.00 & 2.00 & 2.02 & 1.40e-05 & 8.88e-06 & 2.56e-07 \\
+   160 & 2.00 & 2.00 & 2.01 & 3.49e-06 & 2.22e-06 & 6.35e-08 \\
+   320 & 2.00 & 2.00 & 2.00 & 8.72e-07 & 5.55e-07 & 1.58e-08 \\
+   \hline
+   \end{tabular}
+\end{table}
+
+\begin{table}[h]
+   \caption{\label{tab:diffusion_spatial_convergence_stiff_reaction_dom} Convergence Rate for Stiff Reaction--Dominated Problem Using Absolute Error}
+   \centering
+   \begin{tabular}{lllllll}
+   \hline
+    n & $l_{\infty}$ Rate & $l_{1}$ Rate & $l_{2}$ Rate &$l_{\infty}$ Error &$l_{1}$ Error & $l_{2}$ Error\\
+   \hline
+  20 & 2.00 & 2.00 & 2.07 & 9.42e-03 & 6.00e-03 & 7.57e-03 \\ 
+  40 & 2.00 & 2.00 & 2.04 & 2.36e-03 & 1.50e-03 & 1.85e-03 \\ 
+  80 & 2.00 & 2.00 & 2.02 & 5.89e-04 & 3.75e-04 & 4.56e-04 \\ 
+  160 & 2.00 & 2.00 & 2.01 & 1.47e-04 & 9.38e-05 & 1.13e-04 \\ 
+  320 & 2.00 & 2.00 & 2.00 & 3.68e-05 & 2.34e-05 & 2.82e-05 \\
+   \hline
+   \end{tabular}
+\end{table}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=5.0in]{images/chapter-5/diffusion_dominated.png}
+    \caption{Results for the diffusion-dominated case}
+    \label{fig:problem2_diffusion_dom}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=5.0in]{images/chapter-5/reaction_dominated.png}
+    \caption{Results for the reaction-dominated case}
+    \label{fig:problem2_reaction_dom}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=5.0in]{images/chapter-5/stiff_reaction_dominated.png}
+    \caption{Results for the stiff reaction-dominated case}
+    \label{fig:problem2_stiff_reaction_dom}
+\end{figure}
+
+\clearpage
+
+\begin{sidewaysfigure}[htbp]
+    \centering
+    \includegraphics[width=8in]{images/chapter-5/krylovProblem2.png}
+    \caption{Results for the Krylov subspace approximation for each sub-problem}
+    \label{fig:problem2_krylov}
+\end{sidewaysfigure}
+
+\clearpage
+
+\subsection{Problem 3}
+
+Convection was tested using PDE of the form
+
+\begin{equation}
+    \frac{\partial U}{\partial t} = -v\frac{\partial U}{\partial x},
+    \label{eq:convection_PDE}
+\end{equation}
+
+\noindent where $v$ is velocity. Equation (\ref{eq:convection_PDE}) was applied to a system on the domain $x \in [0, 100]$, $t \in [0, 20]$ subject to the following boundary conditions:
+
+\begin{equation}
+    U(0,t) = 1.0, \quad\frac{\partial U}{\partial x}(100, t) = 0.0,
+\end{equation}
+
+\noindent and the initial condition:
+
+\begin{equation}
+    U(x,0) = 0.0.
+\end{equation}
+
+What is most important about this problem is that it exposes an instability with Cauchy solvers which seems to be specific to this problem. This is something that is not seen with the series solvers such as Pad\'e or Taylor. First, results for the first order upwind differencing scheme are shown in Figures \ref{fig:first_order_results}  for a first-order backward differencing formula (BDF1) and the ETD scheme using the series matrix exponential solvers. While only the Taylor solver is shown, results for the Pad\'e solvers are the same. Figure \ref{fig:first_order_results_spatial_refinement} shows the typical reduction in numerical diffusion with decreasing dx. In figure \ref{fig:first_order_results} we see that as the time step size decreases for the explicit BDF1 solver it approaches the accuracy of the ETD method with a single time step. 
+
+The instability seen with Cauchy solvers is shown in figure \ref{fig:first_order_results_cauchy_instability} for a zoomed in and zoomed out view of each solution. In figure \ref{fig:first_order_results_cauchy_instability} it is seen that for dx values 0.5 and 0.4, the solution blows up and oscillates. What is important to note that even know the solution for dx = 1.0 is stable it does contain small negative values as it approaches zero. The matrix exponential is the analytical solution to the ODE system and should not show any instability, so the instability shown here is due to the numerical computation of the exponential itself. To combat this instability the order of the method can be increased, this is seen in figure \ref{fig:first_order_results_cauchy_instability_different_orders}. Figure \ref{fig:first_order_results_cauchy_instability_different_orders} shows the Hyperbolic and Parabolic solvers at different order of N. As the order in increased, the solution becomes more stable.  Another method to increase the stability of the solution is to compute the solution with multiple steps and not just at the final time step. This is equivalent to using the substep method for the Cauchy solvers. Figure \ref{fig:first_order_results_cauchy_instability_different_time_steps} shows results for each of the Cauchy solver for different time step sizes. Even with large time step sizes the solution becomes stable.   \textcolor{red}{Discuss accuracy related to the Jordan canonical form.}
+
+To illustrate the enhanced accuracy of TVD non-linear flux limiters, the same problem is conducted with a variety of limiter functions. This method works to approximate the convection term to at most second order in the case of smooth solutions and reduce numerical diffusion seen in the first order case. Figure \ref{fig:fluxlimiters_problem3} shows results from each of the flux limiter functions in libowski using the Taylor solver. Each of the flux limiter functions reduces the numerical diffusion, seen in the first order upwind case with superbee being the best. While the TVD scheme is designed to remove unphysical oscillations seen in higher order convection schemes, these oscillations are present because of the explicit implementation. Figure \ref{fig:fluxlimiters_instability_problem3} shows these oscillations for six flux limiter functions. This behavior is only present when large time step sizes are used. For some time integration methods, explicit schemes are known to be unstable if large time step sizes are used. In this case the second order correction being calculated from the previous time step causes the solution to become unstable if large enough time steps are taken. This same behavior is seen in all the ETD matrix exponential solvers. 
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/problem3FirstOrder.png}
+    \caption{First-order upwind differencing with series solvers and BDF1}
+    \label{fig:first_order_results}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6.0in]{images/chapter-5/problem3FirstOrderCauchyInstability.png}
+    \caption{First-order upwind differencing instability for Cauchy solvers}
+    \label{fig:first_order_results_cauchy_instability}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=5.0in]{images/chapter-5/problem3FirstOrderCauchyInstabilityDifferentOrders.png}
+    \caption{First-order upwind differencing instability for Cauchy solvers at different orders}
+    \label{fig:first_order_results_cauchy_instability_different_orders}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/problem3FirstOrderCauchyInstabilityDifferentTimeSteps.png}
+    \caption{First-order upwind differencing instability for Cauchy solvers at different time step sizes}
+    \label{fig:first_order_results_cauchy_instability_different_time_steps}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=5in]{images/chapter-5/problem3FluxLimiters.png}
+    \caption{Flux limiter function applied to problem three, dt = 0.1, dx = 0.2}
+    \label{fig:fluxlimiters_problem3}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/problem3SecondOrderFluxLimiterFunctionInstability.png}
+    \caption{Instability of flux limiter functions with the Taylor solver}
+    \label{fig:fluxlimiters_instability_problem3}
+\end{figure}
+
+\clearpage
+
+\subsection{Problem 4}
+
+The same PDE that was shown in the previous problem is tested again:
+
+\begin{equation}
+    \frac{\partial U}{\partial t} = -v\frac{\partial U}{\partial x},
+    \label{eq:convection_PDE}
+\end{equation}
+
+\noindent on the domain $x \in [0, 100]$, $t =\in [0, 5]$ subject to periodic boundary conditions:
+
+\begin{equation}
+    U(0,t) = U(100, t),
+\end{equation}
+
+\noindent and the initial condition:
+
+\begin{equation}
+    U(x,0) = \exp\bigg\{-\bigg(\frac{(x-30)}{10}\bigg)^{2}\bigg\}.
+\end{equation}
+
+\noindent This problem produces a smooth solution which shows the convergence order of the flux limiters. Table \ref{} shows results for each flux limiter using the Taylor solver and results for each of the other solvers are shown in Appendix \ref{appen:results} Each solver has the same error and convergence rate, the run times are different. 
+
+Figure \ref{} show run time results for each of the solvers. 
+
+\clearpage
+
+\begin{table}[htbp]
+   \caption{\label{tab:problem4_results_taylor} Convergence Rate for Problem 4  with Absolute Error Using the Taylor Solver}
+   \centering
+    \scalebox{0.85}{
+   \begin{tabular}{cllllllll}
+   \hline
+    Flux limiter & Cells & $l_{\infty}$ Rate & $l_{1}$ Rate & $l_{2}$ Rate &$l_{\infty}$ Error &$l_{1}$ Error & $l_{2}$ Error & Solve Time (sec)\\
+   \hline
+    Superbee &  10 & - & - & - &  1.73e-01 & 5.91e-02 & 2.02e-01 & 1.01e-02\\ 
+    - &  20 & 0.76 & 1.54 & 1.18 &  1.03e-01 & 2.03e-02 & 8.94e-02 & 8.57e-03\\ 
+    - &  40 & 1.34 & 1.38 & 0.84 &  4.04e-02 & 7.81e-03 & 5.00e-02 & 1.11e-02\\ 
+    - &  80 & 1.20 & 1.58 & 1.14 &  1.77e-02 & 2.62e-03 & 2.27e-02 & 1.62e-02\\ 
+    - & 160 & 0.29 & 1.53 & 1.02 &  1.45e-02 & 9.04e-04 & 1.12e-02 & 2.74e-02\\ 
+    - & 320 & 1.23 & 1.81 & 1.59 &  6.16e-03 & 2.58e-04 & 3.73e-03 & 4.90e-02\\ 
+   \hline
+    VanLeer &  10 & - & - & - &  2.00e-01 & 6.75e-02 & 2.61e-01 & 1.03e-02\\ 
+    - &  20 & 0.52 & 1.43 & 0.87 &  1.40e-01 & 2.50e-02 & 1.43e-01 & 1.06e-02\\ 
+    - &  40 & 1.14 & 1.87 & 1.77 &  6.32e-02 & 6.85e-03 & 4.21e-02 & 1.10e-02\\ 
+    - &  80 & 1.32 & 1.86 & 1.70 &  2.54e-02 & 1.89e-03 & 1.29e-02 & 1.66e-02\\ 
+    - & 160 & 1.37 & 1.91 & 1.80 &  9.81e-03 & 5.05e-04 & 3.71e-03 & 2.77e-02\\ 
+    - & 320 & 1.39 & 2.04 & 2.07 &  3.74e-03 & 1.23e-04 & 8.83e-04 & 4.97e-02\\ 
+   \hline
+    Albada &  10 & - & - & - &  2.21e-01 & 7.24e-02 & 2.99e-01 & 6.96e-03\\ 
+    -  &  20 & 0.43 & 1.31 & 0.61 &  1.64e-01 & 2.93e-02 & 1.95e-01 & 8.18e-03\\ 
+    -  &  40 & 1.05 & 1.75 & 1.51 &  7.92e-02 & 8.68e-03 & 6.84e-02 & 1.11e-02\\ 
+    -  &  80 & 1.23 & 1.76 & 1.50 &  3.37e-02 & 2.56e-03 & 2.41e-02 & 1.62e-02\\ 
+    -  & 160 & 1.31 & 1.88 & 1.76 &  1.36e-02 & 6.94e-04 & 7.12e-03 & 2.73e-02\\ 
+    -  & 320 & 1.35 & 2.05 & 2.10 &  5.31e-03 & 1.67e-04 & 1.66e-03 & 4.89e-02\\ 
+   \hline
+    Min-Mod &  10 & - & - & - &  2.25e-01 & 7.50e-02 & 3.20e-01 & 9.49e-03\\ 
+    - &  20 & 0.37 & 1.24 & 0.49 &  1.74e-01 & 3.18e-02 & 2.28e-01 & 9.86e-03\\ 
+    - &  40 & 0.96 & 1.60 & 1.22 &  8.95e-02 & 1.05e-02 & 9.77e-02 & 1.12e-02\\ 
+    - &  80 & 1.13 & 1.51 & 0.99 &  4.09e-02 & 3.69e-03 & 4.92e-02 & 1.64e-02\\ 
+    - & 160 & 1.21 & 1.75 & 1.51 &  1.77e-02 & 1.09e-03 & 1.73e-02 & 2.74e-02\\ 
+    - & 320 & 1.26 & 1.82 & 1.63 &  7.42e-03 & 3.11e-04 & 5.60e-03 & 4.93e-02\\ 
+   \hline
+    Sweby &  10 & - & - & - &  1.92e-01 & 6.47e-02 & 2.41e-01 & 6.98e-03\\ 
+    - &  20 & 0.54 & 1.47 & 0.93 &  1.32e-01 & 2.34e-02 & 1.26e-01 & 8.26e-03\\ 
+    - &  40 & 1.14 & 1.49 & 1.09 &  5.97e-02 & 8.34e-03 & 5.94e-02 & 1.11e-02\\ 
+    - &  80 & 1.40 & 1.54 & 1.09 &  2.26e-02 & 2.87e-03 & 2.79e-02 & 1.65e-02\\ 
+    - & 160 & 0.94 & 1.55 & 1.06 &  1.18e-02 & 9.84e-04 & 1.34e-02 & 2.80e-02\\ 
+    - & 320 & 0.89 & 1.80 & 1.57 &  6.38e-03 & 2.83e-04 & 4.50e-03 & 4.96e-02\\ 
+   \hline
+    Upwind &  10 & - & - & - &  3.09e-01 & 1.03e-01 & 5.89e-01 & 6.90e-03\\ 
+    - &  20 & 0.15 & 0.79 & -0.37&  2.79e-01 & 5.93e-02 & 7.61e-01 & 1.09e-02\\ 
+    - &  40 & 0.60 & 0.75 & -0.50&  1.83e-01 & 3.52e-02 & 1.07e+00 & 1.10e-02\\ 
+    - &  80 & 0.79 & 0.87 & -0.26&  1.06e-01 & 1.93e-02 & 1.28e+00 & 1.62e-02\\ 
+    - & 160 & 0.89 & 0.93 & -0.15&  5.74e-02 & 1.01e-02 & 1.42e+00 & 2.72e-02\\ 
+    - & 320 & 0.94 & 0.96 & -0.08&  2.99e-02 & 5.21e-03 & 1.50e+00 & 4.86e-02\\ 
+   \hline
+    MUSCL &  10 & - & - & - &  1.88e-01 & 6.40e-02 & 2.37e-01 & 7.09e-03\\ 
+    - &  20 & 0.63 & 1.54 & 1.11 &  1.21e-01 & 2.20e-02 & 1.10e-01 & 8.46e-03\\ 
+    - &  40 & 1.28 & 1.96 & 2.01 &  5.00e-02 & 5.65e-03 & 2.72e-02 & 1.16e-02\\ 
+    - &  80 & 1.49 & 1.90 & 1.75 &  1.78e-02 & 1.52e-03 & 8.09e-03 & 1.70e-02\\ 
+    - & 160 & 1.47 & 1.99 & 1.96 &  6.43e-03 & 3.81e-04 & 2.08e-03 & 2.81e-02\\ 
+    - & 320 & 1.42 & 2.06 & 2.10 &  2.40e-03 & 9.14e-05 & 4.85e-04 & 5.09e-02\\ 
+   \hline
+   \end{tabular}
+   }
+\end{table}
+
+\clearpage
+
+\subsection{Problem 5}
+A two-dimensional convection-diffusion equation is modeled \cite{noye1989}:
+
+\begin{equation}
+    \frac{\partial \phi }{\partial t} + v_{x}\frac{\partial \phi}{\partial x} + v_{y}\frac{\partial \phi }{\partial y} - D_{x}\frac{\partial^{2}\phi }{\partial x^{2}} - D_{y}\frac{\partial^{2}\phi}{\partial y^{2}} = 0,
+\end{equation}
+
+\noindent on the domain $x \in [0, 4]$, $y \in [0, 4]$ with $v_{x} = v_{y} = 0.8, D_{x} = D_{y} 0.01$ Subject to initial condition:
+
+\begin{equation}
+    \phi(x, y, 0) = \exp\bigg\{ -\bigg( \frac{(x - 0.5)^{2}}{D_{x}} + \frac{(y-0.5)^{2}}{D_{y}} \bigg)\bigg\}. 
+\end{equation}
+
+\noindent This has the analytical solution:
+
+\begin{equation}
+    \phi(x, y, t) = \frac{1}{4t+1}\exp\bigg\{ -\bigg( \frac{(x-v_{x}t-0.5)^{2}}{D_{x}(4t+1)} + \frac{(y-v_{y}t-0.5)^{2}}{D_{y}(4t+1)}\bigg)\bigg\}
+\end{equation}
+
+\subsection{Problem 6}
+This problem consist on a convection-reaction problem with a single species represented by:
+
+\begin{equation}
+    \frac{\partial C}{\partial t} = -v\frac{\partial C}{\partial x} - \lambda C,
+\end{equation}
+
+\noindent on the domain $x \in [0,100]$, $t \in [0,20]$ where $v = 2$ and $\lambda = 0.01$. Subject to the following conditions:
+
+\begin{equation}
+    C(x, 0) = 1000, \quad C(0,t) = 1000, \quad \frac{dC}{dx}(100, t) = 0.
+\end{equation}
+
+\noindent This leads to the analytic solution:
+
+\begin{equation}
+C (x,t) = \begin{cases}
+  C (0, t) e^{-\frac{x \lambda _i}{v}}\ , & x < vt \\
+  C (x, 0) e^{-t \lambda _i}\ , & x \ge vt
+\end{cases}
+\end{equation}
+
+
+\subsection{Problem 7}
+This is an extension of problem 6 with two species, one that exist in the liquid and one on the wall. The species in the liquid transports and depositions on the wall where it sticks and does not move. In libowski, this model is set up using the wall deposition mass transport model with the infinite sink approximation. This system is represented by:
+
+\begin{equation}
+\setlength{\jot}{15pt}
+\begin{split}
+    &\frac{\partial C_{l}}{\partial t} = -v\frac{\partial C_{l}}{\partial x} - \frac{kA}{V} C_{l}, \\
+    &\frac{\partial C_{w}}{\partial t} = \frac{kA}{V} C_{l},
+\end{split}
+\end{equation}
+
+\noindent on the domain $x \in [0,100]$, $t \in [0, 20]$ where $v = 2$ and $kA/V = 0.1$. Subject to the following conditions:
+
+\begin{equation}
+\setlength{\jot}{15pt}
+\begin{split}
+    C_{l}(x, 0) = 1000, \quad C_{l}(0,t) = 1000, \quad \frac{dC_{l}}{dx}(100, t) = 0, \\
+    C_{w}(x, 0) = 0, \quad C_{w}(0,t) = 0, \quad \frac{dC_{l}}{dx}(100, t) = 0. \\
+\end{split}
+\end{equation}
+
+\subsection{Problem 9}
+This problem models the primary uranium isotopes along with Pu-239 and Np-239 in a system which contains a neutron flux. Coefficients in the transition matrix include source and sink terms from both neutron induced reactions and radioactive decay. This system is represented by:
+
+
+\begin{equation}
+\frac{d C_i}{dt} = \sum^9_{j = 1} A_{ij} C_j (x, t)
+\end{equation}
+
+\begin{equation}
+i = \begin{dcases}
+  1 , & \text{$^{233}$U}  \\
+  2 , & \text{$^{234}$U}  \\
+  3 , & \text{$^{235}$U}  \\
+  4 , & \text{$^{236}$U}  \\
+  5 , & \text{$^{237}$U}  \\
+  6 , & \text{$^{238}$U}  \\
+  7 , & \text{$^{239}$U}  \\
+  8 , & \text{$^{239}$Pu} \\
+  9 , & \text{$^{239}$Np} \\
+\end{dcases}
+\end{equation}
+
+\noindent On the domain from $t \in [0, 500]$ subject to the following neutron flux $\phi = 1e13$. Each isotope is given an initial concentration of $C_{i, 0} = 1e10$. The transition matrix is built using information from the SCALE ORIGEN library. The analytical solution is given by the exponential of the transition matrix:
+
+\begin{equation}
+   \boldsymbol{C}(t) = e^{\boldsymbol{A}t}, 
+\end{equation}
+
+\noindent where $\boldsymbol{C}$ is a vector of isotope concentrations. The solution is calculated using in MATLAB using the method previously described. 
+
+
+\subsection{Problem 10}
+This is an extension of problem 9 but for a fictitious "pipe" reactor which allows for the flow of isotopes due to a velocity. This is represented by:
+
+\begin{equation}
+\frac{d C_i}{dt} = -v\frac{\partial C_{i}}{\partial x} + \sum^9_{j = 1} A_{ij} C_j (x, t)
+\end{equation}
+
+\begin{equation}
+i = \begin{dcases}
+  1 , & \text{$^{233}$U}  \\
+  2 , & \text{$^{234}$U}  \\
+  3 , & \text{$^{235}$U}  \\
+  4 , & \text{$^{236}$U}  \\
+  5 , & \text{$^{237}$U}  \\
+  6 , & \text{$^{238}$U}  \\
+  7 , & \text{$^{239}$U}  \\
+  8 , & \text{$^{239}$Pu} \\
+  9 , & \text{$^{239}$Np} \\
+\end{dcases}
+\end{equation}
+
+\noindent On the domain $x \in [0, 400]$, $t \in [0, 500]$ where $v = 25$ and $\phi(x) = 1e13$. Subject to the periodic boundary conditions:
+
+\begin{equation}
+    C_{i}(0,t) = C_{i}(400,t).
+\end{equation}
+
+\section{Case Studies}
+The following are a selection of case studies which aim to explore libowskis' accuracy and performance with problems which come up in modeling MSRs. 
+
+\subsection{Neutron precursors}
+This problem examines a convection-driven flow with the 6 neutron precursor groups, as shown in Eqs. (\ref{eq:problem3}) and (\ref{eq:problem3flux}): 
+
+\begin{equation}
+\frac{\partial C_{i}}{\partial t} = -v_{x}\frac{\partial C_{i}}{\partial x} - v_{y}\frac{\partial C_{i}}{\partial y} + \beta_{i} \Psi (x, y) -\lambda_i C_{i},
 \label{eq:problem3}
 \end{equation}
 
-\noindent Each precursor has the same initial condition of zero and the source term for each precursor is scaled in the y-direction by the sine function and is applied in libowski using the mean value theorem. The source term comes from nuclear fission which typically follows a sine shape in the axial direction of a nuclear reactor. The spatial discretization is fixed at 50 cells for a 1 foot length of "pipe" in the y-direction. This make a small distance for the precursors to travel with a high velocity, creating a stiff system from the convective transport alone. Periodic boundary conditions are placed on the top and bottom of the solution domain, allowing the precursors to flow in an endless loop. The problem is ran for a total time of 1 second at which time, the solutions are compared to the solutions for Pad\'e method for a single time step of 1 second. Each of these Cauchy and BDF solvers are ran at various time steps then they are compared to the Pad\'e solution at 1 second. 
+\begin{equation}
+\Psi (x, y) = \begin{cases}
+  \psi _0 \sin\left(\frac{\pi x}{50}\right)\sin\left(\frac{\pi y}{100}\right) , x \in [0,50], y \le 100 \\
+  0\ , \text{otherwise},
+  \label{eq:problem3flux}
+\end{cases}
+\end{equation}
 
-This problem was designed to induce very large imaginary parts for the eigenvalues ($\sim 100$), so that the Cauchy solvers can be well tested. These eigenvalues were manipulated by adding the periodic boundary conditions and by adjusting the ratio $v/dx$. As $v/dx \xrightarrow{} 0$ the imaginary part of the eigenvalues does as well.  
+\noindent where $i \in [1,6]$, $x \in [0, 50]$, $y \in [0, 400]$, $t \in [0, 60]$, $v_{x} = 0$, and $v_{y} = 25$, subject to the following boundary conditions:
 
+\begin{equation}
+    C_{i}(x,0) = C_{i}(x,400), \quad \frac{dC_{i}}{dx}(0,y) = 0, \quad \frac{dC_{i}}{dx}(50, y) = 0.
+\end{equation}
 
-\begin{table}[b]
-    \caption{\label{tab:problem3Coeffs} Coefficients used in the differential equations for problem 3}
+Coefficients for the system are shown in Table \ref{tab:precursorCoeffs} \cite{ott1985}. 
+Each precursor had the same initial condition of zero, and the source term for each precursor was scaled in the x and y directions by the sine function. The spatial domain was modeled to mimic an MSR with a core region extending from $y \in [0,100]$ and $x \in [0,50]$, with a core exterior loop modeled from $y \in [100, 400]$. 
+
+\begin{table}[h!]
+   \caption{\label{tab:precursorCoeffs} Parameters for Neutron Precursors}
+   \centering
+   \begin{tabular}{lll}
+   \hline
+   Group & $\lambda$ & $\beta$ \\
+   \hline
+   1 & 0.0127 & 0.0006 \\
+   2 & 0.0317 & 0.00364 \\
+   3 & 0.115 & 0.00349 \\
+   4 & 0.311& 0.00628 \\
+   5 & 1.4 & 0.00179\\
+   6 & 3.87 & 0.0007 \\
+   \hline
+   \end{tabular}
+\end{table}     
+
+While there is no analytic solution for this example problem, a reference solution was generated in Matlab using the symbolic tool box to solve for the matrix exponential. A small, spatially discretized problem was set up with 5 cells in the x direction and 20 in the y direction. The transition matrix that was built was then exported to Matlab, and the matrix exponential was solved at various times and saved as the reference solution. While the spatial accuracy was not tested in this case, this method will access the accuracy of each matrix exponential algorithm. To further simplify the problem, the first-order upwind difference scheme was applied to the convective flux.
+
+One important feature for many of these solvers was the location of the eigenvalues for the transition matrix. The spectrum was calculated using the Matlab symbolic tool box and is plotted in Figure \ref{fig:spectrum_neutron_precursors} for dx = 10, dy = 20, and various values of dt. Figure \ref{fig:spectrum_neutron_precursors} show 6 elliptical rings, one at each dt, each one representing a precursor group. For a given time step size, the eigenvalues shifted along lines with slopes that are the ratio of their real and imaginary parts \cite{pusaAccruacy2013}. For a system in which the eigenvalues are located in a region where solutions based on Cauchy's integral break down, these eigenvalues can be shifted into a region where the solutions hold. Figure \ref{fig:spectrum_neutron_precursors} shows how changing the time step size can shrink the real and imaginary parts of the eigen spectrum.
+
+\begin{figure}[htbp]
     \centering
-    %\begin{tabular}{c|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}}
-    \begin{tabular}{c|c|c|c}
-    \hline
-    Precursor Group & $v_{y}$(ft/s) &$\lambda $ (1/s) & $M_{k}\gamma_{k}\Sigma_{f,k}\phi/N_{A}$ (lbm/s/ft$^{3}$) \\
-    \hline
-    \hline
-    1 & 2 & 0.0125 & 5.19E-02  \\  
-    \hline
-    2 & 2 & 0.0318 & 2.70E-01 \\  
-    \hline
-    3 & 2 & 0.109 & 2.62E-01 \\  
-    \hline
-    4 & 2 & 0.3170 & 7.47E-01 \\  
-    \hline
-    5 & 2 & 1.3500 & 2.17E-01 \\  
-    \hline
-    6 & 2 & 8.640  & 7.66E-02 \\  
-    \hline
-    \end{tabular}
-\end{table}
-
-Results from problem 3 are shown in Figure \ref{fig:problem3results}. These results are broken up into 4 plots. The top left hand plot is the error from each of the Cauchy and BDF solvers. Each of the other plots show the error of each of the Cauchy solvers on the complex plane along with a plot of the eigenvalues for the problem at each time step. From each of these three plots, you can see that the eigenvalues are scaled by the size of the time step taken so solve the problem. Just like in problem 1, this shows that problems with "bad" eigenvalues can be scaled down to increase the accuracy of Cauchy solvers. 
-
-From Figure \ref{fig:problem3results}, error from Cauchy solvers decrease at a faster rate than the BDF solvers. While the Cauchy solvers get lower error, they never fully converge to the Pad\'e solution, which is used as the goal solution. What is very interesting about the Cauchy solvers is which ones approaches closest to the goal solution. In theory the Hyperbolic and Parabolic solvers should be the best, in that order. This is because each of these solvers has a wider range of accuracy on the imaginary plane. However, the Parabolic solver is about an order of magnitude worse error than the Hyperbolic and CRAM solvers. Again, like the previous problems, the Hyperbolic solver works the best with systems with "bad" eigenvalues. 
-
-Like the previous problems, the exponential solvers outperformed the BDF methods. Even with a system that imposes increased error from the Cauchy solvers, the BDF solvers could not compete with the accuracy of the exponential solvers. What is important to note is that while each method obtains increased accuracy from reducing the time step size, they achieve this accuracy from different mathematical aspects. BDF solvers increase their accuracy by the traditional method of approaching the actual derivative by reducing the time step size. Cauchy methods increase their accuracy by manipulating properties of the system of ODE's and closing the spread of their eigenvalues. 
+    \includegraphics[width=3.5in]{images/neutronPrecursorEigenValues.png}
+    \caption{Spectrum for the Neutron Precursors}
+    \label{fig:spectrum_neutron_precursors}
+\end{figure}
 
 
-\FloatBarrier
+%\subsubsection{Accuracy as a function of substepping}
+To understand how sub-stepping can work to improve the accuracy of a Cauchy-based solver, the neutron precursors problem was computed at 10-second time step intervals. The location of the eigenvalues is a function of the ratio $v_{x}/dx$ in the transition matrix; therefore, at the prescribed discretization, this ratio was manipulated by changing the flow velocity. For each Cauchy solver, the eigenvalues at two different flow velocities, 25 cm/s ($v_{x}/dx = 2.5$) and 60 cm/s ($v_{x}/dx = 6$), are shown in Figure \ref{fig:neturonprecursor_cauchy_eigenvalues}. As shown in Figure \ref{fig:neturonprecursor_cauchy_eigenvalues}, as the ratio increased, so did the spread of the eigenvalues on the real and imaginary axis. This led to a limitation of the velocity to discretization size for convection problems when using Cauchy solvers. One solution, which is also shown in Figure \ref{fig:neturonprecursor_cauchy_eigenvalues}, is to use sub-stepping to reduce the time step size, thus confining the eigenvalues. As the number of substeps is increased, the eigenvalues become confined in a region in which the contour encloses the spectrum, theoretically increasing the solver's accuracy. Each plot in Figure \ref{fig:neturonprecursor_cauchy_eigenvalues} shows how the the spectrum was confined using 0, 2 and 6 substeps. As the number of substeps increased, the spectrum shrank into the confines of the contour. 
 
-\begin{sidewaysfigure}[t]
-  \centering
-  \includegraphics[width=9in]{images/problem3results.png}\\
-  \caption{Cauchy solver results for problem 3}
-  \label{fig:problem3results}
-\end{sidewaysfigure} 
+\subsection{Small case lump depletion mass transport}
+This is a depletion problem using the selected isotopes in Table \ref{tab:small_nuclides} represented by the following equations:
+
+
+\subsection{Medium case lump depletion mass transport}
+Matlab analytical solution
+
+\subsection{Small case 2D transport}
+Matlab analytical solution for small case 
+
+\subsection{Medium case 2D transport}
+The final boss. No analytical solution required

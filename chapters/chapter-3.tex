@@ -150,7 +150,7 @@ Exponential time differencing methods are very similar to the integrating factor
     \label{eq:ETDMethodExact}
 \end{equation}
 
-\noindent where $\Delta t \boldsymbol{L}$ is called the transition matrix.
+\noindent where $\boldsymbol{L}$ is called the transition matrix.
 This formalization is exact and exponential time differencing methods work to approximate the integral of the nonlinear portion. Exponential  time  differencing  methods have the property of being exact when $\boldsymbol{N}(\boldsymbol{y},t) = \text{constant}$ \cite{ash2009}.
 
 Evaluating the integral in Equation \ref{eq:ETDMethodExact} can be done using traditional multistep methods or with Runge-Kutta methods \cite{cox2002}. For example, a fourth order Runge-Kutta approximation for the integral gives the following formula for Equation \ref{eq:ETDMethodExact} \cite{cox2002},
@@ -170,117 +170,83 @@ Evaluating the integral in Equation \ref{eq:ETDMethodExact} can be done using tr
 \end{split}
 \end{equation}
 
+\section{Stability of the Transition Matrix in Linear Systems}
+Particular situations arise in systems for which Equation \ref{eq:ODE_matrix_linear_nonlinear_form} becomes linear when $\boldsymbol{N}(t,\boldsymbol{y} = 0$. In this scenario, the system becomes:
 
+\begin{equation}
+    \frac{d\boldsymbol{t}}{dt} = \boldsymbol{L}\boldsymbol{y}.
+\end{equation}
+
+The existence of the solution to the initial value problem initial value problem $\boldsymbol{y}(t_{0} = \boldsymbol{y}_{0}$ is guaranteed if the coefficients of $\boldsymbol{L}$ are continuous of a common interval $I$ that contains the point $t_{0}$ \cite{zill2012}. The stability of this problem can be accessed by examining the eigenvalues of the linear operator $\boldsymbol{L}$. 
 
 \section{Solutions to the Matrix Exponential}
-When obtaining solutions based on exponential time differencing or integrating factor methods, an exponential of a matrix needs to be computed. There are multiple computational methods for solving for the matrix exponential, many of them are developed specifically to evaluate $e^{\boldsymbol{A}}$ or $e^{\boldsymbol{A}}\boldsymbol{v}$. One evaluates the matrix exponential directly and the other calculates the action of the exponential on a vector. When $\boldsymbol{A}$ is dense or has a low to moderate size (few hundreds) methods such as Pad\'e approximation or Chebyshev rational approximation can be employed. For large sparse matrices, Krylov subspace methods offer more efficient calculations \cite{exokit}. In situations when the matrix $\boldsymbol{A}$ is diagonal, computing the matrix exponential becomes,
+When obtaining solutions based on exponential time differencing, an exponential of a matrix needs to be computed. There are multiple computational methods for solving for the matrix exponential, many of them are developed specifically to evaluate $e^{\boldsymbol{A}t}$ or $e^{\boldsymbol{A}t}\boldsymbol{v}$. One evaluates the matrix exponential directly and the other calculates the action of the exponential on a vector. Because of the way in which the linear systems operate in EDT methods,  only the action of the matrix on the vector is required. However, in some of the methods that will be presented only direct evaluation of the matrix exponential is possible. 
 
-$$
-e^{\boldsymbol{A}} = 
-\begin{bmatrix}
-a_{1,1} & 0 & 0 & \hdots & 0 \\
-0 & a_{2,2} & 0 & \hdots & 0 \\
-0 & 0 & a_{3,3} & \hdots & 0 \\
-\vdots & \vdots & \vdots & \ddots & \vdots\\
-0 & 0 & 0 & \hdots & a_{m,m} \\
-\end{bmatrix}
-=
-\begin{bmatrix}
-e^{a_{1,1}} & 0 & 0 & \hdots & 0 \\
-0 & e^{a_{2,2}} & 0 & \hdots & 0 \\
-0 & 0 & e^{a_{3,3}} & \hdots & 0 \\
-\vdots & \vdots & \vdots & \ddots & \vdots\\
-0 & 0 & 0 & \hdots & e^{a_{m,m}} \\
-\end{bmatrix}
-.
-$$
+Computation of the exponential of a matrix is by far the most difficult part of EDT methods. Not only is the basis for many of the methods mathematically in depth, but they are difficult to deploy on a level that makes the computation of the matrix exponential both fast and accurate. Numerous methods for computing the matrix exponential are discussed here however, they are not limited to the ones presented in this work. 
 
-\noindent
-These sort of situations arise when solving PDEs using spectral methods \cite{ash2009} \cite{cox2002} \cite{kazimi1990}. In this chapter multiple methods for evaluating the matrix exponential are presented. Each of these methods come with various advantages and disadvantages and specific matrix properties that are required for computation. 
+%%%%%%%%%%%%%%%%%%%%
+%% Taylor and Pade 
+%%%%%%%%%%%%%%%%%%%%
+\subsection{Series Approximations Near the Origin} \label{subsec:seriesapprox}
+Solvers of this nature often exploit the following relation when computing the matrix exponential:
+
+\begin{equation}
+    e^{\boldsymbol{A}t} = \big(e^{\boldsymbol{A}t/m}\big)^{m},
+\end{equation}
+
+\noindent where $m$ is a scalar that \textit{scales} matrix $\boldsymbol{A}t$. This method is known as scaling and squaring. The reason this is done is to reduce the norm of matrix $\boldsymbol{A}t$, especially in situations for $\boldsymbol{A}t$ when $t \rightarrow \infty$ as previously mentioned. For series methods near the origin, the accuracy of the method diminishes as the matrix norm increases. 
 
 
-\subsection{Taylor Series Expansion}
+\subsubsection{Taylor Series Expansion}
 Formally,  matrix exponential is defined using an infinite Taylor series \cite{exokit} \cite{moler2003} \cite{pusa2010}. 
 \begin{equation}
     e^{\boldsymbol{A}} = \sum_{k = 0}^{\infty}\frac{1}{k!}\boldsymbol{A}^{k}
     \label{eq:power_series_exp}
 \end{equation}
 
-\noindent Therefore, a straight forward way to calculate the matrix exponential is using its formal definition. This method however, is not commonly used in application for either the matrix or the scalar case. The number of terms required to achieve convergence can be large and produce computational inefficiency. This method is also suffers from numerical round off errors from cancellation for large values of $k$ \cite{moler2003}. 
-
-
-\subsection{Pad\'e Approximation}
-The Pad\'e approximation represents a function by expanding it as a ratio of two power series. A ($p,q$) Pad\'e approximation for $e^{\boldsymbol{A}}$ is defined by \cite{moler2003}, 
+\noindent Therefore, a straight forward way to calculate the matrix exponential is using its formal definition. This method however, is not commonly used in application for either the matrix or the scalar case. The number of terms required to achieve convergence can be large and produce computational inefficiency. This method is also suffers from numerical round off errors from cancellation for large values of $k$ \cite{moler2003}. There is one method in libowski based off of this method. While not commonly used in practice an algorithm for computing the action of the matrix exponential of matrix $\boldsymbol{A} \in \mathbb{C}^{n\times n}$ on matrix $\boldsymbol{B} \in \mathbb{C}^{n\times n_{0}}$ where $n_{0} << n$ was developed by Al-Mohy and Higham based on a truncated Taylor series \cite{higham2011}:
 
 \begin{equation}
-    R_{p,q}(\boldsymbol{A}) = \frac{N_{p,q}(\boldsymbol{A})}{D_{p,q}(\boldsymbol{A})}
+    e^{\boldsymbol{A}}\boldsymbol{B} = (e^{2^{-s}\boldsymbol{A}})^{2^{s}}\boldsymbol{B} \approx T_{m}(2^{-s}\boldsymbol{A})^{2^{s}}\boldsymbol{B},
+\end{equation}
+
+\noindent where $T_{m}$ is a truncated Taylor series of order $m$. Unlike the other matrix exponential algorithms that will be presented, the Taylor series does not require linear solves. This method was developed using a backward error analysis based on $||\boldsymbol{A}^{1/k}||^{1/k}$, keeping in mind the computational cost. To reduce the norm of $\boldsymbol{A}$, the Taylor method uses two key preprocessing steps. These steps include shifting and optional balancing. 
+
+
+\subsubsection{Pad\'e Approximation}
+The Pad\'e approximation represents a function by expanding it as a ratio of two power series. A ($p,q$) Pad\'e approximation for $e^{\boldsymbol{A}t}$ is defined by \cite{moler2003}:
+
+\begin{equation}
+    e^{\boldsymbol{A}t} \approx R_{p,q}(\boldsymbol{A}t) = \frac{N_{p,q}(\boldsymbol{A}t)}{D_{p,q}(\boldsymbol{A}t)}
     \label{eq:padeApprox}
 \end{equation}
 
 \noindent where
 
-\begin{equation*}
-    N_{p,q}(\boldsymbol{A}) = \sum_{j=0}^{p}\frac{(p + q - j)!p!}{(p + q)!j!(p - j)!}\boldsymbol{A}^{j}
-\end{equation*}
-
-\begin{equation*}
-    D_{p,q}(\boldsymbol{A}) = \sum_{j=0}^{q}\frac{(p + q - j)!q!}{(p + q)!j!(q - j)!}(-\boldsymbol{A})^{j}.
-\end{equation*}
-
-\noindent The error associated with the previous Pad\'e approximation is demonstrated by \cite{higham2005} \textcolor{red}{need to fix this}
-
 \begin{equation}
-    e^{\boldsymbol{A}} - R_{p,q}(\boldsymbol{A}) = (-1)^{q}\frac{p!q!}{(p+q)!(p+q+1)!}\boldsymbol{A}^{p+q+1} + \mathcal{O}(\boldsymbol{A}^{p+q+2}).
+    N_{p,q}(\boldsymbol{A}t) = \sum_{j=0}^{p}\frac{(p + q - j)!p!}{(p + q)!j!(p - j)!}(\boldsymbol{A}t)^{j},
 \end{equation}
 
-Pad\'e methods are similar to Taylor series as they approximate a function using a series solution, however, Pad\'e series usually out preform Taylor series. Series solutions methods, such as Pad\'e are also more accurate near the origin, meaning that the matrix norm $||A||$ must be sufficiently small for the approximation to be accurate \cite{pusa2010}. Yet another problem arises when $\boldsymbol{A}$ has a wide spread of eigenvalues, causing an ill-conditioned linear system  \cite{exokit} \cite{moler2003}.  
-
-When applying the Pad\'e approximation it is often advantageous to set $p$ and $q$ equal to one another, this is referred to as diagonal approximations. Setting $q = p$ requires about the same amount of work if $q > p$ for the same $q$, but would result in a approximation that is of order $2p > p + q$. Another reason to set $q=p$ comes from examining the spectrum of $\boldsymbol{A}$. If the eigenvalues of $\boldsymbol{A}$ are located on the left hand side of the complex plane, then $e^{\boldsymbol{A}t}$ goes to zero as $t$ goes to infinity. With $q > p$, $R_{pq}(\boldsymbol{A}t)$ is bounded, but if $q < p$, $R_{pq}(\boldsymbol{A}t)$ is unbounded \cite{moler2003}. 
-
-
-Instead of directly using Equation \ref{eq:padeApprox}, Horners rule can be applied to the numerator and denominator to reduce the number of operations. This result is shown in Equation \ref{eq:hornerPadeApprox}. 
-
 \begin{equation}
-    R_{pp}(\boldsymbol{A})=
-    \begin{cases}
-        1+2\frac{\boldsymbol{A}\sum_{k=0}^{p/2-1}c_{2k+1}\boldsymbol{A}^{2k}}{\sum_{k=0}^{p/2}c_{2k}\boldsymbol{A}^{2k}-\boldsymbol{A}\sum_{k=0}^{p/2-1}c_{2k+1}\boldsymbol{A}^{2k}} & p \text{ even}\\[1em]
-        
-        -1-2\frac{\sum_{k=0}^{(p-1)/2}c_{2k}\boldsymbol{A}^{2k}}{\boldsymbol{A}\sum_{k=0}^{(p-1)/2}c_{2k+1}\boldsymbol{A}^{2k}-\sum_{k=0}^{(p-1)/2}c_{2k}\boldsymbol{A}^{2k}} & p \text{ odd}
-    \end{cases}
-    \label{eq:hornerPadeApprox}
+    D_{p,q}(\boldsymbol{A}t) = \sum_{j=0}^{q}\frac{(p + q - j)!q!}{(p + q)!j!(q - j)!}(-\boldsymbol{A}t)^{j}.
 \end{equation}
 
-\noindent where
+Pad\'e methods are similar to Taylor series as they approximate a function using a series solution, however, Pad\'e series usually out preform Taylor series. Series solutions methods, such as Pad\'e are also more accurate near the origin, meaning that the matrix norm $||\boldsymbol{A}t||$ must be sufficiently small for the approximation to be accurate \cite{pusa2010}. Yet another problem arises when $\boldsymbol{A}$ has a wide spread of eigenvalues, causing an ill-conditioned linear system  \cite{exokit} \cite{moler2003}. 
 
-\begin{equation*}
-    c_{k} = c_{k-1}\frac{p+1-k}{(2p+1-k)k}
-\end{equation*}
-
-\noindent with $c_{0} = 1$. This evaluates Equation \ref{eq:padeApprox} with half the number of operations \cite{exokit}. Figure \ref{fig:PadeApproxError} shows the error of the Pad\'e approximation on the real axis for orders 6, 12 and 24. As the values approach the origin the Pad\'e approximation exponentially decays and oscillates at machine precision. This is because the Pad\'e approximation is more accurate around the origin. 
-
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=5in]{images/padeError.png}\\
-  \caption{$\log_{10}|R(x)-e^{x}|$ for the Pad\'e approximation of orders 6, 12 and 24}
-  \label{fig:PadeApproxError}
-\end{figure} 
+There are many ways to develop an algorithm for computing the matrix exponential using the Pad\'e approximation \cite{exokit} \cite{higham2005} \cite{higham2009}. The key in deriving an algorithm is in both understanding the error associated with the size of the matrix norm and limiting the computation time. Moler and Van Loan derived an elegant and simple proof for determining values for $p$, $q$ and $m$ given a matrix norm \cite{moler2003}. As noted by Higham \cite{higham2005}, this derivation contained weaknesses. Moler and Van Loan assumed that the matrix norm needed to be less than one half ($||\boldsymbol{A}t|| < 1/2$) but Higham proved that this was not the case. Higham further showed that the required minimal matrix norm is different for each order of the Pad\'e implementation. Above this norm, a higher order Pad\'e approximation would be required, or matrix scaling would need to be take place. One other weakness was the derivation of their error bound. It was designed to be easily commutable, which resulted in their error bound not being sharp \cite{higham2005}. When the error bound is not sharp, then it is possible to overscale the matrix, resulting in a loss of accuracy. Higham and Al-Mohy. described two algorithms to resolve the overscaling problem found in Ref. (\cite{higham2005}) and  Ref. (\cite{higham2009}). Reference (\cite{higham2009}) is an updated algorithm to the one described in Ref. (\cite{higham2005}), which works to fix the overscaling problem.
 
 
-\subsection{Scaling and Squaring}
-Both Taylor and Pad\'e methods fail to approximate the matrix exponential when $||\boldsymbol{A}||$ or the spread of the eigenvalues is large. This problem is exacerbated when computing $e^{\boldsymbol{A}t}$ for sufficiently large values of $t$. The scaling and squaring method works to fix these problem by exploiting the property
-
-\begin{equation*}
-    e^{\boldsymbol{A}} = \big( e^{\boldsymbol{A}/m}\big)^{m}
-    \label{eq:scalingAndSquaring},
-\end{equation*}
-
-\noindent $m$ is a scalar chosen to be $2^{\alpha}$ where $\alpha$ is the number of times the matrix is squared \cite{moler2003}. This property is commonly used for methods based on the Pad\'e approximation. Plugging Equation \ref{eq:scalingAndSquaring} into the Pad\'e approximation gives,
+The Pad\'e approximation in combination with scaling and squaring is probably the most widely used method for computing the exponential of a matrix. In fact, the $expm$ function in MATLAB is based on this approach \cite{higham2009}. Two methods based on the Pad\'e approach are implemented in libowski, \textit{Pad\'e - Method 1} and \textit{Pad\'e - Method 2}. Both algorithms work to form a Pad\'e approximation of type $p = q$ and will further be denoted by $m$, combined with scaling and squaring:
 
 \begin{equation}
-    e^{\boldsymbol{A}} = (e^{2^{-\alpha}\boldsymbol{A}})^{2^{\alpha}} \approx R_{p,q}(2^{-\alpha}\boldsymbol{A})^{2^{\alpha}}
+    e^{\boldsymbol{A}} = (e^{2^{-s}\boldsymbol{A}})^{2^{s}} \approx r_{m}(2^{-s}\boldsymbol{A})^{2^{s}},
 \end{equation}
 
-Moler and Van Loan \cite{moler2003} derived an error analysis for choosing the proper value of $\alpha$ based on $||\boldsymbol{A}||$. As noted by Higham \cite{higham2005}, this derivation contained weaknesses. Moler assumed that the matrix norm needed to be less than one half ($||\boldsymbol{A}|| < 1/2$) but Higham proved that this was not the case. Higham further showed that the required minimal matrix norm is different for each order of the Pad\'e implementation. Above this norm, a higher order Pad\'e approximation would be required, or matrix scaling would need to be take place. One other weakness was the derivation of their error bound. It was designed to be easily computable, which resulted in their error bound not being sharp \cite{higham2005}. When the error bound is not sharp, then it is possible to overscale the matrix, resulting in a loss of accuracy. Higham described two algorithms to resolve the overscaling problem found in \cite{higham2005} and \cite{higham2009}. Reference \cite{higham2009} is an updated algorithm to the one described in reference \cite{higham2005}, which works to fix the overscaling problem. 
+\noindent where $s$ is the scaling and squaring parameter and $\boldsymbol{A}$ is $\boldsymbol{A}t$. The scaling parameter $s$ is chosen to that the exponential is computed with a backward error bounded by the unit roundoff.  Method - 1 is based on the algorithm developed by Higham in Ref. (\cite{higham2005}), in which he backwards error is based on $||\boldsymbol{A}||$. Method - 2 is based on Ref. (\cite{higham2009}) which worked to reduce the problem of over scaling in the Method - 1 by tightening the backwards error based on $||\boldsymbol{A}^{1/k}||^{1/k}$ where:
+
+\begin{equation}
+    ||\boldsymbol{A}^{1/k}||^{1/k} \leq ||\boldsymbol{A}||, \quad k = 1:\infty.
+\end{equation}
 
 %\begin{table}[t]
 %   \caption{\label{tab:scalingSquaringOptimalValues} Summary of optimal Pad\'e orders and required matrix multiplications \cite{higham2005}}
@@ -327,38 +293,6 @@ This method is based on transforming the matrix exponential into the complex pla
 
 \noindent When evaluating Equations \ref{eq:cauchyExp} or \ref{eq:cauchyExpVector} it is vital to select a contour that encloses the spectrum of $\boldsymbol{A}t$. If this is not done, then the approximation is inaccurate. There are a number of ways to solve Equations \ref{eq:cauchyExp} or \ref{eq:cauchyExpVector} which involve knowing the nature of the spectrum of the transition matrix $\boldsymbol{A}t$. 
 
-\subsubsection{Direct Implementation of a Contour Function}
-\textcolor{red}{Fix this derivation} If one knows the eigenvalue of the transition matrix then one can choose a contour $\Gamma$ that encloses them. The simplest choice would be a circle of radius $R$ centered at point $z_{0}$ \cite{ash2009}.
-
-\begin{equation}
-    \phi(\theta) = z_{0} + Re^{i\theta}: 0 \leq \theta \leq 2\pi 
-\end{equation}
-
-\noindent Making the substitution $dz = \phi' d\theta$ and making the substitution into Equation \ref{eq:cauchyExp} yields,
-
-\begin{equation}
-\begin{split}
-    e^{\boldsymbol{A}} 
-    & = \frac{1}{2\pi i}\int_{0}^{2\pi} e^{z_{0}-Re^{i\theta}}(z\boldsymbol{I}-\boldsymbol{A})Rie^{i\theta}d\theta \\[3ex]
-    & = \frac{1}{2\pi}\int_{0}^{2\pi}(\phi(\theta)-z_{0})(z\boldsymbol{I}-\boldsymbol{A})e^\phi(\theta)d\theta.
-\end{split}
-\end{equation}
-
-\noindent The integral can then be calculated using a quadrature method. A numerical investigation was conducted by A.H. Ashi et al \cite{ash2009} using the above them by employing a periodic trapezoidal rule. 
-
-\begin{equation*}
-    \int_{0}^{2\pi}f(\theta)d\theta \approx \frac{2\pi}{N}\sum_{j=1}^{N}f(\theta_{j}), \quad \theta_{j} = \frac{2\pi j}{N}.
-\end{equation*}
-
-\noindent Ashi obtained the following formula for approximating the matrix exponential with $N$ quadrature points, 
-
-\begin{equation}
-    e^{\boldsymbol{A}} \approx \frac{1}{N}\sum_{j=1}^{N}(\phi(\theta_{j}) - z_{0})(\phi(\theta_{j})\boldsymbol{I} - \boldsymbol{A})^{-1}e^{\phi(\theta_{j})}.
-    \label{eq:ashContour}
-\end{equation}
-
-
-It is important to note that when evaluating Equation \ref{eq:ashContour} that $N$ matrix inversions need to be calculated. However this can be rewritten in the form where the action of the matrix exponential on a vector is calculated. Evaluating Equation \ref{eq:ashContour} would then require solve $N$ number of linear systems, which is generally more adventitious. When the norm of $\boldsymbol{A}t$ becomes larger as you increase $t$ the contour needs to increase to enclose all of the eigenvalues. This leads to increasing the number of quadrature points to maintain accuracy, thus increasing the computational cost \cite{ash2009}. 
 
 \subsubsection{Rational Approximation}
 A more generalized method for evaluating the contour integral can be accomplished by choosing an analytic function $\phi(\theta)$ that maps the real line onto the contour. Because the function $e^{\phi(\theta)}$ decreases exponentially as $|\theta| \rightarrow \infty$ the approximation can be truncated to a finite number of quadrature points. When the spectrum of the transition matrix falls on the left hand side of the complex plane close to the real axis then the contour $\Gamma$ denotes a Hankel like contour that winds from $-\infty-0i$ on the lower half-plane and $\infty+0i$ on the upper half-plane. \cite{Trefethen2006}. This allows for the definition of a general contour function that will enclose the eigenvalues on the left hand side of the complex plane around the negative real axis. 
@@ -415,16 +349,16 @@ Applying these approximations to real valued scalars or matrices requires half t
 
 %\FloatBarrier
 
-\begin{figure}[h]
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=5in]{images/RationApproxParabolicError32.png}\\
+  \includegraphics[width=5in]{images/chapter-3/RationApproxParabolicError32.png}\\
   \caption{$\log_{10}|r(z)-e^{z}|$ for N = 32 where the contour is defined by a parabola, Equation \ref{eq:parabolicContour}. Quadrature points are denoted with x's}
   \label{fig:complexRationalApproxParabola}
 \end{figure} 
 
-\begin{figure}[h]
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=5in]{images/RationApproxHyperbolicError32.png}\\
+  \includegraphics[width=5in]{images/chapter-3/RationApproxHyperbolicError32.png}\\
   \caption{$\log_{10}|r(z)-e^{z}|$ for N = 32 where the contour is defined by a hyperbola, Equation \ref{eq:hyperbolicContour}. Quadrature points are denoted with x's}
   \label{fig:complexRationalApproxHyperbola}
 \end{figure} 
@@ -468,7 +402,7 @@ The difficulty with using the CRAM approximation is finding the coefficient for 
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=5in]{images/RationApproxCRAMError16.png}\\
+  \includegraphics[width=5in]{images/chapter-3/RationApproxCRAMError16.png}\\
   \caption{$\log_{10}|r(z)-e^{z}|$ for CRAM with N = 16. Quadrature points are denoted with x's}
   \label{fig:complexRationalApproxCRAM}
 \end{figure} 
@@ -484,10 +418,37 @@ The difficulty with using the CRAM approximation is finding the coefficient for 
     \label{eq:CRAMVector}
 \end{equation}
 
+\subsubsection{Accuracy of Rational Approximations}
+While the matrix exponential can be formally defined by Eq. (\ref{eq:power_series_exp}), when examining the accuracy of rational approximations presented, it is more useful to define the matrix exponential in terms of the transition matrix's eigenvalues. Because the contour $\Gamma$ must wind around the eigenvalues of $\boldsymbol{A}t$, if $\boldsymbol{A}$ has eigenvalues which have non-trivial imaginary parts then these eigenvalues will scale as a function of $t$. If these eigenvalues scale to a portion of the complex plane which fall outside the contour, then the accuracy of these methods can be compromised. For traditional burnup matrices it was stated earlier that the eigenvalues are clustered around the negative real axis \cite{pusa2010}. Because of this, the accuracy of CRAM as well as the other two rational approximations are not a function of time $t$ \cite{pusaAccruacy2013}. For burnup calculations in MSRs defined by Eq. (\ref{eq:MSRDepletion}) the eigenvalues are not necessarily clustered around the negative real axis as they have non-trival imaginary parts. Through numerical experiments is was found by the author that these imaginary parts were introduced by the addition of convection terms in the transition matrix. In addition, these imaginary parts were found to be correlated with the ratio the velocity to the spatial discretization as well as the boundary conditions. 
+
+While rational approximations such as CRAM have shown fantastic results in burnup calculations, is has been shown that the relative accuracy of CRAM diminishes when the nuclide concentration diminishes significantly over the time step. For a nuclide concentration $n_{i}(t) << n_{i}(0)$ the error estimate for CRAM follows \cite{isotalo2016}:
+
+\begin{equation}
+    \frac{\delta \hat{n}_{i}(t)}{n_{i}(t)} = \hat{\varepsilon}_{k,k} \frac{n_{i}(0)}{n_{i}(t)}
+    \label{eq:CRAMError}
+\end{equation}
+
+\noindent This means that for CRAM of order $k$ concentration smaller than $\hat{\varepsilon}_{k,k}n_{i}(0)$ is not captured by the rational approximation. Additionally the accuracy of CRAM is diminished when performing calculations on fresh fuel versus depleted fuel. For fresh fuel, the concentrations of nuclides is dependent on transitions corresponding the only a few nuclides in the initial condition. If CRAM introduces large errors in approximating the matrix elements of a few transitions which influence the production of a large number of nuclides then the relative error in calculating nuclides concentrations diminishes. For used fuel depletion these errors are averaged out to provide an overall more accurate calculation. While this error was derived for transition matrices built from solving tradition burnup calculations Eq. (\ref{eq:burnup}) it is assumed that the same holds true for MSR calculations of the form Eq. (\ref{eq:MSRDepletion}). In order to increase the accuracy of CRAM methods for depletion calculations a substepping approach was taken and introduced into the ORIGEN library \cite{isotalo2016}. This substepping method is also utilized in our implementation of the CRAM algorithm. 
+
+It is important to note that the absolute error in computing rational approximations of the from parabolic or hyperbolic contours do not follow the same error as CRAM. In the scalar case of CRAM, if one plots the absolute error on the negative real axis as $x \rightarrow -\infty$, absolute error asymptotically approaches $\hat{\varepsilon}_{k,k}$. This is because the exponential function tends to zero while CRAM stabilizes at $\hat{\varepsilon}_{k,k}$. As $x \rightarrow 0$ the absolute error oscillates between $-\hat{\varepsilon}_{k,k}$ and $\hat{\varepsilon}_{k,k}$ \cite{pusaAccruacy2013}. While the errors for rational functions based on quadrature contours do not necessarily follow this same behavior, the substepping method was implemented and is later shown to also increase their accuracy. 
+
+Substepping is implemented by scaling the time step size and evaluate the solution from the previous step, shown in Algorithm \ref{alg:substep}, where $m$ is the number of substeps to be taken. 
+
+\begin{algorithm}
+	\caption{Substeping} 
+	\begin{algorithmic}[1]
+	    \State $\boldsymbol{v}_{0} = \boldsymbol{\rho}_{0}$
+	    \State $t = t/(m+1)$
+		\For {$j=0,1,\ldots m$}
+            \State $\boldsymbol{\rho}_{m+1} = r(\boldsymbol{A}t)\boldsymbol{v}_{0}$
+            \State $\boldsymbol{v}_{0} = \boldsymbol{\rho}_{m+1}$
+		\EndFor
+	\end{algorithmic} 
+	\label{alg:substep}
+\end{algorithm}
 
 
-
-\subsubsection{Krylov Subspace Method}
+\subsection{Krylov Subspace Method}
 Krylov subpace approximations are a class of popular methods utilized in sparse matrix algorithms. The idea of Krylov subspace methods is to project the sparse $n \times n$ $\boldsymbol{A}$ matrix into a lower-dimensional subspace. The new lower dimension projection is of size $m \times m$ where $m < n$. Because the matrix is of lower dimension, calculating its matrix exponential becomes much faster. It is important to note that Krylov subspace methods can only be used as an operation on a vector, the direct calculation of the matrix exponential is not possible \cite{saad1992}.  
 
 Consider we want to approximate the matrix exponential as a polynomial of order $m-1$, this takes the form,

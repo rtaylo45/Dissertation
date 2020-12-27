@@ -56,6 +56,9 @@
 \usepackage{algpseudocode}
 \usepackage{mathtools}
 \usepackage{xparse}
+\usepackage{array}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
 
 \def\NoNumber#1{{\def\alglinenumber##1{}\State #1}\addtocounter{ALG@line}{-1}}
 
@@ -138,8 +141,9 @@
     
     \makeAppendixPage{1}   % Input the number of appendices
     \appendix    
-    \include{back-matter/appendix-1}
-    %\include{back-matter/appendix-2}
+    \include{back-matter/appendix-pade_functions}
+    \include{back-matter/appendix-nuclide_list}
+    \include{back-matter/appecdix-results}
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % A VITA IS REQUIRED
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

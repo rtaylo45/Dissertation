@@ -73,7 +73,7 @@ Neutron induced reactions follow the schematic shown in Figure \ref{fig:nuclearR
 
 \begin{figure}[b]
   \centering
-  \includegraphics[width=3.0in]{images/nuclearReaction.png}\\
+  \includegraphics[width=3.0in]{images/chapter-2/nuclearReaction.png}\\
   \caption{Schematic of general nuclear reaction}
   \label{fig:nuclearReaction}
 \end{figure} 
@@ -142,7 +142,7 @@ When fissile material undergoes a neutron absorption (to relate it to the previo
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=5.5in]{images/fissionYield.png}\\
+  \includegraphics[width=5.5in]{images/chapter-2/fissionYield.png}\\
   \caption{Fission product yield for thermal and fast neutrons}
   \label{fig:fissionYield}
 \end{figure} 
@@ -257,7 +257,7 @@ Depletion calculations in MSRs can be better represented by the multicomponent c
 
 \noindent It is important to note that the velocity in the second term must be the averaged velocity for the concentration of interest. In Equation \ref{eq:speciesTransportEquation} for example, the concentration units are for mass concentration or density. This means that the velocity used in the second term must be the mass averaged velocity \cite{zackThesis}. 
 
-Equation \ref{eq:LWRDepletion} is simply the rate of generation for nuclide species \textit{i} and can be plugged in for $r_{i}$ in Equation \ref{eq:speciesTransportEquation}. Before it can be plugged in, the units in Equation \ref{eq:LWRDepletion} need to be transformed from atoms per volume to mass per volume using Avogadros constant the molar mass, $n_{i} = \rho_{i}N_{A} / M_{i}$. Using this relation and plugging in Equation \ref{eq:LWRDepletion} into \ref{eq:speciesTransportEquation} results in the MSR depletion equation,
+Equation \ref{eq:LWRDepletion} is simply the rate of generation for nuclide species $\textit{i}$ and can be plugged in for $r_{i}$ in Equation \ref{eq:speciesTransportEquation}. Before it can be plugged in, the units in Equation \ref{eq:LWRDepletion} need to be transformed from atoms per volume to mass per volume using Avogadros constant the molar mass, $n_{i} = \rho_{i}N_{A} / M_{i}$. Using this relation and plugging in Equation \ref{eq:LWRDepletion} into \ref{eq:speciesTransportEquation} results in the MSR depletion equation,
 
 
 \begin{equation}
@@ -274,6 +274,54 @@ Equation \ref{eq:LWRDepletion} is simply the rate of generation for nuclide spec
 \end{equation}
 
 The MSR depletion equation represents the change in an isotopes density via fluid transport, mass diffusion and nuclear reactions. Equation \ref{eq:MSRDepletion} is a nonlinear PDE, first order in time and second order in space. It should be noted that Equation \ref{eq:LWRDepletion} was already discretized in space. For completeness $\sigma_{k,j}$ and $\phi$ are also functions of space and time in Equation \ref{eq:MSRDepletion} however, the scalar flux is for a single energy group. Solving Equation \ref{eq:MSRDepletion} is the primary topic and will be discussed through out the remainder of the dissertation.
+
+\subsection{Mass Transport Models}
+Fission products that are generated in MSRs are often categorized based on their phase and chemical behavior in the molten salt. The common categories are \cite{grimes1975}: 
+
+\begin{enumerate}
+    \item Salt seekers
+    \item Noble metals
+    \item Noble gases
+\end{enumerate}
+
+\noindent Salt seekers are fission products which form halide compounds which are soluble in the molten salt. Noble metals, are elements which under go redox reactions and are reduced to their neutral state. These fission products form metallic compounds which tend to collect on liquid-solid or liquid-gas interfaces. When collecting on liquid-solid surfaces within the flow loop, these fission products can plate a metallic film on the surface which can possibly work to reduce corrosion. Noble metals can also decay which doses the surface with radiation and decay heat. Noble gases such as Xe and Kr are gases which form in the liquid salt from nuclear reactions. These elements can be dissolved in the liquid salt or extracted via gas stripping. In addition, these products may nucleate and/or become trapped in reactor equipment such as a graphite moderator. 
+
+A first order rate model is utilized in modeling mass transfer from liquid to solid and liquid to gas surfaces. At the interface, the flux normal to the surface is defined as \cite{bird2006}:
+
+\begin{equation}
+    j = k_{\text{loc}} \Delta \rho,
+    \label{eq:interface_bc_mass_transfer}
+\end{equation}
+
+\noindent where $j$ is the mass flux [kg/s/m$^{2}$] and $k_{i, \text{loc}}$ is the local mass transfer coefficient [m/s] in terms of density. Depending of the direction of mass transfer the sign of $j_{i}$ can be positive or negative based on the concentration gradient of $\Delta \rho_{i}$. On of the key features of using this previous relation is understanding and calculating the mass transfer coefficient $k$ in its appropriate form. This coefficient will depend upon the fluid profile and geometry within the local region of mass transfer. There are many analytic and empirical relations that can be used to calculate $k$ for different situations. An exhausted summary of these calculation methods can be found in Perry's Chemical Engineers' Handbook \cite{perry2007}.
+
+Equations of the form Eq. \ref{eq:interface_bc_mass_transfer} are sufficient for approximating the mass transfer of a liquid to a solid surface and was utilized in modeling noble metal wall deposition during the molten salt reactor experiment (MSRE) \cite{kedl1972}. For this case, noble metals are transported from the liquid phase to the sold surfaces within the reactor loop. This model is call wall deposition and is represented as:
+
+\begin{equation}
+    j = k(\rho_{\text{bulk}} - \rho_{\text{surface}}).
+\end{equation}
+
+Liquid gas transport is a bit more involved than the wall deposition model. For a liquid-gas system, the species fluxes across the interface as represented by the equation below:
+
+ \begin{equation}
+	j = k_{G}(\rho^{g}_{\text{bulk}} - \rho^{g}_{i}) = k_{L}(\rho^{l}_{i} - \rho^{l}_{\text{bulk}})
+	\label{eq:convection_boundary_condition},
+\end{equation}
+
+\noindent where $k_{G}$ is the gas-phase mass transfer coefficient, $k_{L}$ is the liquid-phase mass transfer coefficient, $\rho^{g}_{bulk}$ is the bulk concentration in the gas phase, $\rho^{l}_{bulk}$ is the bulk concentration in the liquid phase, $\rho^{g}_{i}$ is the concentration at the interface on the gas side, and $\rho^{l}_{i}$ is the concentration at the interface on the liquid side. Because the concentration at the interface of a liquid-gas system is difficult to establish, it is convenient to rewrite Eq. (\ref{eq:convection_boundary_condition}) as:
+
+ \begin{equation}
+	j = K_{G}(\rho^{g}_{\text{bulk}} - \rho^{g}_{*}) = K_{L}(\rho^{l}_{*} - \rho^{l}_{\text{bulk}})
+	\label{eq:overall_convection_boundary_condition},
+\end{equation}
+
+\noindent where $k_{G}$ and $k_{L}$ have been replaced by $K_{G}$ and $K_{L}$, the overall mass transfer coefficients, $\rho^{g}_{*}$ is the gas composition in equilibrium with the liquid, and $\rho^{l}_{*}$ is the liquid composition in equilibrium with the gas. For liquid-gas systems, these equilibrium concentrations can be calculated using Henry's law. 
+
+When the gas has a low solubility in the liquid, the process is dominated by the liquid side resistance \cite{bird2006}. Both Xe and Kr were found to be only slightly soluble in salt during the MSRE \cite{kedl1972}. Because of this, the mass transfer flux becomes:
+
+\begin{equation}
+    j = k_{l}(\rho^{l}_{*} - \rho^{l}_{\text{bulk}}).
+\end{equation}
 
 \subsection{Boundary Conditions}
 Mathematically, there are three types of boundary conditions for Equation \ref{eq:MSRDepletion}: Dirichlet, Neumann and Robin. Each of these boundary conditions are implemented in a way that permit inlet and outlet flow. Dirichlet boundary conditions specify a single constant value at the boundary. A Neumann boundary condition specifies the gradient normal to the boundary surface to be constant. The Robin boundary condition includes both the dependent variable and gradient are included. Table \ref{tab:boundaryConditions} summarizes each of the boundary conditions.

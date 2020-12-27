@@ -89,9 +89,9 @@ The method of lines (MOL) is a general technique for solving PDE's which transfo
 
 The finite volume method is a discretization technique which divides the initial spacial domain into smaller volumes. In each volume (cell), the dependent variable is averaged and assumed to be constant. Each volume connects to one another and allows the species to transport between cells. Volumetric generation terms from nuclear and chemical reactions will be a function of the averaged species concentration, neutron flux and microscopic cross sections in that cell. Next each of the transport operators discretized using a 2-D finite volume method. Each cell volume is fixed and of equal size. A visual representation of an internal finite volume cell is shown in Figure \ref{fig:2DFiniteVolume}
 
-\begin{figure}[t]
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=4in]{images/2DFiniteVoluem.png}\\
+  \includegraphics[width=4in]{images/chapter-4/2DFiniteVoluem.png}\\
   \caption{2-D finite volume cell}
   \label{fig:2DFiniteVolume}
 \end{figure} 
@@ -189,7 +189,7 @@ Convection-diffusion problems are difficult to numerically model because of the 
 
 The convective transport term is more complicated and harder to deal with than the diffusion term. Diffusion has no primary direction of flow, it simply cause a species to evenly distribute through a medium through a concentration gradient. Convection on the other hand, has a primary flow direction that is driven by a pressure gradient. One of the major drawbacks of the central differencing scheme is the inability to identify flow direction. In addition to the neglect in identifying the flow direction, the central differencing scheme will cause numerical instability problems for flows with high Peclet number \cite{versteeg2007}. To combat these numerical problems and to handle flow direction, the upwind differencing scheme can be used. 
 
-There are a number of classical upwind differencing schemes such as, first order, power law, and QUICK, each of these will have different orders of accuracy and stability regions. Convection schemes of third order or higher can lead to undershooting or overshooting and applying boundary conditions can be problematic \cite{versteeg2007}. Because of the issues that higher order schemes can have, much development has been done into deriving a class of second-order schemes called total variation diminishing (TVD) that avoid stability and oscillation issues. TVD schemes have the property of preserving monotonicity, meaning that it must not create local extrema and the value of an existing local minimum must be non-decreasing and that of a local maximum must be non-increasing \cite{versteeg2007}. One other consequence of monotonicity preserving scheme is that the total variation of the solution should diminish or remain the same with time. 
+There are a number of classical differencing schemes such as, first order, power law, and QUICK, each of these will have different orders of accuracy and stability regions. Convection schemes of third order or higher can lead to undershooting or overshooting and applying boundary conditions can be problematic \cite{versteeg2007}. Because of the issues that higher order schemes can have, much development has been done into deriving a class of second-order schemes called total variation diminishing (TVD) that avoid stability and oscillation issues. TVD schemes have the property of preserving monotonicity, meaning that it must not create local extrema and the value of an existing local minimum must be non-decreasing and that of a local maximum must be non-increasing \cite{versteeg2007}. One other consequence of monotonicity preserving scheme is that the total variation of the solution should diminish or remain the same with time. 
 
 The convection term is discretized and represented using a general second order term. First, flow is defined to be positive from cells West to East and South to North and negative in the opposite directions. For positive and negative flows, the convection operators in the x and y-directions are,
 
@@ -283,14 +283,14 @@ The criteria for a scheme to be TVD was derived by Sweby \cite{sweby1984} using 
 \noindent There are a number of flux limiters which can be applied to Equations \ref{eq:eastFaceFlux} - \ref{eq:southFaceFlux}: some of the most popular limiter functions are, Van Leer, Van Albada, Min-Mod, SUPERBEE, QUICK and UMIST. Figure \ref{fig:fluxlimiter} shows the grey shaded region for a second order scheme to be TVD, along with common flux limiter functions. In Figure \ref{fig:fluxlimiter} many of the limiter functions overlap. For the region of $r > 1$ QUICK and UMIST are the exact same and for $r > 5$ UMIST, QUICK and SUPERBEE are the same. 
 
 
-\begin{figure}[t]
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=5.5in]{images/CFLlimiterFunctions.png}\\
+  \includegraphics[width=5.5in]{images/chapter-4/CFLlimiterFunctions.png}\\
   \caption{Flux limiter functions on the $\Psi - r$ plane}
   \label{fig:fluxlimiter}
 \end{figure} 
 
-TVD schemes can become unstable due to negative main coefficients and they are often reformulated in a different way to maintain numerical stability. One of the ways in which TVD schemes can be reformulated is by deferred corrections. This is an iterative method which breaks apart the convective flux coefficients into its first order upwind difference component and the second order component. The upwind differencing components will still appear in the usual matrix element however, the second order approximations are moved into a source term. The source term for step $n$ is calculated using species densities from step $n-1$. In this way the source term is differed and the convection flux is corrected.  
+TVD schemes can become unstable due to negative main coefficients and they are often reformulated in a different way to maintain numerical stability. One of the ways in which TVD schemes can be reformulated is by deferred corrections. This is an iterative method which breaks apart the convective flux coefficients into its first order upwind difference component and the second order component. The upwind differencing components will still appear in the usual matrix element however, the second order approximations are moved into a source term. The source term for step $n$ is calculated using species densities from step $n-1$. In this way the source term is differed and the convection flux is corrected. This method can be implemented both explicitly or implicitly. If the implicit formulation is used then a method such as Newton must be used to allow the solution to converge at each time step. The explicit method does not require internal iterations at each step but does require small time steps to increase the accuracy and maintain stability for the second order portion. The explicit method is utilized in libowski. For smooth functions this formulation is second order, but reverts back to first order for discontinuous functions.  
 
 Coefficients for the convection flux can also be rewritten in the same way that was done for the diffusion coefficients. The deferred corrections are placed in a source term coefficient. For an interior node of species \textit{i}, the transition matrix will have coefficients representing,
 
@@ -305,10 +305,12 @@ Coefficients for the convection flux can also be rewritten in the same way that 
 \end{equation*}
 
 \begin{equation*}
+\begin{split}
     a^{C}_{E} = \max\bigg(\frac{-v_{e}}{\Delta x}, 0\bigg), \quad 
-    a^{C}_{S} = \max\bigg(\frac{v_{s}}{\Delta y}, 0\bigg), \quad 
+    a^{C}_{S} = \max\bigg(\frac{v_{s}}{\Delta y}, 0\bigg), \quad \\
     a^{C}_{W} = \max\bigg(\frac{v_{w}}{\Delta x}, 0\bigg), \quad
     a^{C}_{N} = \max\bigg(\frac{-v_{n}}{\Delta y}, 0\bigg), \quad 
+\end{split}
 \end{equation*}
 
 \begin{equation*}
@@ -345,19 +347,127 @@ Coefficients for the convection flux can also be rewritten in the same way that 
 Source terms considered thus far are for nuclear reactions. In this transition matrix they are the same as for traditional nuclear burnup equations and the coefficients were shown in Equations \ref{eq:diagonalCoeffsTraditionalBurnup} and \ref{eq:offdiagonalCoeffsTraditionalBurnup}. Diagonal coefficients correspond to the depletion of a species while off diagonal elements are generation terms. For species \textit{i} is interior cell \textit{P} the coefficients of the transition matrix for linear sources are,
 
 \begin{equation}
-    \frac{d \rho_{P,i}}{dt} = a_{P,i}^{LS}\rho_{P,i} + \sum_{j=1, j \neq i}^{N}a_{P,j}\rho_{P, j}
+    \frac{d \rho_{P,i}}{dt} = a_{P,i}^{LS}\rho_{P,i} + \sum_{j=1, j \neq i}^{N}a_{P,j}^{LS}\rho_{P, j} + \sum S^{C}_{i}
 \end{equation}
 
-\noindent where,
 
-\begin{equation*}
+\noindent These source terms will also include the deferred corrections from a second order upwind flux approximation represented as constant source terms. 
+
+Nuclear reaction rates are calculated in such a way to preserve reaction rates. This is done by integrating over all neutron energies and the volume of the cell. Over a single burn up calculation step all cross sections and the scalar neutron flux is assumed to be constant. Using volume average operators and the multigroup approximation, the neutron flux and microscopic cross section is collapsed into single values for each depletion zone \cite{aarnoThesis}:
+
+\begin{equation}
+    \sigma_{k,j} = \frac{\int_{V}\int_{0}^{\infty}\sigma_{k,j}(r,E)\phi(r,E) dEdV}{\int_{V}\int_{0}^{\infty}\phi(r,E) dEdV},
+\end{equation}
+
+\begin{equation}
+    \phi = \frac{1}{V}\int_{V}\int_{0}^{\infty}\phi(r,E)dEdV.
+\end{equation}
+
+\noindent Source terms for nuclear reactions are not calculated inside of libowski. Thus, for nuclear reactions, an external source must provide the cross sections, neutron flux and decay constants already calculated in the correct manner. These reactions are added to the transition matrix and are expressed as:
+
+\begin{equation}
     a^{LS}_{P,i} = \lambda_{i} + \overline{\phi}\sum_{k=1}^{K} \overline{\sigma}_{k,i}, \quad 
     a^{LS}_{P,j} = \frac{M_{i}}{M_{j}}\bigg(b_{j\rightarrow i}\lambda_{j} +
     \sum_{k=1}^{K}\gamma_{j\rightarrow i,k}\overline{\sigma}_{k,j}(r)\overline{\phi} \bigg).
-\end{equation*}
+\end{equation}
 
-\noindent These source terms will also include the deferred corrections from a second order upwind flux approximation. 
+Both of the mass transport models were implemented by added linear coefficients to the transition matrix. If a single species has the ability to transport from the liquid or the wall or gas phase then that species is duplicated three times. In the cases of Xe, if Xe is allowed to transport to the gas bubbles or the wall then Xe will have three individual species \textit{XeLiq}, \textit{XeGas} and \textit{XeWall}. Xe generated in the liquid from fission would be allowed to transport to the gas bubbles or the wall via terms in the transition matrix which are calculated using the mass transfer models. In addition to the mass transfer coefficient, scalar variables such as temperature, interfacial area, gas void fraction and Henry's Law coefficients are required to compute the transition coefficient. 
 
+For species $i$ the following relations represent the mass transfer model for cases when the species exist on the wall or in the liquid:
+
+\begin{equation}
+    \frac{d\rho_{i, \text{wall}}}{dt} = \frac{kA}{V}(\rho_{i, \text{liquid}} - \rho_{i,\text{wall}}) \quad \quad \text{Species exist on wall},
+\end{equation}
+
+\begin{equation}
+    \frac{d\rho_{i, \text{liquid}}}{dt} = \frac{kA}{V}(\rho_{i,\text{wall}} - \rho_{i,\text{liquid}}) \quad \quad \text{Species exist in liquid},
+\end{equation}
+
+\noindent where $A$ is the wall area [m$^2$], $V$ is the cell volume [m$^3$] and $k$ is the mass transfer coefficient [m/s]. It is often to express $A/V$ as the interfacial area concentration.The mass transfer coefficient and wall area concentration have to be set by the user when creating the model. In the transition matrix, these coefficients are expressed as:
+
+\begin{equation}
+    a^{LS}_{P,i, \text{wall}} = -\frac{kA}{V}, \quad 
+    a^{LS}_{P,j, \text{liquid}} = \frac{kA}{V}.
+\end{equation}
+
+\begin{equation}
+    a^{LS}_{P,i, \text{liquid}} = -\frac{kA}{V}, \quad 
+    a^{LS}_{P,j, \text{wall}} = \frac{kA}{V}.
+\end{equation}
+
+\noindent In some situations an infinite sink approximation may be appropriate \cite{kedl1972}. This assumes that the species build up on the wall will not influence the mass transfer rate to the wall, reducing the model to: 
+
+\begin{equation}
+    \frac{d\rho_{i, \text{wall}}}{dt} = \frac{kA}{V}\rho_{i,\text{liquid}},
+\end{equation}
+
+\begin{equation}
+    \frac{d\rho_{i, \text{liquid}}}{dt} = -\frac{kA}{V}\rho_{i,\text{liquid}}.
+\end{equation}
+
+Gas transport is implemented in a similar way to wall deposition however, the transition coefficient is more complex. Starting with the flux across the bubble interface:
+
+\begin{equation}
+    j = k_{l}(\rho^{l}_{*} - \rho^{l}_{\text{bulk}}).
+\end{equation}
+
+\noindent where $\rho^{l}_{*}$ is calculated using the gas phase concentration and $\rho^{l}_{\text{bulk}}$ is the liquid phase concentration. Starting with Henry's law for ideal systems, the concentration of gas species $i$ dissolved in the liquid phase is calculated to be:
+
+\begin{equation}
+    C_{i} = H_{i}P_{i},
+\end{equation}
+
+\noindent where $H_{i}$ is the Henry's law coefficient [kg/Pa/m$^3$] and $P_{i}$ is the partial pressure [Pa] of species $i$. A gas phase species partial pressure is required to calculate the amount of gas dissolved in the liquid. For an ideal gas, the partial pressure can be related to the gas phase mass density starting with the ideal gas law:
+
+\begin{equation}
+    P = \frac{nRT}{V}.
+\end{equation}
+
+\noindent where $n$ is moles of gas [mol], R is ideal gas constant [m$^3$Pa/mole/K], and T is temperature [K]. Dalton's law says that the total in the gas phase is equal to a summation of the partial pressures of each individual gas component:
+
+\begin{equation}
+    P_{\text{total}} = P_{1} + P_{2} + P_{3} ... = \sum_{i=1}^{N} P_{i}, 
+\end{equation}
+
+\noindent where partial pressure $P_{i} = P_{\text{total}}x_{i}$ and $x_{i}$ is the mole fraction of species $i$ in the gas phase. Combining Dalton's law and the ideal gas law gives a relation for the partial pressure:
+
+\begin{equation}
+    P_{i} = \frac{nRT}{V}\frac{n_{i}}{n} = \frac{n_{i}RT}{V}. 
+\end{equation}
+
+\noindent In libowski, species concentrations are solved for mass density in the entire cell volume however, volume in the ideal gas law is for the gas phase. These two volumes are related using the gas void fraction, $V_{\text{gas}} = V_{\text{cell}}\alpha_{\text{gas}}$. Using the volume relation and the molar mass $MM_{i}$ [g/mol] of the gas, the partial pressure of gas $i$ in terms of mass density [kg/m$^3$] is:
+
+\begin{equation}
+    P_{i} = \frac{1000RT}{\alpha_{\text{gas}}MM_{i}}\rho_{i}^{g}. 
+\end{equation}
+
+\noindent Plugging this relation into Henry's law gives the equilibrium concentration of gas dissolved in the liquid in terms of mass density in the gas phase:
+
+\begin{equation}
+    \rho_{*,i}^{l} = \frac{1000H_{i}RT}{\alpha_{\text{gas}}MM_{i}}\rho_{i}^{g}
+\end{equation}
+
+\noindent For species $i$ the following relations represent the mass transfer model for cases when the species exist in the gas bubbles or the liquid:
+
+\begin{equation}
+    \frac{d\rho_{i, \text{gas}}}{dt} = \frac{kA}{V}\bigg(\rho_{i,\text{liquid}} - \frac{1000H_{i}RT}{\alpha_{\text{gas}}MM_{i}}\rho_{i, \text{gas}}\bigg) \quad \quad \text{Species exist in gas},
+\end{equation}
+
+\begin{equation}
+    \frac{d\rho_{i, \text{liquid}}}{dt} = \frac{kA}{V}\bigg(\frac{1000H_{i}RT}{\alpha_{\text{gas}}MM_{i}}\rho_{i, \text{gas}} - \rho_{i,\text{liquid}}\bigg) \quad \quad \text{Species exist in liquid},
+\end{equation}
+
+\noindent where $k$ is the mass transfer coefficient [m/s] and $A$ is the interfacial area of the gas phase [m$^2$]. Again, the interfacial area concentration $A/V$ is set by the user. In the transition matrix, these coefficients are expressed as:
+
+\begin{equation}
+    a^{LS}_{P,i, \text{gas}} = -\frac{kA}{V}\frac{1000H_{i}RT}{\alpha_{\text{gas}}MM_{i}}, \quad 
+    a^{LS}_{P,j, \text{liquid}} = \frac{kA}{V}.
+\end{equation}
+
+\begin{equation}
+    a^{LS}_{P,i, \text{liquid}} = -\frac{kA}{V}, \quad 
+    a^{LS}_{P,j, \text{gas}} = \frac{kA}{V}\frac{1000H_{i}RT}{\alpha_{\text{gas}}MM_{i}}.
+\end{equation}
 
 \subsection{Treatment of Boundary Conditions}
 Dirichlet and Neumann boundary conditions can be easily implemented by the use of "ghost" cells. Ghost cells are cell which are placed outside the boundary of our domain and will allow for a scalar value or the derivative of a scalar value to be set at the boundary of the domain. For example, take a 2-D example of the species transport equation. The differential equation for node $P$ would be,
@@ -384,7 +494,7 @@ Neumann boundary conditions are applied in a similar way by approximating the de
 
 Periodic boundary conditions are applied on either the top and bottom or the left and right. This type of boundary condition can be thought of as folding the rectangular domain creating a cylinder. These are implemented by pointing the cell at one boundary next to the cell at the opposite side. For example, if periodic boundary conditions are applied on the top and bottom and the flow is positive, then what comes out the top enters at the bottom. In this way, flow loops can be modeled.
 
-\begin{table}[h]
+\begin{table}[htbp]
     \caption{\label{tab:dirichletBoundaries} Modified Coefficients for Dirichlet Boundaries}
     \centering
     \begin{tabular}{c|c|c|c|c|c|c}
@@ -403,7 +513,7 @@ Periodic boundary conditions are applied on either the top and bottom or the lef
     \end{tabular}
 \end{table}
 
-\begin{table}[t]
+\begin{table}[htbp]
     \caption{\label{tab:newmannBoundaries} Modified Coefficients for Newmann Boundaries}
     \centering
     \begin{tabular}{c|c|c|c|c|c|c}
@@ -423,179 +533,39 @@ Periodic boundary conditions are applied on either the top and bottom or the lef
 \end{table}
 
 \subsection{Application of Matrix Exponential Solvers}
-Five different matrix exponential solver are implemented in libowski with the added ability to use the Krylov subspace approximation. Each of these methods were discussed in Chapter \ref{ch:matrixEXPMethods} and algorithms are presented in this section. These methods include three based on Cauchys integral formula and two based on Pad\'e's approximation with scaling and squaring. Because of the  various magnitudes of the transition matrix coefficients, a direct solver is used to solve the linear systems \cite{pusa2013}. The direct solver is Eigens sparse LU decomposition which is based on the SuperLU library \cite{eigen} \cite{superlu99}. 
+Five different matrix exponential solver are implemented in libowski with the added ability to use the Krylov subspace approximation. Each of these methods were discussed in Chapter \ref{ch:matrixEXPMethods} and algorithms are presented in this section. These methods include three based on Cauchys integral formula and two based on Pad\'e's approximation with scaling and squaring. Because of the  various magnitudes of the transition matrix coefficients, a direct solver is used to solve the linear systems \cite{pusa2013}. The direct solver is Eigens sparse LU decomposition which is based on the SuperLU library \cite{eigen} \cite{superlu99}. Each of the algorithms listed in this paper are shown in Appendix \ref{appen:matexpalg}.
 
 \subsubsection{CRAM}
 The biggest problem with using CRAM is obtaining the coefficients for the partial fraction decomposition. These coefficients for order 14 and 16 can be found in Reference \cite{pusa2011}, only order 16 is implemented in libowski. As discussed earlier for Cauchy method of order $N$, $N/2$ number of complex linear systems need to be solved. The general algorithm for a method based on contour integrals in partial fraction decomposition form is shown in Algorithm \ref{alg:cauchy}. Both the Parabolic and Hyperbolic methods used this same algorithm but with different poles and residues. It should be noted that notation for the residues where changed from $c_{k}$ to $\alpha_{k}$ and the residues from $z_{k}$ to $\theta_{k}$. For complex matrices and scalars $\alpha$ and $\theta$ would need to be the same size as the approximation order. Real valued matrices and scalars require half of these coefficients. Because all the matrices here are real, $\alpha$ and $\theta$ are all of size $N/2$. 
 
-\begin{algorithm}
-	\caption{Matrix Exponential Approximation from Contour Integrals} 
-	\begin{algorithmic}[1]
-		\Procedure{cauchySolveMatrixExponential}{$\boldsymbol{A}$, $\boldsymbol{v}_{0}$, $t$, $\theta$, $\alpha$}
-		\State $At = \boldsymbol{A}$*$t$
-		\State $\text{identity} = \text{setIdentity}(At.\text{rows}(), At.\text{cols}()) $\Comment{Builds the identity matrix}
-		\State $\text{LUSolver}.\text{analyzePattern}(At)$ \Comment{Analyze the sparsity pattern}
-		\State $S = \theta.\text{size}()$
-		\For{$k=1,2,\ldots S$}
-		    \State $\text{tempAt} = At - \theta_{k}$*$\text{identity}$
-		    \State $\text{tempB} = \alpha_{k}$*$\boldsymbol{v}_{0}$
-		    \State LUSolver.factorize(tempAt) \Comment{Compute LU decomposition}
-		    \State v = v + LUSolver.solve(tempB) \Comment{Solve linear systems}
-		\EndFor
-		\State v = 2*v.real()
-		\State v = v + $\alpha_{0}$*$v_{0}$ \Comment{Add limit at infinity}
-		\State ${\text{\textbf{return}}}$ v
-		\EndProcedure
-	\end{algorithmic} 
-	\label{alg:cauchy}
-\end{algorithm}
+
 
 
 \subsubsection{Parabolic and Hyperbolic}
-Solutions with the parabolic and hyperbolic contours use Algorithm \ref{alg:cauchy} but with different poles and residues. While methods for evaluating the coefficients for CRAM take a long time and need to be precalculated, the poles and residues for contour functions can be computed when the solver is initialized. Calculating the coefficients requires the contour function ($\phi$), the function derivative ($\phi'$) and the order of the approximation ($N$) Algorithms \ref{alg:parabolicCoeffs} and \ref{alg:hyperbolicCoeffs} show the functions computing the arrays for $\alpha$ and $\theta$ with parabolic and hyperbolic contours.
+Solutions with the parabolic and hyperbolic contours use Algorithm \ref{alg:cauchy} but with different poles and residues. While methods for evaluating the coefficients for CRAM take a long time and need to be precalculated, the poles and residues for contour functions can be computed when the solver is initialized. Calculating the coefficients requires the contour function ($\phi$), the function derivative ($\phi'$) and the order of the approximation ($N$) Algorithms \ref{alg:parabolicCoeffs} and \ref{alg:hyperbolicCoeffs} in Appendix \ref{appen:matexpalg} show the functions computing the arrays for $\alpha$ and $\theta$ with parabolic and hyperbolic contours. While any order is possible, the default order in libowski is 32. 
 
-\begin{algorithm}
-	\caption{Parabolic Contour Coefficients} 
-	\begin{algorithmic}[1]
-		\Procedure{parabolicContourCoeffs}{$N$}
-		\State i = 1 \Comment{Index counter for $\theta$ array}
-		\For{$k=1,3,5,7,\ldots N-1$} \Comment{Builds array of quadrature points}
-		    \State $\theta_{i} = \pi k/N$
-		    \State i = i+1
-		\EndFor
-		\State $\phi = N(0.1309 - 0.1194\theta^{2} + 0.2500\theta i$ \Comment{Calculate $\phi$ array}
-		\State $\phi'$ = N(-2*0.1194$\theta$ + 0.2500i) \Comment{Calculate $\phi'$ array}
-		\State $\alpha$ = i/N*ElementWiseExp($\phi$)*$\phi'$ \Comment{Calculate $\alpha$ array}
-		\State $\alpha_{0} = 0$
-		\State ${\text{\textbf{return}}}$ $\theta$, $\alpha$, $\alpha_{0}$
-		\EndProcedure
-	\end{algorithmic} 
-	\label{alg:parabolicCoeffs}
-\end{algorithm}
-
-\begin{algorithm}
-	\caption{Hyperbolic Contour Coefficients} 
-	\begin{algorithmic}[1]
-		\Procedure{hyperbolicContourCoeffs}{$N$} 
-		\State i = 1  \Comment{Index counter for $\theta$ array}
-		\For{$k=1,3,5,7,\ldots N-1$} \Comment{Builds array of quadrature points}
-		    \State $\theta_{i} = \pi k/N$
-		    \State i = i+1
-		\EndFor
-		\State $\phi = 2.246N(1 - \sin(1.1721 - 0.3443i\theta))$ \Comment{Calculate $\phi$ array}
-		\State $\phi' = N\cos((3443i\theta) /10000 - 11721/10000)3866489i/5000000$ \Comment{Calculate $\phi'$ array}
-		\State $\alpha$ = i/N*ElementWiseExp($\phi$)*$\phi'$ \Comment{Calculate $\alpha$ array}
-		\State $\alpha_{0} = 0$
-		\State ${\text{\textbf{return}}}$ $\theta$, $\alpha$, $\alpha_{0}$
-		\EndProcedure
-	\end{algorithmic} 
-	\label{alg:hyperbolicCoeffs}
-\end{algorithm}
+\subsubsection{Parallelization of Cauchy Solvers}
+As mentioned before, for a given order $N$ of the Cauchy solvers $N/2$ linear systems need to be solved. Each of these systems are independent and can be performed separately. Paralelization takes two general forms: shared and distributed memory. Shared memory archetypes involve using multicore CPUs which have access to the same shared memory. Because of this; all processors have access to the same set of variables and can modify them individually. Distributed memory works by connecting multiple CPUs over a network and having each computer solve a portion of the problem. In this case; each computer has its own copy of the variables required to solve its portion of the problem. Libraries exist which allow programmers the ability to parallelize their code on a high level for each of these two architectures. Open multiprocessing (OpenMP) is used for shared memory and message massing interface (MPI) for distributed memory \cite{openmp} \cite{mpi}. In general OpenMP is easier to implement but less flexible because of the memory requirement. This issue with MPI is that using it on a shared memory device will unnecessarily increase the memory consumption. Because of its inherent flexibility MPI is utilized in parallizing the Cauchy solver in libowski. 
 
 \subsubsection{Pad\'e - Method 1}
-The first method bast on the Pad\'e approximation was developed by Nicholas J. Higham and can be found in Reference \cite{higham2005}. Higham developed this algorithm in a similar manner which was done before by Moler and Van Loan \cite{moler2003} by choosing the optimal number of matrix scalings required for the Pad\'e of a certain order. Higham noted that the backward error analysis done by Moler and Van Loan was simple and elegant, however not sharp. Instead of only developing an algorithm based on a numerical error bound, Highman also considered computational cost. The resulting algorithm developed by Highman can be found in Reference \cite{higham2005} and the reader should refer to Highman's paper for further detail in its development. Algorithm \ref{alg:method1} is the algorithm that was developed in the paper, and shows its implementation in libowski. From now it shall be referred to as Pad\'e Method 1. Pad\'e Method's 1 and 2 both rely on functions that are shown in Appendix \ref{appen:padeFunctions}. Unlike methods based on contour functions, the Pa\'e method directly computes the matrix exponential. 
-
-\begin{algorithm}
-	\caption{Pad\'e Method 1} 
-	\begin{algorithmic}[1]
-		\Procedure{padeMethod1}{$\boldsymbol{A}$, $t$}
-		\State $\alpha = 0$ \Comment{Number of times to square the matrix}
-		\State A = $\boldsymbol{A}$*t 
-		\State norm = $||\text{A}||_{1}$ \Comment{Compute the $l_{1}$ norm of the matrix}
-		\State A2 = A$^{2}$ 
-        \If{norm $<$ 1.495585217958292e-002}
-        \State U, V = pade3(A, A2) \Comment{Compute terms to build pade order 3}
-        \ElsIf{norm $<$ 2.539398330063230e-001}
-        \State A4 = A2*A2
-        \State  U, V = pade5(A, A2, A4) \Comment{Compute terms to build pade order 5}
-        \ElsIf{norm $<$ 9.504178996162932e-001}
-        \State A4 = A2*A2
-        \State A6 = A4*A2
-        \State U, V = pade7(A, A2, A4, A6) \Comment{Compute terms to build pade order 7}
-        \ElsIf{norm $<$ 2.097847961257068}
-        \State A4 = A2*A2
-        \State A6 = A4*A2
-        \State A8 = A6*A2
-        \State U, V = pade9(A, A2, A4, A6, A8) \Comment{Compute terms to build pade order 9}
-        \Else 
-        \State maxnorm = 5.371920351148152
-        \State $\alpha = \max(0, \lceil(\log_{2}(\text{norm}/\text{maxnorm})\rceil)$ \Comment{Calculate number of squarings}
-        \State A = A/$2^{\alpha}$ \Comment{Scale the matrix}
-        \State A2 = A*A
-        \State A4 = A2*A2
-        \State A6 = A4*A2
-        \State U, V = pade13(A, A2, A4, A6) \Comment{Compute terms to build pade order 13}
-        \EndIf
-        \State denominator = -U + V \Comment{Build the denominator}
-        \State numerator = U + V \Comment{Build the numerator}
-        \State LUSolver.analyzePattern(denominator) \Comment{Analyze sparsity patern}
-        \State LUSolver.factorize(denominator) \Comment{Compute LU factorization}
-        \State R = LUSolver.solve(numerator) \Comment{Solve for the matrix exponential}
-        \For{k=1,2,3$\ldots \alpha$} \Comment{Unscale the matrix}
-            \State R = R*R
-        \EndFor
-        \State ${\text{\textbf{return}}}$ R
-		\EndProcedure
-	\end{algorithmic} 
-	\label{alg:method1}
-\end{algorithm}
-
-
-
+The first method bast on the Pad\'e approximation was developed by Nicholas J. Higham and can be found in Reference \cite{higham2005}. Higham developed this algorithm in a similar manner which was done before by Moler and Van Loan \cite{moler2003} by choosing the optimal number of matrix scalings required for the Pad\'e of a certain order. Higham noted that the backward error analysis done by Moler and Van Loan was simple and elegant, however not sharp. Instead of only developing an algorithm based on a numerical error bound, Highman also considered computational cost. The resulting algorithm developed by Highman can be found in Reference \cite{higham2005} and the reader should refer to Highman's paper for further detail in its development. Algorithm \ref{alg:method1} is the algorithm that was developed in the paper, and shows its implementation in libowski. From now it shall be referred to as Pad\'e Method 1. Pad\'e Method's 1 and 2 both rely on functions that are shown in Appendix \ref{appen:matexpalg}. Unlike methods based on contour functions, the Pa\'e method directly computes the matrix exponential. 
 
 \subsubsection{Pad\'e - Method 2}
-The second Pad\'e method is a modification of the first Pad\'e method that addresses the weakness in overscaling. Overscaling occurs when a large matrix norm causes a larger than necessary $\alpha$ to be used, leading to decreased accuracy \cite{higham2009}. Al-Mohy and Higham developed this algorithm by inroducing a new sharper truncation error bound, which is likely to help correct the overscaling problem. More information on the new algorithm can be found in Referenence \cite{higham2009}. Algorithm 6.1 from said reference is implemented in libowski and is shown in Algorithm \ref{alg:method2}. There are two helper functions that are used in Algorithm \ref{alg:method2}, these function are defined Appendix \ref{appen:padeFunctions}. 
+The second Pad\'e method is a modification of the first Pad\'e method that addresses the weakness in overscaling. Overscaling occurs when a large matrix norm causes a larger than necessary $\alpha$ to be used, leading to decreased accuracy \cite{higham2009}. Al-Mohy and Higham developed this algorithm by inroducing a new sharper truncation error bound, which is likely to help correct the overscaling problem. More information on the new algorithm can be found in Referenence \cite{higham2009}. Algorithm 6.1 from said reference is implemented in libowski and is shown in Algorithm \ref{alg:method2}. There are two helper functions that are used in Algorithm \ref{alg:method2}, these function are defined Appendix \ref{appen:matexpalg} along with Algorithm \ref{alg:method2}. 
 
-\begin{algorithm}
-	\caption{Pad\'e Method 2} 
-	\begin{algorithmic}[1]
-		\Procedure{padeMethod2}{$\boldsymbol{A}$, $t$}
-		\State $\alpha = 0$ \Comment{Number of times to square the matrix}
-		\State A = $\boldsymbol{A}$*t 
-		\State norm = $||\text{A}||_{l_{1}}$ \Comment{Compute the $l_{1}$ norm of the matrix}
-		\State A2 = A$^{2}$ 
-		\State d6 = normest(A2,3)$^{1/6}$,  $\eta_{1} = \max(\text{normest(A2,3)}^{1/4}, \text{d6})$
-        \If{$\eta_{1} <$ 1.495585217958292e-002 \textbf{and} ell(A,3) = 0} \Comment{Try Pad\'e 3}
-            \State U, V = pade3(A, A2)
-            \State Evaluate R using lines 29-33 of Algorithm Pad\'e Method 1
-            \State \textbf{return} R
-        \EndIf
-        \State A4 = A2*A2
-        \State d4 = $||\text{A4}||_{l_{1}}^{1/4}$, $\eta_{2} = \max(\text{d4, d6})$
-        \If{$\eta_{2} < $ 2.539398330063230e-001 \textbf{and} ell(A,5) = 0} \Comment{Try Pad\'e 5}
-            \State U, V = pade5(A, A2, A4)
-            \State Evaluate R using lines 29-33 of Algorithm Pad\'e Method 1
-            \State \textbf{return} R
-        \EndIf
-        \State A6 = A4*A2
-        \State d6 = $||\text{A6}||_{l_{1}}^{1/6}$, d8 = $\text{normest(A2,2)}^{1/8}$, $\eta_{3} = \max(d6,d8)$
-        \If{$\eta_{3} < $ 9.504178996162932e-001 \textbf{and} ell(A, 7) = 0} \Comment{Try Pad\'e 7}
-            \State U, V = pade7(A, A2, A4, A6)
-            \State Evaluate R using lines 29-33 of Algorithm Pad\'e Method 1
-            \State \textbf{return} R
-        \EndIf 
-        \If{$\eta_{3} < $ 2.097847961257068e+000 \textbf{and} ell(A, 9) = 0} \Comment{Try Pad\'e 9}
-            \State A8 = A6*A2
-            \State U, V = pade9(A, A2, A4, A6, A8)
-            \State Evaluate R using lines 29-33 of Algorithm Pad\'e Method 1
-            \State \textbf{return} R
-        \EndIf 
-        \State d10 = normest(A4, A6)$^{1/10}$
-        \State $\eta_{4} = \max(\text{d8, d10})$
-        \State $\eta_{5} = \min(\eta_{3}, \eta_{4})$
-        \State $\alpha = \max(\lceil \log_{2}(\eta_{5}/4.25)\rceil, 0)$
-        \State $\alpha = \alpha + $ell(A/$s^{\alpha}$) \Comment{Compute the number of squarings}
-        \State A = A/$s^{\alpha}$, A2 = A2/$s^{2\alpha}$, A4 = A4/$s^{4\alpha}$, A6 = A6/$s^{6\alpha}$
-        \State U, V = pade13(A, B2, B4, B6) \Comment{Compute Pad\'e 13}
-        \State Evaluate R using lines 29-33 of Algorithm Pad\'e Method 1
-        \For{k=1,2,3$\ldots \alpha$} \Comment{Unscale the matrix}
-            \State R = R*R
-        \EndFor
-        \State ${\text{\textbf{return}}}$ R
-		\EndProcedure
-	\end{algorithmic} 
-	\label{alg:method2}
-\end{algorithm}
+
+\subsubsection{Taylor}
+The Taylor algorithms implemented in libowski was taken from Reference \cite{higham2011} for computing $F \approx e^{\boldsymbol{A}t}\boldsymbol{B}$ over a single step, where $\boldsymbol{A} \in \mathbb{C}^{n\times n}$ and $\boldsymbol{B} \in \mathbb{C}^{n\times n_{0}}$. Unlike the Pad\'e methods, the Taylor algorithm does not require the need for linear solves. This was done in an attempt to reduce the computational cost. Three key ideas were employed when developing this algorithm:
+
+\begin{enumerate}
+    \item Careful choice of the Taylor series order and scaling parameter, exploiting estimates of $||t{\boldsymbol{A}}^{p}||^{p}$, to keep the backward error suitably bounded while minimizing the computational cost.
+    \item Shifting, and optional balancing, to reduce the norm of $\boldsymbol{A}t$.
+    \item Premature termination of the truncated Taylor series evaluations.
+\end{enumerate}
+
+
+One of the major components of this algorithm is in picking the optimal Taylor order and scaling parameter. This is accomplished by minimizing the computational cost while choosing the appropriate scaling and squaring parameter to obtain a backwards error below a minimal tolerance. For this algorithm, the parameters function accomplishes this and is shown in Algorithm \ref{alg:taylor_parameters}. 
+
 
 
 

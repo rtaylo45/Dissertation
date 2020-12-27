@@ -1,0 +1,321 @@
+\section{Matrix Exponential Algorithms}
+\label{appen:matexpalg}
+
+\subsection{Cauchy}
+\begin{algorithm}
+	\caption{Parabolic Contour Coefficients} 
+	\begin{algorithmic}[1]
+		\Procedure{parabolicContourCoeffs}{$N$}
+		\State i = 1 \Comment{Index counter for $\theta$ array}
+		\For{$k=1,3,5,7,\ldots N-1$} \Comment{Builds array of quadrature points}
+		    \State $\theta_{i} = \pi k/N$
+		    \State i = i+1
+		\EndFor
+		\State $\phi = N(0.1309 - 0.1194\theta^{2} + 0.2500\theta i$ \Comment{Calculate $\phi$ array}
+		\State $\phi'$ = N(-2*0.1194$\theta$ + 0.2500i) \Comment{Calculate $\phi'$ array}
+		\State $\alpha$ = i/N*ElementWiseExp($\phi$)*$\phi'$ \Comment{Calculate $\alpha$ array}
+		\State $\alpha_{0} = 0$
+		\State ${\text{\textbf{return}}}$ $\theta$, $\alpha$, $\alpha_{0}$
+		\EndProcedure
+	\end{algorithmic} 
+	\label{alg:parabolicCoeffs}
+\end{algorithm}
+
+\begin{algorithm}
+	\caption{Hyperbolic Contour Coefficients} 
+	\begin{algorithmic}[1]
+		\Procedure{hyperbolicContourCoeffs}{$N$} 
+		\State i = 1  \Comment{Index counter for $\theta$ array}
+		\For{$k=1,3,5,7,\ldots N-1$} \Comment{Builds array of quadrature points}
+		    \State $\theta_{i} = \pi k/N$
+		    \State i = i+1
+		\EndFor
+		\State $\phi = 2.246N(1 - \sin(1.1721 - 0.3443i\theta))$ \Comment{Calculate $\phi$ array}
+		\State $\phi' = N\cos((3443i\theta) /10000 - 11721/10000)3866489i/5000000$ \Comment{Calculate $\phi'$ array}
+		\State $\alpha$ = i/N*ElementWiseExp($\phi$)*$\phi'$ \Comment{Calculate $\alpha$ array}
+		\State $\alpha_{0} = 0$
+		\State ${\text{\textbf{return}}}$ $\theta$, $\alpha$, $\alpha_{0}$
+		\EndProcedure
+	\end{algorithmic} 
+	\label{alg:hyperbolicCoeffs}
+\end{algorithm}
+
+\begin{algorithm}
+	\caption{Matrix Exponential Approximation from Contour Integrals} 
+	\begin{algorithmic}[1]
+		\Procedure{cauchySolveMatrixExponential}{$\boldsymbol{A}$, $\boldsymbol{v}_{0}$, $t$, $\theta$, $\alpha$}
+		\State $At = \boldsymbol{A}$*$t$
+		\State $\text{identity} = \text{setIdentity}(At.\text{rows}(), At.\text{cols}()) $\Comment{Builds the identity matrix}
+		\State $\text{LUSolver}.\text{analyzePattern}(At)$ \Comment{Analyze the sparsity pattern}
+		\State $S = \theta.\text{size}()$
+		\For{$k=1,2,\ldots S$}
+		    \State $\text{tempAt} = At - \theta_{k}$*$\text{identity}$
+		    \State $\text{tempB} = \alpha_{k}$*$\boldsymbol{v}_{0}$
+		    \State LUSolver.factorize(tempAt) \Comment{Compute LU decomposition}
+		    \State v = v + LUSolver.solve(tempB) \Comment{Solve linear systems}
+		\EndFor
+		\State v = 2*v.real()
+		\State v = v + $\alpha_{0}$*$v_{0}$ \Comment{Add limit at infinity}
+		\State ${\text{\textbf{return}}}$ v
+		\EndProcedure
+	\end{algorithmic} 
+	\label{alg:cauchy}
+\end{algorithm}
+
+\FloatBarrier
+\subsection{Pad\'e}
+\begin{algorithm}
+	\caption{Pad\'e of Order 3} 
+	\begin{algorithmic}[1]
+		\Procedure{pade3}{$A$, $A2$}
+		\State identity = setIdentity($A$.rows(), $A$.cols())
+		\State b = [120, 60, 12, 1]
+		\State temp = b[3]*A2 + b[1]*identity
+		\State U = A*temp
+        \State V = b[2]*A2 + b[0]*identity
+        \State \textbf{return} U, V
+        \EndProcedure
+	\end{algorithmic} 
+\end{algorithm}
+
+\begin{algorithm}
+	\caption{Pad\'e of Order 5} 
+	\begin{algorithmic}[1]
+		\Procedure{pade5}{$A$, $A2$, $A4$}
+		\State identity = setIdentity($A$.rows(), $A$.cols())
+		\State b = [30240, 15120, 3360, 420, 30, 1]
+		\State temp = b[5]*A4 + b[3]*A2 + b[1]*identity
+		\State U = A*temp
+        \State V = b[4]*A4 + b[2]*A2 + b[0]*identity
+        \State \textbf{return} U, V
+        \EndProcedure
+	\end{algorithmic} 
+\end{algorithm}
+
+\begin{algorithm}
+	\caption{Pad\'e of Order 7} 
+	\begin{algorithmic}[1]
+		\Procedure{pade7}{$A$, $A2$, $A4$, $A6$}
+		\State identity = setIdentity($A$.rows(), $A$.cols())
+		\State b = [17297280, 8648640, 1995840, 277200, 25200, 1512, 56, 1]
+		\State temp = b[7]*A6 + b[5]*A4 + b[3]*A2 + b[1]*identity
+		\State U = A*temp
+        \State V = b[6]*A6 + b[4]*A4 + b[2]*A2 + b[0]*identity
+        \State \textbf{return} U, V
+        \EndProcedure
+	\end{algorithmic} 
+\end{algorithm}
+
+\begin{algorithm}
+	\caption{Pad\'e of Order 9} 
+	\begin{algorithmic}[1]
+		\Procedure{pade9}{$A$, $A2$, $A4$, $A6$, $A8$}
+		\State identity = setIdentity($A$.rows(), $A$.cols())
+		\State b = [17643225600, 8821612800, 2075673600, 302702400, 30270240, 2162160, 110880, \State $\quad$ 3960, 90, 1]
+		\State temp = b[9]*A8 + b[7]*A6 + b[5]*A4 + b[3]*A2 + b[1]*identity
+		\State U = A*temp
+        \State V = b[8]*A8 + b[6]*A6 + b[4]*A4 + b[2]*A2 + b[0]*identity
+        \State \textbf{return} U, V
+        \EndProcedure
+	\end{algorithmic} 
+\end{algorithm}
+
+\begin{algorithm}
+	\caption{Pad\'e of Order 13} 
+	\begin{algorithmic}[1]
+		\Procedure{pade13}{$A$, $A2$, $A4$, $A6$}
+		\State identity = setIdentity($A$.rows(), $A$.cols())
+		\State b = [64764752532480000, 32382376266240000, 7771770303897600, 
+		\State $\quad$ 1187353796428800, 129060195264000, 10559470521600, 670442572800, 
+		\State $\quad$ 33522128640, 1323241920, 40840800, 960960, 16380, 182, 1]
+		\State V = b[13]*A6 + b[11]*A4 + b[9]*A2
+		\State temp = A6*V + b[7]*A6 + b[5]*A4 + b[3]*A2 + b[1]*identity
+		\State U = A*temp
+		\State temp = b[12]*A6 + b[10]*A4 + b[8]*A2
+        \State V = A6*temp + b[6]*A6 + b[4]*A4 + b[2]*A2 + b[0]*identity
+        \State \textbf{return} U, V
+        \EndProcedure
+	\end{algorithmic} 
+\end{algorithm}
+
+\begin{algorithm}
+	\caption{Normest of Multiple Matrices} 
+	\begin{algorithmic}[1]
+		\Procedure{normest}{$A_{1}, A_{2}, \ldots, A_{k}$}
+        \State l1norm = $||A_{1}, A_{2}, \ldots, A_{k}||_{l_{1}}$ \Comment{Although Reference \cite{higham2009} uses an estimate,}
+        \State \textbf{return} l1norm \Comment{the exact is used here}
+        \EndProcedure
+	\end{algorithmic} 
+\end{algorithm}
+
+\begin{algorithm}
+	\caption{Normest of Matrix Power} 
+	\begin{algorithmic}[1]
+		\Procedure{normest}{$A, m$}
+        \State l1norm = $||A^{m}||$ \Comment{Although Reference \cite{higham2009} uses an estimate,}
+        \State \textbf{return} l1norm \Comment{the exact is used here}
+        \EndProcedure
+	\end{algorithmic} 
+\end{algorithm}
+
+\begin{algorithm}
+	\caption{ell} 
+	\begin{algorithmic}[1]
+		\Procedure{ell}{$A, m$}
+        \State p = 2*m + 1
+        \State $c = {2p!}/((2p)!(2p+1)!)$ \Comment{Leading coefficient}
+        \State $u = 2^{-53}$ \Comment{Unit round off for IEE double}
+        \State $\alpha$ = c*normest($|A|, p$)/$|A|_{l_{1}}$
+        \State value = $\lceil \log_{2}({\alpha/u})/($2*m$)\rceil$
+        \State \textbf{return} $\max$(value, 0)
+        \EndProcedure
+	\end{algorithmic} 
+\end{algorithm}
+
+\begin{algorithm}
+	\caption{Pad\'e Method 1} 
+	\begin{algorithmic}[1]
+		\Procedure{padeMethod1}{$\boldsymbol{A}$, $t$}
+		\State $\alpha = 0$ \Comment{Number of times to square the matrix}
+		\State A = $\boldsymbol{A}$*t 
+		\State norm = $||\text{A}||_{1}$ \Comment{Compute the $l_{1}$ norm of the matrix}
+		\State A2 = A$^{2}$ 
+        \If{norm $<$ 1.495585217958292e-002}
+        \State U, V = pade3(A, A2) \Comment{Compute terms to build pade order 3}
+        \ElsIf{norm $<$ 2.539398330063230e-001}
+        \State A4 = A2*A2
+        \State  U, V = pade5(A, A2, A4) \Comment{Compute terms to build pade order 5}
+        \ElsIf{norm $<$ 9.504178996162932e-001}
+        \State A4 = A2*A2
+        \State A6 = A4*A2
+        \State U, V = pade7(A, A2, A4, A6) \Comment{Compute terms to build pade order 7}
+        \ElsIf{norm $<$ 2.097847961257068}
+        \State A4 = A2*A2
+        \State A6 = A4*A2
+        \State A8 = A6*A2
+        \State U, V = pade9(A, A2, A4, A6, A8) \Comment{Compute terms to build pade order 9}
+        \Else 
+        \State maxnorm = 5.371920351148152
+        \State $\alpha = \max(0, \lceil(\log_{2}(\text{norm}/\text{maxnorm})\rceil)$ \Comment{Calculate number of squarings}
+        \State A = A/$2^{\alpha}$ \Comment{Scale the matrix}
+        \State A2 = A*A
+        \State A4 = A2*A2
+        \State A6 = A4*A2
+        \State U, V = pade13(A, A2, A4, A6) \Comment{Compute terms to build pade order 13}
+        \EndIf
+        \State denominator = -U + V \Comment{Build the denominator}
+        \State numerator = U + V \Comment{Build the numerator}
+        \State LUSolver.analyzePattern(denominator) \Comment{Analyze sparsity patern}
+        \State LUSolver.factorize(denominator) \Comment{Compute LU factorization}
+        \State R = LUSolver.solve(numerator) \Comment{Solve for the matrix exponential}
+        \For{k=1,2,3$\ldots \alpha$} \Comment{Unscale the matrix}
+            \State R = R*R
+        \EndFor
+        \State ${\text{\textbf{return}}}$ R
+		\EndProcedure
+	\end{algorithmic} 
+	\label{alg:method1}
+\end{algorithm}
+
+
+\begin{algorithm}
+	\caption{Pad\'e Method 2} 
+	\begin{algorithmic}[1]
+		\Procedure{padeMethod2}{$\boldsymbol{A}$, $t$}
+		\State $\alpha = 0$ \Comment{Number of times to square the matrix}
+		\State A = $\boldsymbol{A}$*t 
+		\State norm = $||\text{A}||_{l_{1}}$ \Comment{Compute the $l_{1}$ norm of the matrix}
+		\State A2 = A$^{2}$ 
+		\State d6 = normest(A2,3)$^{1/6}$,  $\eta_{1} = \max(\text{normest(A2,3)}^{1/4}, \text{d6})$
+        \If{$\eta_{1} <$ 1.495585217958292e-002 \textbf{and} ell(A,3) = 0} \Comment{Try Pad\'e 3}
+            \State U, V = pade3(A, A2)
+            \State Evaluate R using lines 29-33 of Algorithm Pad\'e Method 1
+            \State \textbf{return} R
+        \EndIf
+        \State A4 = A2*A2
+        \State d4 = $||\text{A4}||_{l_{1}}^{1/4}$, $\eta_{2} = \max(\text{d4, d6})$
+        \If{$\eta_{2} < $ 2.539398330063230e-001 \textbf{and} ell(A,5) = 0} \Comment{Try Pad\'e 5}
+            \State U, V = pade5(A, A2, A4)
+            \State Evaluate R using lines 29-33 of Algorithm Pad\'e Method 1
+            \State \textbf{return} R
+        \EndIf
+        \State A6 = A4*A2
+        \State d6 = $||\text{A6}||_{l_{1}}^{1/6}$, d8 = $\text{normest(A2,2)}^{1/8}$, $\eta_{3} = \max(d6,d8)$
+        \If{$\eta_{3} < $ 9.504178996162932e-001 \textbf{and} ell(A, 7) = 0} \Comment{Try Pad\'e 7}
+            \State U, V = pade7(A, A2, A4, A6)
+            \State Evaluate R using lines 29-33 of Algorithm Pad\'e Method 1
+            \State \textbf{return} R
+        \EndIf 
+        \If{$\eta_{3} < $ 2.097847961257068e+000 \textbf{and} ell(A, 9) = 0} \Comment{Try Pad\'e 9}
+            \State A8 = A6*A2
+            \State U, V = pade9(A, A2, A4, A6, A8)
+            \State Evaluate R using lines 29-33 of Algorithm Pad\'e Method 1
+            \State \textbf{return} R
+        \EndIf 
+        \State d10 = normest(A4, A6)$^{1/10}$
+        \State $\eta_{4} = \max(\text{d8, d10})$
+        \State $\eta_{5} = \min(\eta_{3}, \eta_{4})$
+        \State $\alpha = \max(\lceil \log_{2}(\eta_{5}/4.25)\rceil, 0)$
+        \State $\alpha = \alpha + $ell(A/$s^{\alpha}$) \Comment{Compute the number of squarings}
+        \State A = A/$s^{\alpha}$, A2 = A2/$s^{2\alpha}$, A4 = A4/$s^{4\alpha}$, A6 = A6/$s^{6\alpha}$
+        \State U, V = pade13(A, B2, B4, B6) \Comment{Compute Pad\'e 13}
+        \State Evaluate R using lines 29-33 of Algorithm Pad\'e Method 1
+        \For{k=1,2,3$\ldots \alpha$} \Comment{Unscale the matrix}
+            \State R = R*R
+        \EndFor
+        \State ${\text{\textbf{return}}}$ R
+		\EndProcedure
+	\end{algorithmic} 
+	\label{alg:method2}
+\end{algorithm}
+
+\FloatBarrier
+
+\subsection{Taylor}
+\begin{algorithm}
+	\caption{parameters} 
+	\begin{algorithmic}[1]
+		\Procedure{Parameters}{$\boldsymbol{A}$, $t$, tol}
+		\State $A = \boldsymbol{A}t$
+		\State norm = $||A||_{1}$
+        \State $l_{lim}$ = $\frac{4}{n_{0}}\frac{\theta_{m_{max}}}{m_{max}}p_{max}(p_{max}+3)$
+        \If{norm $\leq l_{lim}$ }
+            \State $m_{*} = $ argmin$_{1 \leq m \leq m_{max}}$ $m\lceil ||A||_{1}/\theta_{m}\rceil$
+            \State $s = \lceil ||A||_{1}/\theta_{m}$
+        \Else
+            \State Cost = min[$m\lceil \alpha_{p}(A)/\theta_{m}\rceil : 2 \leq p \leq p_{max},\quad p(p-1) -1 \leq m \leq m_{max}$]
+            \State Let $m_{*}$ to be the smallest $m$ achieving the minimum in Cost.
+            \State$s = $ max $(\text{Cost}/m_{*}, 1)$
+        \EndIf
+        \State ${\text{\textbf{return}}}$ $m_{*}, s$  
+		\EndProcedure
+	\end{algorithmic} 
+	\label{alg:taylor_parameters}
+\end{algorithm}
+
+\begin{algorithm}
+	\caption{Taylor} 
+	\begin{algorithmic}[1]
+		\Procedure{taylor}{$\boldsymbol{A}$, $t$, $\boldsymbol{b}$}
+		\State $A = \boldsymbol{A}$, $b = \boldsymbol{b}$
+        \State $\mu = \text{trace}(A)/n$
+        \State $A = A - \mu \boldsymbol{I}$
+        \State $[m_{*}, s] = \text{parameters}(A, t, \text{tol})$
+        \State $F = b$, $\eta = e^{t\mu}$
+        \For{$i = 1:s$}
+            \State $c_{1} = ||b||_{\infty}$
+            \For{$j = 1:m_{*}$}
+                \State $b = tAb/(sj)$, $c_{2} = ||b||_{\infty}$
+                \State $ F = F + B$
+                \If{$c_{1} + c_{2} \leq \text{tol}||F||_{\infty}$}
+                    \State break
+                \EndIf
+                \State $c_{1} = c_{2}$
+            \EndFor
+            \State $F = \eta F$, $b = F$
+        \EndFor
+        \State ${\text{\textbf{return}}}$ $F$  
+		\EndProcedure
+	\end{algorithmic} 
+	\label{alg:taylor}
+\end{algorithm}
