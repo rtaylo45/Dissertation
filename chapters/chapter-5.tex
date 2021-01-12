@@ -379,14 +379,14 @@ The same PDE that was shown in the previous problem is tested again:
     U(x,0) = \exp\bigg\{-\bigg(\frac{(x-30)}{10}\bigg)^{2}\bigg\}.
 \end{equation}
 
-\noindent This problem produces a smooth solution which shows the convergence order of the flux limiters. Table \ref{} shows results for each flux limiter using the Taylor solver and results for each of the other solvers are shown in Appendix \ref{appen:results} Each solver has the same error and convergence rate, the run times are different. 
+\noindent This problem produces a smooth solution which shows the convergence order of the flux limiters. Table \ref{tab:problem4_results_taylor} shows results for each flux limiter using the Taylor solver and results for each of the other solvers are shown in Appendix \ref{appen:results}. Each solver has the same error and convergence rate however, the run times are different. From Table \ref{tab:problem4_results_taylor} each of the flux limiter functions has different behavior. While each of the higher order functions do not have exactly second order convergence, they are higher than the first order upwind approximation. All of the higher order limiter functions do show an increase in accuracy when compared to first order upwind. Figure \ref{fig:problem4_fluxlimiter_convergence_rate} shows flux limiter convergence rates for each function as a function of temporal and spatial refinement. 
 
-Figure \ref{} show run time results for each of the solvers. 
+Figure \ref{fig:problem4_runtimes} shows the average run time results for each of the solvers. Each flux limiter function is simple enough to assume that the run time difference between calling each function while building the transition matrix is the same. This leads to the notion that small run time differences for each solve is due to the computers computation. For the small cases, the Taylor and Pad\'e solvers out perform the Cauchy solvers. As the number of cells increase, the Pad\'e solver run times begin to approach values greater than the Cauchy solvers. Hyperbolic and Parabolic remain about the same as seen before, with CRAM being the lowest of the three. The Taylor solver remains the lowest for all problem sizes. 
 
 \clearpage
 
 \begin{table}[htbp]
-   \caption{\label{tab:problem4_results_taylor} Convergence Rate for Problem 4  with Absolute Error Using the Taylor Solver}
+   \caption{\label{tab:problem4_results_taylor} Convergence Rate for Problem 4  with Absolute Error Using the Taylor Solver, dt = 0.01}
    \centering
     \scalebox{0.85}{
    \begin{tabular}{cllllllll}
@@ -448,26 +448,25 @@ Figure \ref{} show run time results for each of the solvers.
 
 \clearpage
 
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/problem4Runtimes.png}
+    \caption{Problem 4 average run times for each solver}
+    \label{fig:problem4_runtimes}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/problem4FluxLimiterConvergenceRate.png}
+    \caption{Problem 4 flux limiter convergence rate}
+    \label{fig:problem4_fluxlimiter_convergence_rate}
+\end{figure}
+
+\clearpage
+
 \subsection{Problem 5}
-A two-dimensional convection-diffusion equation is modeled \cite{noye1989}:
-
-\begin{equation}
-    \frac{\partial \phi }{\partial t} + v_{x}\frac{\partial \phi}{\partial x} + v_{y}\frac{\partial \phi }{\partial y} - D_{x}\frac{\partial^{2}\phi }{\partial x^{2}} - D_{y}\frac{\partial^{2}\phi}{\partial y^{2}} = 0,
-\end{equation}
-
-\noindent on the domain $x \in [0, 4]$, $y \in [0, 4]$ with $v_{x} = v_{y} = 0.8, D_{x} = D_{y} 0.01$ Subject to initial condition:
-
-\begin{equation}
-    \phi(x, y, 0) = \exp\bigg\{ -\bigg( \frac{(x - 0.5)^{2}}{D_{x}} + \frac{(y-0.5)^{2}}{D_{y}} \bigg)\bigg\}. 
-\end{equation}
-
-\noindent This has the analytical solution:
-
-\begin{equation}
-    \phi(x, y, t) = \frac{1}{4t+1}\exp\bigg\{ -\bigg( \frac{(x-v_{x}t-0.5)^{2}}{D_{x}(4t+1)} + \frac{(y-v_{y}t-0.5)^{2}}{D_{y}(4t+1)}\bigg)\bigg\}
-\end{equation}
-
-\subsection{Problem 6}
 This problem consist on a convection-reaction problem with a single species represented by:
 
 \begin{equation}
@@ -489,8 +488,16 @@ C (x,t) = \begin{cases}
 \end{cases}
 \end{equation}
 
+This problem represents a single species which is transported by convection which decays. The solution to this leads to a function that is not smooth, causing the higher order flux limiter functions to reduced to first order accuracy. Figure \ref{fig: }
 
-\subsection{Problem 7}
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/problem5FluxLimiterConvergenceRate.png}
+    \caption{Problem 5 flux limiter convergence rate}
+    \label{fig:problem5_fluxlimiter_convergence_rate}
+\end{figure}
+
+\subsection{Problem 6}
 This is an extension of problem 6 with two species, one that exist in the liquid and one on the wall. The species in the liquid transports and depositions on the wall where it sticks and does not move. In libowski, this model is set up using the wall deposition mass transport model with the infinite sink approximation. This system is represented by:
 
 \begin{equation}
@@ -511,7 +518,7 @@ This is an extension of problem 6 with two species, one that exist in the liquid
 \end{split}
 \end{equation}
 
-\subsection{Problem 9}
+\subsection{Problem 7}
 This problem models the primary uranium isotopes along with Pu-239 and Np-239 in a system which contains a neutron flux. Coefficients in the transition matrix include source and sink terms from both neutron induced reactions and radioactive decay. This system is represented by:
 
 
@@ -542,7 +549,7 @@ i = \begin{dcases}
 \noindent where $\boldsymbol{C}$ is a vector of isotope concentrations. The solution is calculated using in MATLAB using the method previously described. 
 
 
-\subsection{Problem 10}
+\subsection{Problem 8}
 This is an extension of problem 9 but for a fictitious "pipe" reactor which allows for the flow of isotopes due to a velocity. This is represented by:
 
 \begin{equation}
