@@ -483,17 +483,17 @@ This problem consist on a convection-reaction problem with a single species repr
 
 \begin{equation}
 C (x,t) = \begin{cases}
-  C (0, t) e^{-\frac{x \lambda _i}{v}}\ , & x < vt \\
+  C (x, 0) e^{-\frac{x \lambda _i}{v}}\ , & x < vt \\
   C (x, 0) e^{-t \lambda _i}\ , & x \ge vt
 \end{cases}
 \end{equation}
 
-The solution to this leads to a function that is not smooth, causing the higher order flux limiter functions to reduced to first order accuracy. Table \ref{tab:problem5_results_taylor} shows results for the Taylor solver, additional results are shown in Appendix \ref{appen:results}, Tables \ref{tab:problem5_results_CRAM}, \ref{tab:problem5_results_hyperbolic}, \ref{tab:problem5_results_parabolic}, \ref{tab:problem5_results_pade-method1} and \ref{tab:problem5_results_pade-method2}. For stable solutions, the convergence rates for each solver remain the same. Run times for each solver are different, these are shown in the same manor that was done in Problem 5, in Figure \ref{fig:problem5_runtimes}. Run times show that same trend observed in problem 4, Cauchy and Taylor scale better than Pad\'e. For each flux limiter these convergence rates are shown for various temporal and spatial refinements in Figure \ref{fig:problem5_fluxlimiter_convergence_rate}. As mentioned before, the solution is not smooth, leading to a reduction in convergence rate. In general, as the spatial and temporal refinement increases, the convergence rate does as well. The acceptation to this is the Albada limiter, which shows increased convergence rates for small time steps. As with problem 3, the Cauchy solvers showed instability with small dx and large dt values. Instability problems are solved in the same way as before, by increasing the number of substeps or the order of the Cauchy method. 
+This problem is a 1D convection driven flow where the species decays at a constant rate. The solution to this leads to a function that is not smooth, causing the higher order flux limiter functions to reduced to first order accuracy. Table \ref{tab:problem5_results_taylor} shows results for the Taylor solver, additional results are shown in Appendix \ref{appen:results}, Tables \ref{tab:problem5_results_CRAM}, \ref{tab:problem5_results_hyperbolic}, \ref{tab:problem5_results_parabolic}, \ref{tab:problem5_results_pade-method1} and \ref{tab:problem5_results_pade-method2}. For stable solutions, the convergence rates for each solver remain the same. Run times for each solver are different, these are shown in the same manor that was done in Problem 5, in Figure \ref{fig:problem5_runtimes}. Run times show that same trend observed in problem 4, Cauchy and Taylor scale better than Pad\'e. For each flux limiter these convergence rates are shown for various temporal and spatial refinements in Figure \ref{fig:problem5_fluxlimiter_convergence_rate}. As mentioned before, the solution is not smooth, leading to a reduction in convergence rate. In general, as the spatial and temporal refinement increases, the convergence rate does as well. The acceptation to this is the Albada limiter, which shows increased convergence rates for small time steps. As with problem 3, the Cauchy solvers showed instability with small dx and large dt values. Instability problems are solved in the same way as before, by increasing the number of substeps or the order of the Cauchy method. 
 
 \clearpage
 
 \begin{table}[htbp]
-   \caption{\label{tab:problem5_results_taylor} Convergence Rate for Problem 5  with Absolute Error Using the Taylor Solver, dt = 0.1}
+   \caption{\label{tab:problem5_results_taylor} Convergence Rate for Problem 5 with Relative Error Using the Taylor Solver, dt = 0.1}
    \centering
     \scalebox{0.85}{
    \begin{tabular}{cllllllll}
@@ -557,7 +557,7 @@ The solution to this leads to a function that is not smooth, causing the higher 
 
 \begin{figure}[p]
     \centering
-    \includegraphics[width=6in]{images/chapter-5/problem5FluxLimiterConvergenceRate.png}
+    \includegraphics[width=6in]{images/chapter-5/problem5Runtimes.png}
     \caption{Problem 5 average run times for each solver, dt = 0.1}
     \label{fig:problem5_runtimes}
 \end{figure}
@@ -574,17 +574,18 @@ The solution to this leads to a function that is not smooth, causing the higher 
 \clearpage
 
 \subsection{Problem 6}
-This is an extension of problem 6 with two species, one that exist in the liquid and one on the wall. The species in the liquid transports and depositions on the wall where it sticks and does not move. In libowski, this model is set up using the wall deposition mass transport model with the infinite sink approximation. This system is represented by:
+This is an extension of problem 6 with two species, one that exist in the liquid and one on the wall. The species in the liquid transports and depositions on the wall where it sticks and does not move. This system is represented by:
 
 \begin{equation}
 \setlength{\jot}{15pt}
 \begin{split}
     &\frac{\partial C_{l}}{\partial t} = -v\frac{\partial C_{l}}{\partial x} - \frac{kA}{V} C_{l}, \\
     &\frac{\partial C_{w}}{\partial t} = \frac{kA}{V} C_{l},
+    \label{eq:problem6}
 \end{split}
 \end{equation}
 
-\noindent on the domain $x \in [0,100]$, $t \in [0, 20]$ where $v = 2$ and $kA/V = 0.1$. Subject to the following conditions:
+\noindent on the domain $x \in [0,100]$, $t \in [0, 20]$ where $v = 2$ and $kA/V = \lambda = 0.1$. Subject to the following conditions:
 
 \begin{equation}
 \setlength{\jot}{15pt}
@@ -593,6 +594,24 @@ This is an extension of problem 6 with two species, one that exist in the liquid
     C_{w}(x, 0) = 0, \quad C_{w}(0,t) = 0, \quad \frac{dC_{l}}{dx}(100, t) = 0. \\
 \end{split}
 \end{equation}
+
+\noindent Let $\lambda = kA/V$, equation \ref{eq:problem6} the following solution:
+
+\begin{equation}
+C_{l} (x,t) = \begin{cases}
+  C_{l} (x, 0) e^{-\frac{x \lambda _i}{v}}\ , & x < vt \\
+  C_{l} (x, 0) e^{-t \lambda _i}\ , & x \ge vt
+\end{cases}
+\end{equation}
+
+\begin{equation}
+C_{w} (x,t) = \begin{cases}
+  C_{l} (x, 0) \Big( 1 - e^{-\frac{x \lambda _i}{v}} + \lambda \big(t - x/v\big)e^{-\lambda x/v} \Big)\ , & x < vt \\
+  C_{l} (x, 0) \Big( 1 - e^{-t \lambda _i}\Big)\ , & x \ge vt
+\end{cases}
+\end{equation}
+
+This problem is conducted in the same manor as problem 4 and 5. As with problem 5, the solution for $C_{l}$ 
 
 \subsection{Problem 7}
 This problem models the primary uranium isotopes along with Pu-239 and Np-239 in a system which contains a neutron flux. Coefficients in the transition matrix include source and sink terms from both neutron induced reactions and radioactive decay. This system is represented by:
