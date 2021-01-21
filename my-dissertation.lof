@@ -1,6 +1,30 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Schematic of general nuclear reaction\relax }}{7}{figure.caption.14}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Fission product yield for thermal and fast neutrons\relax }}{10}{figure.caption.16}%
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces $\qopname \relax o{log}_{10}|r(z)-e^{z}|$ for N = 32 where the contour is defined by a parabola, Equation \ref {eq:parabolicContour}. Quadrature points are denoted with x's\relax }}{28}{figure.caption.21}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces $\qopname \relax o{log}_{10}|r(z)-e^{z}|$ for N = 32 where the contour is defined by a hyperbola, Equation \ref {eq:hyperbolicContour}. Quadrature points are denoted with x's\relax }}{28}{figure.caption.22}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces $\qopname \relax o{log}_{10}|r(z)-e^{z}|$ for CRAM with N = 16. Quadrature points are denoted with x's\relax }}{30}{figure.caption.24}%
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces 2-D finite volume cell\relax }}{39}{figure.caption.26}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Flux limiter functions on the $\Psi - r$ plane\relax }}{45}{figure.caption.29}%
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Run time performance for diffusion problem one\relax }}{62}{figure.caption.39}%
+\contentsline {figure}{\numberline {5.2}{\ignorespaces Eigenvalues for the 400 x 400 case in diffusion problem one\relax }}{62}{figure.caption.40}%
+\contentsline {figure}{\numberline {5.3}{\ignorespaces Results for the diffusion-dominated case\relax }}{67}{figure.caption.45}%
+\contentsline {figure}{\numberline {5.4}{\ignorespaces Results for the reaction-dominated case\relax }}{68}{figure.caption.46}%
+\contentsline {figure}{\numberline {5.5}{\ignorespaces Results for the stiff reaction-dominated case\relax }}{69}{figure.caption.47}%
+\contentsline {figure}{\numberline {5.6}{\ignorespaces Results for the Krylov subspace approximation for each sub-problem\relax }}{70}{figure.caption.48}%
+\contentsline {figure}{\numberline {5.7}{\ignorespaces First-order upwind differencing with series solvers and BDF1\relax }}{73}{figure.caption.49}%
+\contentsline {figure}{\numberline {5.8}{\ignorespaces First-order upwind differencing instability for Cauchy solvers\relax }}{74}{figure.caption.50}%
+\contentsline {figure}{\numberline {5.9}{\ignorespaces First-order upwind differencing instability for Cauchy solvers at different orders\relax }}{75}{figure.caption.51}%
+\contentsline {figure}{\numberline {5.10}{\ignorespaces First-order upwind differencing instability for Cauchy solvers at different time step sizes\relax }}{76}{figure.caption.52}%
+\contentsline {figure}{\numberline {5.11}{\ignorespaces Flux limiter function applied to problem three, dt = 0.1, dx = 0.2\relax }}{77}{figure.caption.53}%
+\contentsline {figure}{\numberline {5.12}{\ignorespaces Instability of flux limiter functions with the Taylor solver\relax }}{78}{figure.caption.54}%
+\contentsline {figure}{\numberline {5.13}{\ignorespaces Problem 4 average run times for each solver, dt = 0.01\relax }}{81}{figure.caption.56}%
+\contentsline {figure}{\numberline {5.14}{\ignorespaces Problem 4 flux limiter $l_{1}$ convergence rate using absolute error\relax }}{82}{figure.caption.57}%
+\contentsline {figure}{\numberline {5.15}{\ignorespaces Problem 5 average run times for each solver, dt = 0.1\relax }}{85}{figure.caption.59}%
+\contentsline {figure}{\numberline {5.16}{\ignorespaces Problem 5 flux limiter $l_{1}$ convergence rate using relative error\relax }}{86}{figure.caption.60}%
+\contentsline {figure}{\numberline {5.17}{\ignorespaces Spectrum for the Neutron Precursors\relax }}{91}{figure.caption.62}%
 \addvspace {10\p@ }
