@@ -379,13 +379,13 @@ The same PDE that was shown in the previous problem is tested again:
     U(x,0) = \exp\bigg\{-\bigg(\frac{(x-30)}{10}\bigg)^{2}\bigg\}.
 \end{equation}
 
-\noindent This problem produces a smooth solution which shows the convergence order of the flux limiters. Figures \ref{fig:problem4_l1error_spatial_results} and \ref{fig:problem4_l1error_time_results} show results for each flux limiter function using the Taylor solver. Figure \ref{fig:problem4_l1error_spatial_results} shows $l_{1}$ error behavior as a function of spatial discretization at various time step sizes. Figure \ref{fig:problem4_l1error_time_results} shows the same error behavior as a function of temporal discretization at various number of spatial cells. Figure \ref{fig:problem4_l1error_spatial_results} shows that as the number of time steps take is increased the higher order flux limiters begin to show a linear relationship with spatial discretization. This can be readily seen with the number of steps greater than 40. The upwind limiter is unaffected by decreasing the time step size, which is to be expected. This is because increasing the number of times steps do nothing to increase its accuracy. Figure \ref{fig:problem4_l1error_time_results} shows that increasing the number of time steps has little to no affect on the error for large spatial discretization. As the number of cells increases, decreasing the time step size has a greater affect on reducing the error. This figure also reiterates the fact that the first order upwind error is not affected by increasing the number of time steps taken. Results for the $l_{\infty}$ and $l_{2}$ errors are shown in Appendix \ref{appen:results} figures \ref{fig:problem4_linferror_spatial_results}, \ref{fig:problem4_linferror_time_results}, \ref{fig:problem4_l2error_spatial_results} and \ref{fig:problem4_l2error_time_results}. Figure \ref{fig:problem4_linferror_spatial_results} shows a similar trend with spatial refinement using the $l_{\infty}$ error to the $l_{1}$ error however, the error function in figure \ref{fig:problem4_linferror_spatial_results} does not maintain the same linear rate. This relation is further represented in Figure \ref{fig:problem4_linferror_time_results} which shows the error with temporal refinement. For large spatial refinement, the error remains constant. For smaller refinement, the error takes a dip then increases. The $l_{2}$ error shown in figures \ref{fig:problem4_l2error_spatial_results} and \ref{fig:problem4_l2error_time_results} shows a trend resembling the $l_{1}$ error, in which the error convergence rate remains semi linear as a function of spatial discretization for most flux limiters with larger number of time steps. The MUSCL flux limiter achieves the lowest error for this problem.
+\noindent This problem produces a smooth solution which shows the convergence order of the flux limiters. Figures \ref{fig:problem4_l1error_spatial_results} and \ref{fig:problem4_l1error_time_results} show results for each flux limiter function using the Taylor solver. Figure \ref{fig:problem4_l1error_spatial_results} shows $l_{1}$ error behavior as a function of spatial discretization at various time step sizes. Figure \ref{fig:problem4_l1error_time_results} shows the same error behavior as a function of temporal discretization at various number of spatial cells. Figure \ref{fig:problem4_l1error_spatial_results} shows that as the number of time steps take is increased the higher order flux limiters begin to show a linear relationship with spatial discretization. This can be readily seen with the number of steps greater than 40. The upwind limiter is unaffected by decreasing the time step size, which is to be expected. This is because increasing the number of times steps do nothing to increase its accuracy. Figure \ref{fig:problem4_l1error_time_results} shows that increasing the number of time steps has little to no affect on the error for large spatial discretization. As the number of cells increases, decreasing the time step size has a greater affect on reducing the error. This figure also reiterates the fact that the first order upwind error is not affected by increasing the number of time steps taken. Results for the $l_{\infty}$ and $l_{2}$ errors are shown in Appendix \ref{appen:results} figures \ref{fig:problem4_linferror_spatial_results}, \ref{fig:problem4_linferror_time_results}, \ref{fig:problem4_l2error_spatial_results} and \ref{fig:problem4_l2error_time_results}. Figure \ref{fig:problem4_linferror_spatial_results} shows a similar trend with spatial refinement using the $l_{\infty}$ error to the $l_{1}$ error however, the error function in figure \ref{fig:problem4_linferror_spatial_results} does not maintain the same linear rate. This relation is further represented in Figure \ref{fig:problem4_linferror_time_results} which shows the error with temporal refinement. For large spatial refinement, the error remains constant. For smaller refinement, the error takes a dip then increases. The $l_{2}$ error shown in figures \ref{fig:problem4_l2error_spatial_results} and \ref{fig:problem4_l2error_time_results} shows a trend resembling the $l_{1}$ error, in which the error convergence rate remains semi linear as a function of spatial discretization for most flux limiters with larger number of time steps. 
 
-Figure \ref{fig:problem4_l1error_fluxlimiter_convergence_rate} shows convergence rates for each of the higher order flux limiter functions as a function of space and time using the $l_{1}$ error. Each flux limiter shows a dark zone (representing low convergence rate) with high spatial discretization and low temporal discretization. At 320 spatial cells, the convergence rate of each flux limiter increases until reaching an apex at 40 time steps, then slightly decreases to a constant-ish value. At low spatial resolution, increases the number of time steps taken does not have a large affect on changing the convergence rate. Results for the $l_{\infty}$ and $l_{2}$ error metrics are shown in Appendix \ref{appen:results} figures \ref{fig:problem4_linferror_fluxlimiter_convergence_rate} and \ref{fig:problem4_l2error_fluxlimiter_convergence_rate}. Behavior of the $l_{2}$ error shows similar trends to $l_{1}$, low to negative convergence rates for high spatial resolution and low temporal, with most limiters showing peak convergence with 40 time steps and 320 cells. Convergence rates for $l_{\infty}$ error are shown in figure \ref{fig:problem4_linferror_fluxlimiter_convergence_rate}. These results show convergence rates which are slightly worse than the other two errors. The peak convergence rate for most flux limiters has also shifted from 320 cells and 40 time steps to 320 cells and 8 time steps. All limiter functions also show a general trend of having larger convergence rates at lower spatial resolution. The MUSCL flux limiter obtains the highest convergence rate for all error metrics. 
+Figure \ref{fig:problem4_l1error_fluxlimiter_convergence_rate} shows convergence rates for each of the higher order flux limiter functions as a function of space and time using the $l_{1}$ error. Each flux limiter shows a dark zone (representing low convergence rate) with high spatial discretization and low temporal discretization. At 320 spatial cells, the convergence rate of each flux limiter increases until reaching an apex at 40 time steps, then slightly decreases to a constant-ish value. At low spatial resolution, increases the number of time steps taken does not have a large affect on changing the convergence rate. Results for the $l_{\infty}$ and $l_{2}$ error metrics are shown in Appendix \ref{appen:results} figures \ref{fig:problem4_linferror_fluxlimiter_convergence_rate} and \ref{fig:problem4_l2error_fluxlimiter_convergence_rate}. Behavior of the $l_{2}$ error shows similar trends to $l_{1}$, low to negative convergence rates for high spatial resolution and low temporal, with most limiters showing peak convergence with 40 time steps and 320 cells. Convergence rates for $l_{\infty}$ error are shown in figure \ref{fig:problem4_linferror_fluxlimiter_convergence_rate}. These results show convergence rates which are slightly worse than the other two errors. The peak convergence rate for most flux limiters has also shifted from 320 cells and 40 time steps to 320 cells and 8 time steps. All limiter functions also show a general trend of having larger convergence rates at lower spatial resolution. 
 
 Figure \ref{fig:problem4_runtimes} shows the average run time results for each of the solvers. Each flux limiter function call requires the same time meaning that small run time differences for each solve is due to the computers computation. For the small cases, the Taylor and Pad\'e solvers out perform the Cauchy solvers. As the number of cells increase, the Pad\'e solver run times begin to approach values greater than the Cauchy solvers. Hyperbolic and Parabolic remain about the same as seen before, with CRAM being the lowest of the three. The Taylor solver remains the lowest for all problem sizes. 
 
-Unlike the previous example, not instabilities were noticed while conducting the numerical test. Even at large spatial resolutions and small time steps, the flux limiter functions remained stable. Each of the Cauchy solvers also remained stable during testing. 
+Unlike the previous example, not instabilities were noticed while conducting the numerical test. Even at large spatial resolutions and small time steps, the flux limiter functions remained stable. Each of the Cauchy solvers also remained stable during testing. While only results for the Taylor solver are shown, all other solvers show the same errors and convergence rates.
 
 \clearpage
 
@@ -447,70 +447,49 @@ C (x,t) = \begin{cases}
 \end{cases}
 \end{equation}
 
-This problem is a 1D convection driven flow where the species decays at a constant rate. The solution to this leads to a function that is not smooth, causing the higher order flux limiter functions to reduced to first order accuracy. Table \ref{tab:problem5_results_taylor} shows results for the Taylor solver, additional results are shown in Appendix \ref{appen:results}, Tables \ref{tab:problem5_results_CRAM}, \ref{tab:problem5_results_hyperbolic}, \ref{tab:problem5_results_parabolic}, \ref{tab:problem5_results_pade-method1} and \ref{tab:problem5_results_pade-method2}. For stable solutions, the convergence rates for each solver remain the same. Run times for each solver are different, these are shown in the same manor that was done in Problem 5, in Figure \ref{fig:problem5_runtimes}. Run times show that same trend observed in problem 4, Cauchy and Taylor scale better than Pad\'e. For each flux limiter these convergence rates are shown for various temporal and spatial refinements in Figure \ref{fig:problem5_fluxlimiter_convergence_rate}. As mentioned before, the solution is not smooth, leading to a reduction in convergence rate. In general, as the spatial and temporal refinement increases, the convergence rate does as well. The acceptation to this is the Albada limiter, which shows increased convergence rates for small time steps. As with problem 3, the Cauchy solvers showed instability with small dx and large dt values. Instability problems are solved in the same way as before, by increasing the number of substeps or the order of the Cauchy method. 
+This problem is a 1D convection driven flow where the species decays at a constant rate. The solution to this leads to a function that is not smooth, causing the higher order flux limiter functions to reduced to first order accuracy. Figures \ref{fig:problem5_l1error_spatial_results} and \ref{fig:problem5_l1error_time_results} show results for each of the flux limiter functions for the $l_{1}$ relative error for spatial and temporal discretization. Starting with figure \ref{fig:problem5_l1error_spatial_results}, each of the flux limiters show about the same convergence rate at the first order upwind function. This agrees with the previous statement about TVD schemes reducing to first order convergence rates for non smooth solutions. While the TVD schemes do not have second order convergence rates, they do increase the accuracy of the solution when compared to first order upwind. This is most prevalent with the Albada limiter, which does show are higher convergence rate with large number of cells and time steps. This limiter also maintains the lowest error for all test shown if figures \ref{fig:problem5_l1error_spatial_results} and \ref{fig:problem5_l1error_time_results}. Albada also benefits the most from increasing the number of time steps, this is easly seen in figure \ref{fig:problem5_l1error_time_results}. Figure \ref{fig:problem5_l1error_time_results} also shows that each of the other flux limiter functions are not greatly affected by increasing the number of time steps. For smaller spatial discretizations, increasing the number of time steps does slightly increase the accuracy of the other TVD schemes. Results using the $l_{\infty}$ and $l_{2}$ errors are found in Appendix \ref{appen:results} figures \ref{fig:problem5_linferror_spatial_results}, \ref{fig:problem5_linferror_time_results}, \ref{fig:problem5_l2error_spatial_results} and \ref{fig:problem5_l2error_time_results}. Figure \ref{fig:problem5_linferror_spatial_results} shows that the $l_{\infty}$ error behaves a little worse than $l_{1}$, showing different flux limiters achieve minimal error at higher spatial resolution. While Albada is still one of the best, it does not have the lowest error for higher spatial and temporal resolutions. The $l_{2}$ error, shown in figure \ref{fig:problem5_l2error_spatial_results}, shows interesting results, as the error appears to get worse as the number of cells is increased for almost all time step sizes. The notable exception to this is the Albada limiter, which shows reduction in error for low dt values. 
+
+Figure \ref{fig:problem5_l1error_fluxlimiter_convergence_rate} shows convergence rates as a function of time and space. Unlike problem 4, which showed minimal convergence rate in the bottom left corner, these results show the minimal to be in the top left. This corresponds to low spatial and temporal resolution. For each limiter function, the convergence rate is increased by increasing the number of time steps taken. Just as with figures \ref{fig:problem5_l1error_spatial_results} and \ref{fig:problem5_l1error_spatial_results}, figure \ref{fig:problem5_l1error_fluxlimiter_convergence_rate} shows the the Albada limiter has the highest convergence rate, reaching a sweet spot at 80 cells and 400 time steps. Figures \ref{fig:problem5_linferror_fluxlimiter_convergence_rate} and \ref{fig:problem5_l2error_fluxlimiter_convergence_rate} shows convergence rates for $l_{\infty}$ and $l_{2}$ errors. The $l_{\infty}$ error shows high convergence rates for for low cells and high time steps for all but the Albada and Min-Mod limiters. As expected, the $l_{2}$ error shows negative convergence rates for all but the Albada limiter. 
+
+Figure \ref{fig:problem5_l1error_coefficient_changes} shows how the problem behaves as a function of $v$ and $\lambda$. These coefficients are changed to induce and reaction or velocity dominated system. In a reaction dominated system, all of the flux limiter functions converge to a single point. This is because the accuracy of the solution is dominated by the integration of the reaction rate of the time interval. As the velocity is increased, the flux limiters begin to diverge to difference accuracy's. The Albada limiter diverges the most, decreasing the error 2 orders of magnitude below all the others. What is also interesting is that the error follows a hump shape, increasing up until it reaches a max value where the coefficient are the same. After this, the error decreases. This is also the point where the Albada separates from the rest. 
+
+Figure \ref{fig:problem5_runtimes} show how each of the solvers scale with number of cells. On the log-log scale, the Cauchy and Taylor solvers scale linearly while the Pad\'e solvers begin low then increase to a point above the others. This indicates that the Pad\'e solvers scale much more poorly. As with problem 3, the Cauchy solvers did how instability. These instabilities were also remedied by increasing the order of the method and by adding substeps. 
 
 \clearpage
 
-\begin{table}[htbp]
-   \caption{\label{tab:problem5_results_taylor} Convergence Rate for Problem 5 with Relative Error Using the Taylor Solver, dt = 0.1}
-   \centering
-    \scalebox{0.85}{
-   \begin{tabular}{cllllllll}
-   \hline
-    Flux limiter & Cells & $l_{\infty}$ Rate & $l_{1}$ Rate & $l_{2}$ Rate &$l_{\infty}$ Error &$l_{1}$ Error & $l_{2}$ Error & Solve Time (sec)\\
-   \hline
-    Superbee &   10 & - & - & - & 2.69e-02 & 8.23e-03 & 4.85e-03 & 2.55e-02  \\ 
-    - &   20 & 1.07 & 0.85 & -0.32 & 1.28e-02 & 4.55e-03 & 6.07e-03 & 4.63e-02 \\ 
-    - &   40 & 1.01 & 0.93 & -0.14 & 6.35e-03 & 2.38e-03 & 6.69e-03 & 7.84e-02 \\ 
-    - &   80 & 1.01 & 0.97 & -0.07 & 3.15e-03 & 1.22e-03 & 7.00e-03 & 1.50e-01 \\ 
-    - &  160 & 1.01 & 0.98 & -0.03 & 1.57e-03 & 6.17e-04 & 7.15e-03 & 2.89e-01 \\ 
-    - &  320 & 0.84 & 0.99 & -0.02 & 8.78e-04 & 3.10e-04 & 7.23e-03 & 6.01e-01 \\ 
-   \hline
-    VanLeer &   10 & - & - & - & 2.16e-02 & 7.42e-03 & 3.80e-03 & 2.42e-02  \\
-    - &   20 & 1.02 & 0.92 & -0.20 & 1.07e-02 & 3.92e-03 & 4.36e-03 & 4.50e-02 \\ 
-    - &   40 & 0.99 & 0.97 & -0.09 & 5.35e-03 & 2.01e-03 & 4.64e-03 & 8.01e-02 \\ 
-    - &   80 & 0.93 & 0.98 & -0.04 & 2.81e-03 & 1.01e-03 & 4.78e-03 & 1.45e-01 \\ 
-    - &  160 & 0.65 & 0.99 & -0.02 & 1.79e-03 & 5.10e-04 & 4.85e-03 & 2.87e-01 \\ 
-    - &  320 & 0.35 & 0.95 & -0.08 & 1.41e-03 & 2.63e-04 & 5.14e-03 & 5.95e-01 \\ 
-   \hline
-    Albada &   10 & - & - & - & 8.39e-03 & 1.82e-03 & 1.92e-04 & 2.35e-02  \\
-    - &   20 & 0.64 & 0.96 & -0.15 & 5.38e-03 & 9.31e-04 & 2.13e-04 & 4.45e-02 \\ 
-    - &   40 & 0.63 & 1.26 & 0.53 & 3.48e-03 & 3.88e-04 & 1.47e-04 & 8.07e-02  \\
-    - &   80 & 0.58 & 1.29 & 0.59 & 2.33e-03 & 1.59e-04 & 9.77e-05 & 1.48e-01  \\
-    - &  160 & 0.47 & 1.15 & 0.31 & 1.68e-03 & 7.15e-05 & 7.88e-05 & 2.89e-01  \\
-    - &  320 & 0.35 & 0.79 & -0.42 & 1.32e-03 & 4.13e-05 & 1.05e-04 & 5.98e-01 \\ 
-   \hline
-    Min-Mod &   10 & - & - & - & 1.55e-02 & 6.64e-03 & 2.86e-03 & 2.50e-02  \\
-    - &   20 & 0.62 & 0.99 & -0.06 & 1.01e-02 & 3.34e-03 & 2.98e-03 & 4.46e-02 \\ 
-    - &   40 & 0.62 & 1.00 & -0.05 & 6.57e-03 & 1.67e-03 & 3.09e-03 & 7.97e-02 \\ 
-    - &   80 & 0.61 & 0.95 & -0.12 & 4.31e-03 & 8.62e-04 & 3.35e-03 & 1.49e-01 \\ 
-    - &  160 & 0.57 & 0.94 & -0.12 & 2.90e-03 & 4.50e-04 & 3.65e-03 & 3.02e-01 \\ 
-    - &  320 & 0.53 & 0.93 & -0.12 & 2.01e-03 & 2.35e-04 & 3.97e-03 & 5.90e-01 \\ 
-   \hline
-    Sweby &   10 & - & - & - & 2.08e-02 & 7.44e-03 & 3.90e-03 & 2.36e-02  \\
-    - &   20 & 0.91 & 0.89 & -0.27 & 1.10e-02 & 4.03e-03 & 4.69e-03 & 4.61e-02 \\ 
-    - &   40 & 1.02 & 0.96 & -0.10 & 5.44e-03 & 2.08e-03 & 5.03e-03 & 7.92e-02 \\ 
-    - &   80 & 0.94 & 0.98 & -0.05 & 2.84e-03 & 1.05e-03 & 5.21e-03 & 1.47e-01 \\ 
-    - &  160 & 0.85 & 0.99 & -0.02 & 1.57e-03 & 5.31e-04 & 5.30e-03 & 2.85e-01 \\ 
-    - &  320 & 0.74 & 0.99 & -0.02 & 9.40e-04 & 2.67e-04 & 5.36e-03 & 5.93e-01 \\ 
-   \hline
-    Upwind &   10 & - & - & - & 2.28e-02 & 1.00e-02 & 6.33e-03 & 2.43e-02  \\
-    - &   20 & 0.31 & 0.76 & -0.47 & 1.83e-02 & 5.91e-03 & 8.80e-03 & 4.55e-02 \\ 
-    - &   40 & 0.31 & 0.83 & -0.34 & 1.48e-02 & 3.32e-03 & 1.11e-02 & 8.17e-02 \\ 
-    - &   80 & 0.37 & 0.87 & -0.27 & 1.15e-02 & 1.82e-03 & 1.34e-02 & 1.46e-01 \\ 
-    - &  160 & 0.41 & 0.90 & -0.20 & 8.62e-03 & 9.74e-04 & 1.54e-02 & 2.95e-01 \\ 
-    - &  320 & 0.44 & 0.93 & -0.15 & 6.37e-03 & 5.12e-04 & 1.70e-02 & 5.96e-01 \\ 
-   \hline
-    MUSCL &   10 & - & - & - & 2.50e-02 & 7.84e-03 & 4.30e-03 & 2.46e-02  \\
-    - &   20 & 1.00 & 0.91 & -0.20 & 1.25e-02 & 4.16e-03 & 4.95e-03 & 4.50e-02 \\ 
-    - &   40 & 1.02 & 0.96 & -0.09 & 6.18e-03 & 2.13e-03 & 5.26e-03 & 8.00e-02 \\ 
-    - &   80 & 0.98 & 0.98 & -0.04 & 3.14e-03 & 1.08e-03 & 5.42e-03 & 1.47e-01 \\ 
-    - &  160 & 0.85 & 0.99 & -0.02 & 1.74e-03 & 5.42e-04 & 5.49e-03 & 2.98e-01 \\ 
-    - &  320 & 0.43 & 0.99 & -0.02 & 1.29e-03 & 2.73e-04 & 5.59e-03 & 5.99e-01 \\ 
-   \hline
-   \end{tabular}
-   }
-\end{table}
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/problem5l1ErrorWithSpace.png}
+    \caption{Problem 5 absolute $l_{1}$ error with spatial discretization at various time steps}
+    \label{fig:problem5_l1error_spatial_results}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/problem5l1ErrorWithTime.png}
+    \caption{Problem 5 absolute $l_{1}$ error with temporal discretization at various number of spatial cells}
+    \label{fig:problem5_l1error_time_results}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/problem5l1FluxLimiterConvergenceRate.png}
+    \caption{Problem 5 flux limiter $l_{1}$ convergence rate using absolute error}
+    \label{fig:problem5_l1error_fluxlimiter_convergence_rate}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/problem5CoefficientChanges.png}
+    \caption{Problem 5 flux limiter $l_{1}$ behavior with coefficient changes using absolute error}
+    \label{fig:problem5_l1error_coefficient_changes}
+\end{figure}
 
 \clearpage
 
@@ -519,15 +498,6 @@ This problem is a 1D convection driven flow where the species decays at a consta
     \includegraphics[width=6in]{images/chapter-5/problem5Runtimes.png}
     \caption{Problem 5 average run times for each solver, dt = 0.1}
     \label{fig:problem5_runtimes}
-\end{figure}
-
-\clearpage
-
-\begin{figure}[p]
-    \centering
-    \includegraphics[width=6in]{images/chapter-5/problem5FluxLimiterConvergenceRate.png}
-    \caption{Problem 5 flux limiter $l_{1}$ convergence rate using relative error}
-    \label{fig:problem5_fluxlimiter_convergence_rate}
 \end{figure}
 
 \clearpage
