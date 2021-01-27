@@ -58,45 +58,49 @@ The eigenvalues for this problem were found to be clustered on the negative real
 
 \FloatBarrier
 
-\begin{table}[htbp]
+\begin{table}[p]
    \caption{\label{tab:diffusion_problem1_results} Convergence Rate for Diffusion Problem 1  with Absolute Error}
    \centering
-    \scalebox{0.85}{
+    \scalebox{0.8}{
    \begin{tabular}{cllllllll}
    \hline
-    Solver & Cells & $l_{\infty}$ Rate & $l_{1}$ Rate & $l_{2}$ Rate &$l_{\infty}$ Error &$l_{1}$ Error & $l_{2}$ Error & Solve Time (sec)\\
+    Solver & Cells & E${}_{\infty}$ Rate & E${}_{1}$ Rate & E${}_{2}$ Rate & E${}_{\infty}$ Error & E${}_{1}$ Error & E${}_{2}$ Error & Solve Time (sec)\\
    \hline
-   CRAM  100 0.00 0.00 0.00 4.39e-03 1.84e-03 2.20e-04 8.06e-03 \\ 
-   CRAM  400 2.02 2.02 2.98 1.08e-03 4.53e-04 2.77e-05 5.07e-02 \\ 
-   CRAM 1600 1.97 2.01 3.00 2.76e-04 1.13e-04 3.48e-06 5.37e-01 \\ 
-   CRAM 6400 1.99 2.00 3.00 6.94e-05 2.82e-05 4.35e-07 5.62e+00 \\ 
-   parabolic  100 0.00 0.00 0.00 4.39e-03 1.84e-03 2.20e-04 1.08e-02 \\ 
-   parabolic  400 2.02 2.02 2.98 1.08e-03 4.53e-04 2.77e-05 9.71e-02 \\ 
-   parabolic 1600 1.97 2.01 3.00 2.76e-04 1.13e-04 3.48e-06 1.06e+00 \\ 
-   parabolic 6400 1.99 2.00 3.00 6.94e-05 2.82e-05 4.35e-07 1.10e+01 \\ 
-   hyperbolic  100 0.00 0.00 0.00 4.39e-03 1.84e-03 2.20e-04 1.07e-02 \\ 
-   hyperbolic  400 2.02 2.02 2.98 1.08e-03 4.53e-04 2.77e-05 9.70e-02 \\ 
-   hyperbolic 1600 1.97 2.01 3.00 2.76e-04 1.13e-04 3.48e-06 1.05e+00 \\ 
-   hyperbolic 6400 1.99 2.00 3.00 6.94e-05 2.82e-05 4.35e-07 1.10e+01 \\ 
-   pade-method1  100 0.00 0.00 0.00 4.39e-03 1.84e-03 2.20e-04 6.19e-03 \\ 
-   pade-method1  400 2.02 2.02 2.98 1.08e-03 4.53e-04 2.77e-05 5.27e-01 \\ 
-   pade-method1 1600 1.97 2.01 3.00 2.76e-04 1.13e-04 3.48e-06 6.70e+01 \\ 
-   pade-method1 6400 1.99 2.00 3.00 6.94e-05 2.82e-05 4.35e-07 5.52e+03 \\ 
-   pade-method2  100 0.00 0.00 0.00 4.39e-03 1.84e-03 2.20e-04 1.62e-02 \\ 
-   pade-method2  400 2.02 2.02 2.98 1.08e-03 4.53e-04 2.77e-05 1.23e+00 \\ 
-   pade-method2 1600 1.97 2.01 3.00 2.76e-04 1.13e-04 3.48e-06 1.19e+02 \\ 
-   pade-method2 6400 1.99 2.00 3.00 6.94e-05 2.82e-05 4.35e-07 9.48e+03 \\ 
-   taylor  100 0.00 0.00 0.00 4.39e-03 1.84e-03 2.20e-04 4.83e-03 \\ 
-   taylor  400 2.02 2.02 2.98 1.08e-03 4.53e-04 2.77e-05 2.20e-02 \\ 
-   taylor 1600 1.97 2.01 3.00 2.76e-04 1.13e-04 3.48e-06 1.20e-01 \\ 
-   taylor 6400 1.99 2.00 3.00 6.94e-05 2.82e-05 4.35e-07 7.38e-01 \\ 
+   CRAM         &  100 & - & - & - & 4.39e-03 & 1.84e-03 & 2.20e-04 & 8.06e-03 \\ 
+   -         &  400 & 2.02 & 2.02 & 2.98 & 1.08e-03 & 4.53e-04 & 2.77e-05 & 5.07e-02 \\ 
+   -         & 1600 & 1.97 & 2.01 & 3.00 & 2.76e-04 & 1.13e-04 & 3.48e-06 & 5.37e-01 \\ 
+   -         & 6400 & 1.99 & 2.00 & 3.00 & 6.94e-05 & 2.82e-05 & 4.35e-07 & 5.62e+00 \\ 
+   \hline
+   Parabolic    &  100 & - & - & - & 4.39e-03 & 1.84e-03 & 2.20e-04 & 1.08e-02 \\ 
+   -    &  400 & 2.02 & 2.02 & 2.98 & 1.08e-03 & 4.53e-04 & 2.77e-05 & 9.71e-02 \\ 
+   -    & 1600 & 1.97 & 2.01 & 3.00 & 2.76e-04 & 1.13e-04 & 3.48e-06 & 1.06e+00 \\ 
+   -    & 6400 & 1.99 & 2.00 & 3.00 & 6.94e-05 & 2.82e-05 & 4.35e-07 & 1.10e+01 \\ 
+   \hline
+   Hyperbolic   &  100 & - & - & - & 4.39e-03 & 1.84e-03 & 2.20e-04 & 1.07e-02 \\ 
+   -   &  400 & 2.02 & 2.02 & 2.98 & 1.08e-03 & 4.53e-04 & 2.77e-05 & 9.70e-02 \\ 
+   -   & 1600 & 1.97 & 2.01 & 3.00 & 2.76e-04 & 1.13e-04 & 3.48e-06 & 1.05e+00 \\ 
+   -   & 6400 & 1.99 & 2.00 & 3.00 & 6.94e-05 & 2.82e-05 & 4.35e-07 & 1.10e+01 \\ 
+   \hline
+   Pade-method1 &  100 & - & - & - & 4.39e-03 & 1.84e-03 & 2.20e-04 & 6.19e-03 \\ 
+   - &  400 & 2.02 & 2.02 & 2.98 & 1.08e-03 & 4.53e-04 & 2.77e-05 & 5.27e-01 \\ 
+   - & 1600 & 1.97 & 2.01 & 3.00 & 2.76e-04 & 1.13e-04 & 3.48e-06 & 6.70e+01 \\ 
+   - & 6400 & 1.99 & 2.00 & 3.00 & 6.94e-05 & 2.82e-05 & 4.35e-07 & 5.52e+03 \\ 
+   \hline
+   Pade-method2 &  100 & - & - & - & 4.39e-03 & 1.84e-03 & 2.20e-04 & 1.62e-02 \\ 
+   - &  400 & 2.02 & 2.02 & 2.98 & 1.08e-03 & 4.53e-04 & 2.77e-05 & 1.23e+00 \\ 
+   - & 1600 & 1.97 & 2.01 & 3.00 & 2.76e-04 & 1.13e-04 & 3.48e-06 & 1.19e+02 \\ 
+   - & 6400 & 1.99 & 2.00 & 3.00 & 6.94e-05 & 2.82e-05 & 4.35e-07 & 9.48e+03 \\ 
+   \hline
+   Taylor       &  100 & - & - & - & 4.39e-03 & 1.84e-03 & 2.20e-04 & 4.83e-03 \\ 
+   -      &  400 & 2.02 & 2.02 & 2.98 & 1.08e-03 & 4.53e-04 & 2.77e-05 & 2.20e-02 \\ 
+   -      & 1600 & 1.97 & 2.01 & 3.00 & 2.76e-04 & 1.13e-04 & 3.48e-06 & 1.20e-01 \\ 
+   -      & 6400 & 1.99 & 2.00 & 3.00 & 6.94e-05 & 2.82e-05 & 4.35e-07 & 7.38e-01 \\ 
    \hline
    \end{tabular}
    }
 \end{table}
 
-\FloatBarrier
-\newpage
+\clearpage
 
 \begin{figure}[ht]
     \centering
@@ -112,7 +116,9 @@ The eigenvalues for this problem were found to be clustered on the negative real
     \label{fig:eigenvalues_diffusion_one}
 \end{figure}
 
-\begin{table}[ht!]
+\clearpage
+
+\begin{table}[p]
    \caption{\label{tab:diffusion_problem1_results_krylov} Error and Run Times for Different Krylov Subspace Dimensions}
    \centering
    \begin{tabular}{cllllll}
@@ -126,6 +132,7 @@ The eigenvalues for this problem were found to be clustered on the negative real
    - & 100 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 3.33e-01 \\
    - & 150 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 7.30e-01 \\
    - & 200 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 1.33e+00 \\
+   \hline
    Pad\'e-method 2 &   5 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 9.15e-03 \\
    - &  10 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 1.18e-02 \\
    - &  25 & 1.74e-05 & 7.05e-06 & 1.12e-02 & 2.96e-02 \\
