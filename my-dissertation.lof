@@ -22,9 +22,26 @@
 \contentsline {figure}{\numberline {5.10}{\ignorespaces First-order upwind differencing instability for Cauchy solvers at different time step sizes\relax }}{76}{figure.caption.52}%
 \contentsline {figure}{\numberline {5.11}{\ignorespaces Flux limiter function applied to problem three, dt = 0.1, dx = 0.2\relax }}{77}{figure.caption.53}%
 \contentsline {figure}{\numberline {5.12}{\ignorespaces Instability of flux limiter functions with the Taylor solver\relax }}{78}{figure.caption.54}%
-\contentsline {figure}{\numberline {5.13}{\ignorespaces Problem 4 average run times for each solver, dt = 0.01\relax }}{81}{figure.caption.56}%
-\contentsline {figure}{\numberline {5.14}{\ignorespaces Problem 4 flux limiter $l_{1}$ convergence rate using absolute error\relax }}{82}{figure.caption.57}%
-\contentsline {figure}{\numberline {5.15}{\ignorespaces Problem 5 average run times for each solver, dt = 0.1\relax }}{85}{figure.caption.59}%
-\contentsline {figure}{\numberline {5.16}{\ignorespaces Problem 5 flux limiter $l_{1}$ convergence rate using relative error\relax }}{86}{figure.caption.60}%
-\contentsline {figure}{\numberline {5.17}{\ignorespaces Spectrum for the Neutron Precursors\relax }}{91}{figure.caption.62}%
+\contentsline {figure}{\numberline {5.13}{\ignorespaces Problem 4 absolute $l_{1}$ error with spatial discretization at various time steps \relax }}{81}{figure.caption.55}%
+\contentsline {figure}{\numberline {5.14}{\ignorespaces Problem 4 absolute $l_{1}$ error with temporal discretization at various number of spatial cells\relax }}{82}{figure.caption.56}%
+\contentsline {figure}{\numberline {5.15}{\ignorespaces Problem 4 flux limiter $l_{1}$ convergence rate using absolute error\relax }}{83}{figure.caption.57}%
+\contentsline {figure}{\numberline {5.16}{\ignorespaces Problem 4 average run times for each solver, dt = 0.01\relax }}{84}{figure.caption.58}%
+\contentsline {figure}{\numberline {5.17}{\ignorespaces Problem 5 absolute $l_{1}$ error with spatial discretization at various time steps\relax }}{87}{figure.caption.59}%
+\contentsline {figure}{\numberline {5.18}{\ignorespaces Problem 5 absolute $l_{1}$ error with temporal discretization at various number of spatial cells\relax }}{88}{figure.caption.60}%
+\contentsline {figure}{\numberline {5.19}{\ignorespaces Problem 5 flux limiter $l_{1}$ convergence rate using absolute error\relax }}{89}{figure.caption.61}%
+\contentsline {figure}{\numberline {5.20}{\ignorespaces Problem 5 flux limiter $l_{1}$ behavior with coefficient changes using absolute error\relax }}{90}{figure.caption.62}%
+\contentsline {figure}{\numberline {5.21}{\ignorespaces Problem 5 average run times for each solver, dt = 0.1\relax }}{91}{figure.caption.63}%
+\contentsline {figure}{\numberline {5.22}{\ignorespaces Spectrum for the Neutron Precursors\relax }}{96}{figure.caption.65}%
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {1}{\ignorespaces Problem 4 absolute E${}_{\infty }$ error with spatial discretization at various time steps \relax }}{120}{figure.caption.75}%
+\contentsline {figure}{\numberline {2}{\ignorespaces Problem 4 absolute E${}_{\infty }$ error with temporal discretization at various number of spatial cells\relax }}{121}{figure.caption.76}%
+\contentsline {figure}{\numberline {3}{\ignorespaces Problem 4 absolute E${}_{2}$ error with spatial discretization at various time steps \relax }}{122}{figure.caption.77}%
+\contentsline {figure}{\numberline {4}{\ignorespaces Problem 4 absolute E${}_{2}$ error with temporal discretization at various number of spatial cells\relax }}{123}{figure.caption.78}%
+\contentsline {figure}{\numberline {5}{\ignorespaces Problem 4 flux limiter E${}_{\infty }$ convergence rate using absolute error\relax }}{124}{figure.caption.79}%
+\contentsline {figure}{\numberline {6}{\ignorespaces Problem 4 flux limiter E${}_{2}$ convergence rate using absolute error\relax }}{125}{figure.caption.80}%
+\contentsline {figure}{\numberline {7}{\ignorespaces Problem 5 absolute E${}_{\infty }$ error with spatial discretization at various time steps \relax }}{127}{figure.caption.81}%
+\contentsline {figure}{\numberline {8}{\ignorespaces Problem 5 absolute E${}_{\infty }$ error with temporal discretization at various number of spatial cells\relax }}{128}{figure.caption.82}%
+\contentsline {figure}{\numberline {9}{\ignorespaces Problem 5 absolute E${}_{2}$ error with spatial discretization at various time steps \relax }}{129}{figure.caption.83}%
+\contentsline {figure}{\numberline {10}{\ignorespaces Problem 5 absolute E${}_{2}$ error with temporal discretization at various number of spatial cells\relax }}{130}{figure.caption.84}%
+\contentsline {figure}{\numberline {11}{\ignorespaces Problem 5 flux limiter E${}_{\infty }$ convergence rate using absolute error\relax }}{131}{figure.caption.85}%
+\contentsline {figure}{\numberline {12}{\ignorespaces Problem 5 flux limiter E${}_{2}$ convergence rate using absolute error\relax }}{132}{figure.caption.86}%
