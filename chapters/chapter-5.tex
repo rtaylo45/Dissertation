@@ -12,7 +12,7 @@ In chapters \ref{ch:burnupEquations}, \ref{ch:matrixEXPMethods}, \ref{ch:applica
 
 In order to test the validity of libowski, the problems which are conducted must have reference solutions to test against. Many of the problems do in fact have analytical solutions while some do not. For those that do not MATLAB is utilized in generating the reference solution. In these cases the transition matrix and initial condition that is generated in libowski is save to a CSV file and read by a MATLAB script. This script then uses the Symbolic tool box to calculate the exponential of the transition matrix using variable precision arithmetic with 64 digits of accuracy. The solution is then converted to IEEE double precision and read in to libowski as the reference solution. While this method is not able to test the accuracy of the diffusion or convection operators, it is able to access the time integration thus overall accuracy of the matrix exponential algorithms. 
 
-Many of the case studies involve a set of isotopes that are referred to as the small and medium sets. These set of isotopes were chosen based on their inclusion in TRITON for cross section evaluation with depletion \cite{scaleManual}. The small case corresponds to \textit{addnux} = -2 and the medium case to \textit{addnux} = 2. Additional isotopes are added to both of these sets to fully include the initial condition for the MSRE salt \cite{MSREbenchmark}. The list of isotopes for the small and medium cases are shown in Appendix , Tables  . One important note about these tables is that indicate which species will have addition mass transport models for wall depositon and gas sparging. In some cases no mass transport is included, resulting in a subset of nuclides which do not include the additional isotopes required to model addition mass transport models. For example if one were to model three species, ${}^{235}$U, ${}^{135}$Xe and ${}^{109}$Ag with no mass transport then the system would only contain these three isotopes. If wall deposition and gas sparging is added for Ag and Xe then the system would contain two addition species ${}^{135}$XeGas and ${}^{109}$AgWall. Making the total number of species five. 
+Many of the case studies involve a set of isotopes that are referred to as the small and medium sets. These set of isotopes were chosen based on their inclusion in TRITON for cross section evaluation with depletion \cite{scaleManual}. The small case corresponds to \textit{addnux} = -2 and the medium case to \textit{addnux} = 2. Additional isotopes are added to both of these sets to fully include the initial condition for the MSRE salt \cite{MSREbenchmark}. The list of isotopes for the small and medium cases are shown in Appendix , Tables  . One important note about these tables is that indicate which species will have addition mass transport models for wall deposition and gas sparging. In some cases no mass transport is included, resulting in a subset of nuclides which do not include the additional isotopes required to model addition mass transport models. For example if one were to model three species, ${}^{235}$U, ${}^{135}$Xe and ${}^{109}$Ag with no mass transport then the system would only contain these three isotopes. If wall deposition and gas sparging is added for Ag and Xe then the system would contain two addition species ${}^{135}$XeGas and ${}^{109}$AgWall. Making the total number of species five. 
 
 All problems show an error based on a reference solution. For the following results the relative errors are defined as:
 
@@ -548,7 +548,11 @@ C_{w} (x,t) = \begin{cases}
 \end{cases}
 \end{equation}
 
-This problem is conducted in the same manor as problem 4 and 5. But unlike problem 4, this problem has a discontinuous solution. Figures \ref{fig:problem6_l1error_spatial_results} and  \ref{fig:problem6_l1error_time_results} shows results for the E${}_{1}$ error as a function of time and space. These results shows the same behavior for each of the flux limiters that was shown in problem 4. The only difference is the error is slightly higher in this problem. Again, the Albada flux limiter showes the lowest over all error and does show the most improvment from increasing the number of time steps. Figure 
+This problem is conducted in the same manor as problem 4 and 5. But unlike problem 4, this problem has a discontinuous solution. Figures \ref{fig:problem6_l1error_spatial_results} and  \ref{fig:problem6_l1error_time_results} shows results for the E${}_{1}$ error as a function of time and space. These results shows the same behavior for each of the flux limiters that was shown in problem 4. The only difference is the error is slightly higher in this problem. Again, the Albada flux limiter showes the lowest over all error and does show the most improvement from increasing the number of time steps. Figure \ref{fig:problem6_linferror_spatial_results} and \ref{fig:problem6_linferror_time_results} shows that the E${}_{\infty}$ error follows the same shape from problem 5. For high dt, each of the flux limiters seem to converge to the same solution. As the time step size is decreased, each flux limiter begins to separate, with Albada acheiving the lowest error for low dt and dx. Figure \ref{fig:problem6_linferror_time_results} shows that for a high dx, increasing the number of time steps causes most of the high order flux limiter functions to become worst. As dx becomes lower, all of the high order functions become more accurate until they reach a point where decreasing dt does not affect the solution. The Albada limiter however, increases its accuracy as dt decreases for all dx values. Figures \ref{fig:problem6_l2error_spatial_results} and \ref{fig:problem6_l2error_time_results} show that the E${}_{2}$ also behaves the same in problems 5 and 6. For a low number of cells, each of the limiter functions converge to a similar solution, with the Albada limiter out performing the rest. 
+
+Figure \ref{fig:problem6_l1error_fluxlimiter_convergence_rate} shows the spatial convergence rate as a function of space and time. This figure shows the same convergence behavior seen in problem 5, but with slightly different values. In this case, the Albada limiter shows a higher convergence rate, while each of the other limiters seem to have higher convergence rates for higher dt. As the number of steps is increased the convergence rates are higher in problem 5. Figures \ref{fig:problem6_linferror_fluxlimiter_convergence_rate} and \ref{fig:problem6_l2error_fluxlimiter_convergence_rate} show the spatial convergence rates for the E${}_{\infty}$ and E${}_{2}$. Both of these figures show the same trend that was seen in problem 5. The E${}_{\infty}$ error shows low convergence rates for the Albada and Min-Mod limiters, while the other limiters have high convergence rates for both low dt and dx. The E${}_{2}$ error shows higher convergence rates for all limiters for both low dt and dx. 
+
+Figure \ref{fig:problem6_l1error_coefficient_changes} shows E${}_{1}$ error with changes in the problem coefficients. This figure shows almost the exact same behavior that was seen in problem 5. In a reaction dominated system, all limiters converge to the same solution. As the velocity is increased, each of the limiters separate, with the Albada limiter performing the best. Figure \ref{fig:problem6_runtimes} shows run times for this problem behave in a similar way to problem 5. However in problem 6, the Taylor, Hyperbolic and Parabolic solvers have almost the same run times.
 
 \clearpage
 
@@ -573,7 +577,7 @@ This problem is conducted in the same manor as problem 4 and 5. But unlike probl
 \begin{figure}[p]
     \centering
     \includegraphics[width=6in]{images/chapter-5/progressionProblems/problem6/problem6E1FluxLimiterConvergenceRate.png}
-    \caption{Problem 6 flux limiter relative E${}_{1}$ spatial convergence rate using absolute error}
+    \caption{Problem 6 flux limiter relative E${}_{1}$ spatial convergence rate}
     \label{fig:problem6_l1error_fluxlimiter_convergence_rate}
 \end{figure}
 
@@ -582,7 +586,7 @@ This problem is conducted in the same manor as problem 4 and 5. But unlike probl
 \begin{figure}[p]
     \centering
     \includegraphics[width=6in]{images/chapter-5/progressionProblems/problem6/problem6CoefficientChanges.png}
-    \caption{Problem 6 flux limiter relative E${}_{1}$ behavior with coefficient changes using absolute error}
+    \caption{Problem 6 flux limiter relative E${}_{1}$ behavior with coefficient changes}
     \label{fig:problem6_l1error_coefficient_changes}
 \end{figure}
 
@@ -590,9 +594,9 @@ This problem is conducted in the same manor as problem 4 and 5. But unlike probl
 
 \begin{figure}[p]
     \centering
-    \includegraphics[width=6in]{images/chapter-5/progressionProblems/problem5/problem5Runtimes.png}
-    \caption{Problem 5 average run times for each solver, dt = 0.1}
-    \label{fig:problem5_runtimes}
+    \includegraphics[width=6in]{images/chapter-5/progressionProblems/problem6/problem6Runtimes.png}
+    \caption{Problem 6 average run times for each solver, dt = 0.1}
+    \label{fig:problem6_runtimes}
 \end{figure}
 
 \clearpage
