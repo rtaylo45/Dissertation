@@ -623,14 +623,90 @@ i = \begin{dcases}
 \end{dcases}
 \end{equation}
 
-\noindent On the domain from $t \in [0, 500]$ subject to the following neutron flux $\phi = 1e13$. Each isotope is given an initial concentration of $C_{i, 0} = 1e10$. The transition matrix is built using information from the SCALE ORIGEN library. The analytical solution is given by the exponential of the transition matrix:
+\noindent On the domain from $t \in [0, 500]$ subject to the following neutron flux $\phi = 1e13$ n/cm$^2/$/s. Each isotope is given an initial concentration of $C_{i, 0} = 1e10$ atoms/cm$^2$. The transition matrix is built using information from the SCALE ORIGEN library. The analytical solution is given by the exponential of the transition matrix:
 
 \begin{equation}
    \boldsymbol{C}(t) = e^{\boldsymbol{A}t}, 
 \end{equation}
 
-\noindent where $\boldsymbol{C}$ is a vector of isotope concentrations. The solution is calculated using in MATLAB using the method previously described. 
+\noindent where $\boldsymbol{C}$ is a vector of isotope concentrations. The solution is calculated using in MATLAB using the method previously described. This solution is plotted in figure \ref{fig:problem7_solution}, with a zoomed in portion showing the solution for a number of the isotopes are very close. 
 
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/progressionProblems/problem7/problem7soltution.png}
+    \caption{Problem 7 solution}
+    \label{fig:problem7_solution}
+\end{figure}
+
+\clearpage
+
+This problem offers a good example of how sub-stepping can be utilized in improving the solution for Cauchy solvers.  Results of the sub-stepping for the Cauchy solvers are shown in Figure \ref{fig:problem7_E1_error_with_steps} at the 50-day time step mark. Surprisingly, CRAM started out with the largest E${}_{1}$ relative error. With just 2 substeps, the error from all Cauchy solvers dropped by many orders of magnitude. Past 4 substeps, the errors begin to compound from an inaccurate initial condition. While the behavior in this system shows that 6 is the optimal number of sub-steps for the CRAM and Hyperbolic solvers and 2 for the Parabolic solver. Error behavior for E${}_{\infty}$ and E${}_{2}$ are shown in Appendix \ref{appen:results}, figures \ref{fig:problem7_Einf_error_with_steps} and \ref{fig:problem7_E2_error_with_steps}. Figure \ref{fig:problem7_Einf_error_with_steps} shows the same trend but with a minimal value at 4 steps instead of 6 for CRAM and Hyperbolic. Figure \ref{fig:problem7_E2_error_with_steps} shows the same behavior that was seen with the E${}_{1}$ error. 
+
+Results for the decay transition matrix are shown in Figure \ref{fig:problem7_E1_error_with_steps4}, where each Cauchy solver was run with 4 substeps. Both the CRAM and hyperbolic solvers outperformed the other solvers. The parabolic solver, the Taylor solver, and the Pad\'e-method 1 solver all performed about the same. The Pad\'e-method 2 solver performed the worst, but the E${}_{1}$ relative error was still below $10^{-9}$ over the solution domain. Results for E${}_{\infty}$ and E${}_{2}$ are shown in figures \ref{fig:problem7_Einf_error_with_steps4} and \ref{fig:problem7_E2_error_with_steps4}, these results show the same trends seen in figure \ref{fig:problem7_E1_error_with_steps4}. 
+
+
+Run times for all of these solvers were quite fast and are shown in Table \ref{tab:problem7_run_times}; Cauchy solvers are shown for 4 sub-steps. For a test as small as the one analyzed here, all run times were remarkably fast. While the $l_{l}$ matrix norm is ~2,100 for the time step size and requires a notable amount of scaling, the problem was small enough that it did not increase the run times for series solvers. 
+
+Eigenvalues for this problem are shown in figure \ref{fig:problem7_eigenvalues}, while most have zero for the imaginary parts there are two which have non zero elements. However, these eigenvalues are still clustered extremely close to the zero axis and do not affect the accuracy of the Cauchy solvers by themselves. While the accuracy of the Cauchy solvers are not affected by the placement of the eigenvalues, it is however, affected by the change is nuclide concentration over the time steps involved. Figure \ref{fig:problem7_nuclide_relative_error} shows the relative error of each nuclide at the 50 day time step for each of the Cauchy solvers. This figure, along with figure \ref{fig:problem7_solution} shows that the nuclides contributing to the highest two errors are the ones whos solution changes the most during that time step. 
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/progressionProblems/problem7/problem7E1ErrorWithSteps.png}
+    \caption{Problem 7 E${}_{1}$ relative error with sub-steps}
+    \label{fig:problem7_E1_error_with_steps}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/progressionProblems/problem7/problem7E1ErrorerrorSteps4.png}
+    \caption{Problem 7 E${}_{1}$ relative error with 4 sub-steps}
+    \label{fig:problem7_E1_error_with_steps4}
+\end{figure}
+
+\clearpage
+
+\begin{table}[p]
+   \caption{\label{tab:problem7_run_times} Run Times for All Solvers in Depletion Case}
+   \centering
+   \begin{tabular}{ll}
+   \hline
+   Solver & Run time (sec)  \\
+   \hline
+   CRAM & 9.04e-03 \\
+   Hyperbolic & 1.51e-02 \\
+   Parabolic & 1.51e-02 \\
+   Pad\'e-method 1 & 1.09e-03 \\
+   Pad\'e-method 2 & 2.29e-03 \\
+   Taylor & 5.76e-03 \\
+   \hline
+   \end{tabular}
+\end{table}  
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/progressionProblems/problem7/problem7Eigenvalues.png}
+    \caption{Problem 7 eigenvalues}
+    \label{fig:problem7_eigenvalues}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/progressionProblems/problem7/problem7NuclideErrorFirstStep.png}
+    \caption{Problem 7 E${}_{\infty}$ relative error for each nuclide at the first time step}
+    \label{fig:problem7_nuclide_relative_error}
+\end{figure}
+
+\clearpage
 
 \subsection{Problem 8}
 This is an extension of problem 9 but for a fictitious "pipe" reactor which allows for the flow of isotopes due to a velocity. This is represented by:
@@ -653,11 +729,24 @@ i = \begin{dcases}
 \end{dcases}
 \end{equation}
 
-\noindent On the domain $x \in [0, 400]$, $t \in [0, 500]$ where $v = 25$ and $\phi(x) = 1e13$. Subject to the periodic boundary conditions:
+\noindent On the domain $x \in [0, 400]$, $t \in [0, 500]$. Subject to the periodic boundary conditions:
 
 \begin{equation}
     C_{i}(0,t) = C_{i}(400,t).
 \end{equation}
+
+\noindent The neutron flux follows a sine function in the x-direction from $x \in [0, 200]$, half of the total length of the pipe. Four different velocities are chosen $ v = 2, 25, 50 $ and $100$, with a time step size of 50 days. This problem is ran with 3 different discretization sizes, with the number of cells varying from 10, 20 and 40. The higher order flux limiter functions are not used, with the first order upwind function being chosen for the convective flux. The reference solution is calculated using MATLAB. The eigenvalues for each velocity and discretization are shown in figure \ref{problem8_eigenvalues}, the left column are the eigenvalues of the transition matrix and the right column are the eigenvalues of the transition matrix multiplied by the time step size. 
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/progressionProblems/problem8/problem8Eigenvalues.png}
+    \caption{Problem 8 eigenvalues for each velocity and discretization}
+    \label{fig:problem8_eigenvalues}
+\end{figure}
+
+\clearpage
 
 \section{Case Studies}
 The following are a selection of case studies which aim to explore libowskis' accuracy and performance with problems which come up in modeling MSRs. 
