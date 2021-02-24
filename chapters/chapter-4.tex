@@ -564,25 +564,9 @@ The Taylor algorithms implemented in libowski was taken from Reference \cite{hig
 \end{enumerate}
 
 
-One of the major components of this algorithm is in picking the optimal Taylor order and scaling parameter. This is accomplished by minimizing the computational cost while choosing the appropriate scaling and squaring parameter to obtain a backwards error below a minimal tolerance. For this algorithm, the parameters function accomplishes this and is shown in Algorithm \ref{alg:taylor_parameters}. 
+One of the major components of this algorithm is in picking the optimal Taylor order and scaling parameter. This is accomplished by minimizing the computational cost while choosing the appropriate scaling and squaring parameter to obtain a backwards error below a minimal tolerance. For this algorithm, the parameters function accomplishes this and is shown in Algorithm \ref{alg:taylor_parameters}. This algorithm requires 2 additional parameters $p_{\text{max}}$ and $m_{\text{max}}$, where $m_{\text{max}}$ is the maximum order of the Taylor series. The first parameter $p_{\text{max}}$ is the largest integer such that $p(p - 1) \leq m_{\text{max}} + 1$. For values of $m$ up to 100, $p_{\text{max}}$ are tabulated in table \ref{tab:pmax_mmax_values}. Reference \cite{higham2011} notes that as $m_{\text{max}}$ increases the overall cost of the algorithm decreases however, large values of $m$ can lead to numerical instability. The default parameters, which were recommended by Al-Mohy et al., are $p_{\text{max}} = 8$ and $m_{\text{max}} = 55$.  
 
-
-
-
-\subsection{Time Marching Schemes}
-\label{sec:timeMarchingSchemes}
-There are two different approaches to evaluating the solution as a function of time. Each of these schemes will have different impacts on the error and computation time. The first scheme involves evaluating the solution at each time step starting from the initial condition. In this case the step length is not constant and the length is equal to the time at the time step assuming that the solution begins from $t_{0} = 0$. The solution for this time marching scheme is,
-
-\begin{equation}
-    \boldsymbol{\rho}(t_{n+1}) = e^{\boldsymbol{A}\Delta t}\boldsymbol{\rho}(t_{0}), \quad \Delta t = t_{n+1} - 0, \quad \text{Time stepping method 1}.
-\end{equation}
-
-\noindent One of the advantages of this time marching scheme is that the error is based on the error for a single time step because the initial condition is considered exact. As $\Delta t$ becomes larger then the norm of $\boldsymbol{A}\Delta t$ also grows, this can become a problem for methods based on Pad\'e. One other consequence is that the eigenvalues of the transition matrix will grow and possibly spread apart, causing problems with some of the numerical methods previously discussed. If the eigenvalue has a large imaginary part and a small real part then any $\Delta t > 1$ could move then eigenvalue into a region where Cauchy's solution will be inaccurate. Krylov subspace methods will also not work well if the eigenvalues are spread apart.
-
-The second method involves calculating the solution at $t_{n+1}$ is calculated using the $\rho(t_{n})$ as the initial condition where $\rho(t_{n})$ was calculated from the previous time step and thus not the exact solution. The solution for this time marching scheme is, 
-
-\begin{equation}
-    \boldsymbol{\rho}(t_{n+1}) = e^{\boldsymbol{A}\Delta t}\boldsymbol{\rho}(t_{n}), \quad \Delta t = t_{n+1} - t_{n}, \quad \text{Time stepping method 2}
-\end{equation}
-
-\noindent The error with this calculation will be larger because of the compounding errors from taking multiple time steps instead of one. Solutions using matrix exponential methods do not behave in the same way that normal numerical integration methods i.e. its not guaranteed that smaller time steps give more accurate solutions. There are however, a few of advantages to this scheme. The first is that it has been shown that the accuracy of CRAM is increased by dividing long depletion steps into smaller substeps if the species concentration diminishes significantly during a single time step \cite{isotalo2016}. If methods based on Pad\'e are used, then dividing the total depletion length into smaller time steps will help with the size of the matrix norm. Another consequence of the Pad\'e method can be exploited if time steps of constant size are taken. Because Pad\'e methods compute the matrix exponential and not the action on a vector, the matrix exponential will not change for constant time steps. This is not true in the case where other elements such as flow or reactions rates change moving from each time step. 
+\subsection{Krylov Subspace}
+\label{sec:krylovSubspace}
+The Krylov subspace can be implemented in two different ways, based on when the time step is multiplied by the transition matrix. These two methods may not lead to two different solution out comes but it is important to note them. 
+ 

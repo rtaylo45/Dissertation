@@ -735,7 +735,7 @@ i = \begin{dcases}
     C_{i}(0,t) = C_{i}(400,t).
 \end{equation}
 
-\noindent The neutron flux follows a sine function in the x-direction from $x \in [0, 200]$, half of the total length of the pipe. Four different velocities are chosen $ v = 2, 25, 50 $ and $100$, with a time step size of 50 days. This problem is ran with 3 different discretization sizes, with the number of cells varying from 10, 20 and 40. The higher order flux limiter functions are not used, with the first order upwind function being chosen for the convective flux. The reference solution is calculated using MATLAB. The eigenvalues for each velocity and discretization are shown in figure \ref{problem8_eigenvalues}, the left column are the eigenvalues of the transition matrix and the right column are the eigenvalues of the transition matrix multiplied by the time step size. 
+\noindent The neutron flux follows a sine function in the x-direction from $x \in [0, 200]$, half of the total length of the pipe. Four different velocities are chosen $ v = 2, 25, 50 $ and $100$, with a time step size of 50 days. This problem is ran with 3 different discretization sizes, with the number of cells varying from 10, 20 and 40. The higher order flux limiter functions are not used, with the first order upwind function being chosen for the convective flux. The reference solution is calculated using MATLAB. The eigenvalues for each velocity and discretization are shown in figure \ref{fig:problem8_eigenvalues}, the left column are the eigenvalues of the transition matrix and the right column are the eigenvalues of the transition matrix multiplied by the time step size. As the number of cells increases the real and imaginary parts of the eigenvalues spread further out. This also happens as the velocity is increased. 
 
 \clearpage
 
@@ -744,6 +744,39 @@ i = \begin{dcases}
     \includegraphics[width=6in]{images/chapter-5/progressionProblems/problem8/problem8Eigenvalues.png}
     \caption{Problem 8 eigenvalues for each velocity and discretization}
     \label{fig:problem8_eigenvalues}
+\end{figure}
+
+\clearpage
+
+The E${}_{1}$ error for each velocity are shown for cells 10, 20 and 40 in figures \ref{fig:problem8_E1_error_10cells}, \ref{fig:problem8_E1_error_20cells} and \ref{fig:problem8_E1_error_40cells}. Figure \ref{fig:problem8_E1_error_10cells} shows that all solvers but Pad\'e-method2 have around the same error. As the velocity is increased the error increases, with errors for velocities of 50 and 100 appear to be on top of one another except for Pad\'e-method2. Figure \ref{fig:problem8_E1_error_20cells} shows that for 20 cells, E${}_{1}$ errors for velocities 25, 50 and 100 fall on top of one another. Pad\'e-method1 again shows the worst error, with this error increasing as a function of velocity. Figure \ref{fig:problem8_E1_error_40cells} shows that the error for velocities 25 and 50 are about the same for all but Pad\'e-method2 and Taylor. Error for a velocity of 50 is only slightly higher than 25. Again Pad\'e-method2 shows the worst error, with the error increases with velocity. An important take away from these results is that each solver shows the same error behavior as a function of velocity. Indicating that the increased error seen in the Cauchy solvers do not result from the placement of the eigenvalues. Results for both the E${}_{\infty}$ and E${}_{2}$ errors for 10, 20 and 40 cells are shown in Appendix \ref{appen:results}, figures \ref{fig:problem8_Einf_error_10cells}, \ref{fig:problem8_Einf_error_20cells}, \ref{fig:problem8_Einf_error_40cells}, \ref{fig:problem8_E2_error_10cells}, \ref{fig:problem8_E2_error_20cells} and \ref{fig:problem8_E2_error_40cells}. These error metrics show the same behavior as E${}_{1}$. 
+
+Run times for each solver using 40 cells are shown for each velocity in Table \ref{tab:}, each of the Cauchy solvers are shown with 2 sub-steps. None of the Cauchy solvers appear to show variation in run time with increased velocity but there is some slight differences with the Pad\'e solvers. The Taylor solver is most effected by the change in velocity and the reason is found in the scaling and squaring method itself. 
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/progressionProblems/problem8/problem8E1ErrorWithVelocity10cells.png}
+    \caption{Problem 8 E${}_{1}$ error with 10 cells}
+    \label{fig:problem8_E1_error_10cells}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/progressionProblems/problem8/problem8E1ErrorWithVelocity20cells.png}
+    \caption{Problem 8 E${}_{1}$ error with 20 cells}
+    \label{fig:problem8_E1_error_20cells}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/progressionProblems/problem8/problem8E1ErrorWithVelocity40cells.png}
+    \caption{Problem 8 E${}_{1}$ error with 40 cells}
+    \label{fig:problem8_E1_error_40cells}
 \end{figure}
 
 \clearpage
