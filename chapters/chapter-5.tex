@@ -12,7 +12,7 @@ In chapters \ref{ch:burnupEquations}, \ref{ch:matrixEXPMethods}, \ref{ch:applica
 
 In order to test the validity of libowski, the problems which are conducted must have reference solutions to test against. Many of the problems do in fact have analytical solutions while some do not. For those that do not MATLAB is utilized in generating the reference solution. In these cases the transition matrix and initial condition that is generated in libowski is save to a CSV file and read by a MATLAB script. This script then uses the Symbolic tool box to calculate the exponential of the transition matrix using variable precision arithmetic with 64 digits of accuracy. The solution is then converted to IEEE double precision and read in to libowski as the reference solution. While this method is not able to test the accuracy of the diffusion or convection operators, it is able to access the time integration thus overall accuracy of the matrix exponential algorithms. 
 
-Many of the case studies involve a set of isotopes that are referred to as the small and medium sets. These set of isotopes were chosen based on their inclusion in TRITON for cross section evaluation with depletion \cite{scaleManual}. The small case corresponds to \textit{addnux} = -2 and the medium case to \textit{addnux} = 2. Additional isotopes are added to both of these sets to fully include the initial condition for the MSRE salt \cite{MSREbenchmark}. The list of isotopes for the small and medium cases are shown in Appendix , Tables  . One important note about these tables is that indicate which species will have addition mass transport models for wall deposition and gas sparging. In some cases no mass transport is included, resulting in a subset of nuclides which do not include the additional isotopes required to model addition mass transport models. For example if one were to model three species, ${}^{235}$U, ${}^{135}$Xe and ${}^{109}$Ag with no mass transport then the system would only contain these three isotopes. If wall deposition and gas sparging is added for Ag and Xe then the system would contain two addition species ${}^{135}$XeGas and ${}^{109}$AgWall. Making the total number of species five. 
+Many of the case studies involve a set of isotopes that are referred to as the small and large sets. These set of isotopes were chosen based on their inclusion in TRITON for cross section evaluation with depletion \cite{scaleManual}. The small case corresponds to \textit{addnux} = -2 and the large case to \textit{addnux} = 2. Additional isotopes are added to both of these sets to fully include the initial condition for the MSRE salt \cite{MSREbenchmark}. The list of isotopes for the small and medium cases are shown in Appendix , Tables  . One important note about these tables is that indicate which species will have addition mass transport models for wall deposition and gas sparging. In some cases no mass transport is included, resulting in a subset of nuclides which do not include the additional isotopes required to model addition mass transport models. For example if one were to model three species, ${}^{235}$U, ${}^{135}$Xe and ${}^{109}$Ag with no mass transport then the system would only contain these three isotopes. If wall deposition and gas sparging is added for Ag and Xe then the system would contain two addition species ${}^{135}$XeGas and ${}^{109}$AgWall. Making the total number of species five. 
 
 All problems show an error based on a reference solution. For the following results the relative errors are defined as:
 
@@ -750,7 +750,7 @@ i = \begin{dcases}
 
 The E${}_{1}$ error for each velocity are shown for cells 10, 20 and 40 in figures \ref{fig:problem8_E1_error_10cells}, \ref{fig:problem8_E1_error_20cells} and \ref{fig:problem8_E1_error_40cells}. Figure \ref{fig:problem8_E1_error_10cells} shows that all solvers but Pad\'e-method2 have around the same error. As the velocity is increased the error increases, with errors for velocities of 50 and 100 appear to be on top of one another except for Pad\'e-method2. Figure \ref{fig:problem8_E1_error_20cells} shows that for 20 cells, E${}_{1}$ errors for velocities 25, 50 and 100 fall on top of one another. Pad\'e-method1 again shows the worst error, with this error increasing as a function of velocity. Figure \ref{fig:problem8_E1_error_40cells} shows that the error for velocities 25 and 50 are about the same for all but Pad\'e-method2 and Taylor. Error for a velocity of 50 is only slightly higher than 25. Again Pad\'e-method2 shows the worst error, with the error increases with velocity. An important take away from these results is that each solver shows the same error behavior as a function of velocity. Indicating that the increased error seen in the Cauchy solvers do not result from the placement of the eigenvalues. Results for both the E${}_{\infty}$ and E${}_{2}$ errors for 10, 20 and 40 cells are shown in Appendix \ref{appen:results}, figures \ref{fig:problem8_Einf_error_10cells}, \ref{fig:problem8_Einf_error_20cells}, \ref{fig:problem8_Einf_error_40cells}, \ref{fig:problem8_E2_error_10cells}, \ref{fig:problem8_E2_error_20cells} and \ref{fig:problem8_E2_error_40cells}. These error metrics show the same behavior as E${}_{1}$. 
 
-Run times for each solver using 40 cells are shown for each velocity in Table \ref{tab:}, each of the Cauchy solvers are shown with 2 sub-steps. None of the Cauchy solvers appear to show variation in run time with increased velocity but there is some slight differences with the Pad\'e solvers. The Taylor solver is most effected by the change in velocity and the reason is found in the scaling and squaring method itself. 
+Run times for each solver using 40 cells are shown for each velocity in Table \ref{tab:problem8_run_times}, each of the Cauchy solvers are shown with 2 sub-steps. None of the Cauchy solvers appear to show variation in run time with increased velocity but there is some slight differences with the Pad\'e solvers. The Taylor solver is most effected by the change in velocity and the reason is found in the scaling and squaring method itself. For example, using the default parameters in the Taylor solver the required scaling parameter for velocities 2, 25, 50 and 100 are 486,179, 8,314,425, 18,132,096, and 39,544,424 for each time step. This causes a very large number of matrix vector multiplications. For the same velocities Pad\'e-method1 requires 19, 22, 23, 24 and Pad\'e-method2 requires 29, 35, 36, 38. While these run times for the Taylor solver can be mitigated by exploiting the computations from the previous time step, the time required to to compute a single time step is still quite large, about 1/10 of the total time required shown in Table \ref{tab:problem8_run_times}. The Krylov subspace method was applied to the Taylor solver, but using this method only increased the scaling and squaring value. For the Pad\'e solvers, the Krylov method is utilized in reducing the run time. These results are shown in figure \ref{fig:problem8_E1_error_krylov} for the E$_{1}$ error and figures \ref{fig:problem8_Einf_error_krylov} and \ref{fig:problem8_E2_error_krylov} for E$_{\infty}$ and E$_{2}$. The left most error point in these plots represents problem which is ran without using the Krylov subspace. Just by reducing the dimension by 9 increases the error a bit, followed by reaching a constant value for a number of Krylov dimensions. The error remains constant until increasing to a point where the solution blows up. These same trends occur for all 3 error metrics. 
 
 \clearpage
 
@@ -781,11 +781,40 @@ Run times for each solver using 40 cells are shown for each velocity in Table \r
 
 \clearpage
 
+\begin{table}[p]
+   \caption{\label{tab:problem8_run_times} Run Times for All Solvers in Problem 8}
+   \centering
+   \begin{tabular}{lllll}
+   \hline
+    \multicolumn{1}{c}{} & \multicolumn{4}{c}{Run time (sec)}  \\
+    Solver & Velocity 2 & Velocity 25 & Velocity 50 & Velocity 100 \\
+   \hline
+	CRAM & 7.16E-01 & 7.12E-01	& 7.14E-01 & 7.13E-01 \\
+	Hyperbolic & 1.39E+00 & 1.38E+00	& 1.40E+00 & 1.38E+00 \\
+	Parabolic & 1.40E+00 & 1.41E+00	& 1.40E+00 & 1.40E+00 \\
+	Pad\'e-method1 & 1.70E+01 & 1.74E+01	& 1.91E+01 & 2.04E+01 \\
+	Pad\'e-method2 & 2.42E+01 & 2.93E+01	& 2.76E+01 & 3.26E+01 \\
+	Taylor & 3.93E+02 & 6.13E+03	& 1.27E+04 & 2.74E+04 \\
+   \hline
+   \end{tabular}
+\end{table}  
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=6in]{images/chapter-5/progressionProblems/problem8/problem8KrylovE1Error.png}
+    \caption{Problem 8 E${}_{1}$ error for the Pad\'e solvers using the Krylov subspace with 40 cells}
+    \label{fig:problem8_E1_error_krylov}
+\end{figure}
+
+\clearpage
+
 \section{Case Studies}
-The following are a selection of case studies which aim to explore libowskis' accuracy and performance with problems which come up in modeling MSRs. 
+The following are a selection of case studies which aim to explore libowskis' accuracy and performance with problems which come up in modeling MSRs. The small and large MSR cases require cross section data for the isotopes listed in tables \ref{tab:small_nuclies} and \ref{tab:medium_nuclides}. This data is generated using ORIGEN f33 files with the Obiwan utility and exported to text files. These text file are then preprocessed by a python scrip (pyLibowski) to generate input files for libowski. 
 
 \subsection{Neutron precursors}
-This problem examines a convection-driven flow with the 6 neutron precursor groups, as shown in Eqs. (\ref{eq:problem3}) and (\ref{eq:problem3flux}): 
+This problem examines a convection-driven flow with the 6 neutron precursor groups, as shown in equations (\ref{eq:problem3}) and (\ref{eq:problem3flux}): 
 
 \begin{equation}
 \frac{\partial C_{i}}{\partial t} = -v_{x}\frac{\partial C_{i}}{\partial x} - v_{y}\frac{\partial C_{i}}{\partial y} + \beta_{i} \Psi (x, y) -\lambda_i C_{i},

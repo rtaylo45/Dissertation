@@ -566,7 +566,4 @@ The Taylor algorithms implemented in libowski was taken from Reference \cite{hig
 
 One of the major components of this algorithm is in picking the optimal Taylor order and scaling parameter. This is accomplished by minimizing the computational cost while choosing the appropriate scaling and squaring parameter to obtain a backwards error below a minimal tolerance. For this algorithm, the parameters function accomplishes this and is shown in Algorithm \ref{alg:taylor_parameters}. This algorithm requires 2 additional parameters $p_{\text{max}}$ and $m_{\text{max}}$, where $m_{\text{max}}$ is the maximum order of the Taylor series. The first parameter $p_{\text{max}}$ is the largest integer such that $p(p - 1) \leq m_{\text{max}} + 1$. For values of $m$ up to 100, $p_{\text{max}}$ are tabulated in table \ref{tab:pmax_mmax_values}. Reference \cite{higham2011} notes that as $m_{\text{max}}$ increases the overall cost of the algorithm decreases however, large values of $m$ can lead to numerical instability. The default parameters, which were recommended by Al-Mohy et al., are $p_{\text{max}} = 8$ and $m_{\text{max}} = 55$.  
 
-\subsection{Krylov Subspace}
-\label{sec:krylovSubspace}
-The Krylov subspace can be implemented in two different ways, based on when the time step is multiplied by the transition matrix. These two methods may not lead to two different solution out comes but it is important to note them. 
  

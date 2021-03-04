@@ -138,7 +138,8 @@
     left = 1.0in,
     right = 1.0in,
     top = 1.0in,
-    bottom = 1.0in
+    bottom = 1.0in,
+    includefoot
 }
 %\hyphenation{example, pa-ra-me-ter} % Over-ride Latex hyphenation, define hyphenated words
 \hyphenpenalty=5000	% reduce hyphenation as much as possible
