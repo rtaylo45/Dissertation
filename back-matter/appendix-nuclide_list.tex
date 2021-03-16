@@ -66,13 +66,13 @@
 \subsection{Description of MSR Mesh}
 The MSR case studies are tested against MATLAB using a 3x9 cell volume mesh. There are 3 cells in the x-direction and 9 cells in the y-direction. The height and width of the MSR core is taken from Reference (\cite{haubenreich1964}) to be 63 inches tall and 27 inches wide. The average velocity in the loop was found to be 0.7 ft/s \cite{kedl1972}. With an external loop residence time of 16.45 seconds, the outside loop is 138.18 inches. Libowskis' internal mesh generator can only generate meshes with constant dx and dy values, therefor the width of the core and external regions are the same sizes. Dimensions of the core, width, outside loop and total length are: 1.9024 m, 0.6858 m, 3.5098 m and 5.4122 m. The mesh is broken up in to 3 group regions in the y-direction. The first is a 3x3 region containing the core, second and third are two 3x3 regions which comprise of the outside loop. To make things easier to integrate over the flux in the core region, the total length of the loop is extended so that each of the three sub-regions are the same size. For example: the total length divided by the core length is 5.4122/1.9024 = 2.84. This is close to three but a little off. So the total length of the model is extended to be 3*1.92024 = 5.7607 m. 
 
-The core temperature rise in the MSRE during steady state operation was found to 22.2 $^{\degree}$C with an inlet temperature of 632.2 $^{\circ}$C and outlet temperature of 654.4 $^{\degree}$C \cite{engel1962}. The bulk mean fuel temperature can be calculated by \cite{engel1962}:
+The core temperature rise in the MSRE during steady state operation was found to 22.2 $^{\circ}$C with an inlet temperature of 632.2 $^{\circ}$C and outlet temperature of 654.4 $^{\circ}$C \cite{engel1962}. The bulk mean fuel temperature can be calculated by \cite{engel1962}:
 
 \begin{equation}
 	\overline{T}_{f} = T_{\text{in}} + 0.46(T_{\text{out}} - T_{\text{in}}),
 \end{equation}
 
-\noindent where temperature is in Fahrenheit. For the lump depletion cases, the bulk mean temperature is calculated to be 1203.06 $^{\degree}$F or 650.6 $^{\degree}$C. 
+\noindent where temperature is in Fahrenheit. For the lump depletion cases, the bulk mean temperature is calculated to be 1203.06 $^{\circ}$F or 650.6 $^{\circ}$C. 
 
 
 
