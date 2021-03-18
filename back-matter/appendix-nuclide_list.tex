@@ -63,18 +63,33 @@
 
 \clearpage
 
-\subsection{Description of MSR Mesh}
+\subsection{Description of MSR Mesh and System Properties}
 The MSR case studies are tested against MATLAB using a 3x9 cell volume mesh. There are 3 cells in the x-direction and 9 cells in the y-direction. The height and width of the MSR core is taken from Reference (\cite{haubenreich1964}) to be 63 inches tall and 27 inches wide. The average velocity in the loop was found to be 0.7 ft/s \cite{kedl1972}. With an external loop residence time of 16.45 seconds, the outside loop is 138.18 inches. Libowskis' internal mesh generator can only generate meshes with constant dx and dy values, therefor the width of the core and external regions are the same sizes. Dimensions of the core, width, outside loop and total length are: 1.9024 m, 0.6858 m, 3.5098 m and 5.4122 m. The mesh is broken up in to 3 group regions in the y-direction. The first is a 3x3 region containing the core, second and third are two 3x3 regions which comprise of the outside loop. To make things easier to integrate over the flux in the core region, the total length of the loop is extended so that each of the three sub-regions are the same size. For example: the total length divided by the core length is 5.4122/1.9024 = 2.84. This is close to three but a little off. So the total length of the model is extended to be 3*1.92024 = 5.7607 m. 
 
-The core temperature rise in the MSRE during steady state operation was found to 22.2 $^{\circ}$C with an inlet temperature of 632.2 $^{\circ}$C and outlet temperature of 654.4 $^{\circ}$C \cite{engel1962}. The bulk mean fuel temperature can be calculated by \cite{engel1962}:
+The core temperature rise in the MSRE during steady state operation was found to 22.2 $^{\circ}$C with an inlet temperature of 632.2 $^{\circ}$C and outlet temperature of 654.4 $^{\circ}$C \cite{engel1962}. These temperatures are rounded up to be 632 $^{\circ}$C and 654 $^{\circ}$C for each of the 2D mesh cases. A map of the temperature profile for the 2D mesh is shown in figure \ref{}. The temperature is linearly increased over the core, then decreases over a region which is meant to represent the heat exchanger. The average system temperature for both 2D meshes is approximately 639 $^{\circ}$C, this temperature is used in the lump case. 
+
+During $^{235}$U operation is was estimated that the average void fraction was between 0.0002 and 0.00045. An average value of 0.0003 is chosen for the lumped case and the void fraction values for the 2D cases are arranged so that the average is also 0.0003. For the 2D cases the void increases up the reactor core and decreases over a fictitious heat exhanger region. Figure \ref{} shows the values for the void fractions for 3 decimal places.  
+
+Interfacial area for the gas bubbles is required for the gas phase mass transport models. When calculating the migration of nobel metals to the gas bubbles, the parameter for this surface area was found to be 345 ft$^{2}$ or 32.1 m$^{2}$, this value is rounded to 32 for the case studies \cite{kedl1972}. For lumped depletion and a spatial resolved loop this value of 32 m$^{2}$ remains the same, but the interfacial area concentrations between the two meshes are different. These concentrations are chosen so that the summation of the mesh volume multiplied by the concentration is equal to 32 m$^{2}$. Figure \ref{} shows a map of the interfacial area concentrations for the 2D meshes. 
+
+Area for the wall deposition model is broken up into two sections, core and outside loop. The core section contains only interfacial area exposed to the graphite for which only the noble metals are allowed to migrate. During the MSRE this value was found to be 1465 ft$^{2}$ or 136.103 m$^{2}$, this value is rounded to 136 m$^{2}$. The graphite area is divided evenly throughout the core region and it converted to a concentration. The mass transfer coefficient for the noble metals to the graphite was found to be 0.063 ft/hr or 5.334E-6 m/s \cite{kedl1972}. The surface area for the heat exchanger is 315 ft$^{2}$ or 29.2645 m$^{2}$, this value is rounded to 29 m$^{2}$. Again, this value is evenly divided up in the heat exhanger area and converted to concentration. Noble metals were found to have a mass transfer coefficient of 1.23 ft/hr or 1.041E-4 m/s \cite{kedl1972}. For the rest of the loop, the interfacial area given for the fuel loop piping, core and pump volute in Ref(\cite{kedl1972}) is 154 ft$^{2}$ or 14.3071 m$^{2}$. This value is rounded to 14 m$^{2}$ and will be evenly distributed for the remainder of the mesh cells. While this is not an accurate representation of the remaining loop, because it contains some regions of the core, this value will be used. Figure \ref{} shows the interfacial area concentrations for the 2D meshes with each of the regions highlighted. 
+
+The neuron flux follows a sine shape in both the x-direction and the y-direction. This function is represented by:
+
 
 \begin{equation}
-	\overline{T}_{f} = T_{\text{in}} + 0.46(T_{\text{out}} - T_{\text{in}}),
+\Psi (x, y) = \begin{cases}
+  1.0\text{E}13 \sin\left(\frac{\pi x}{0.6858}\right)\sin\left(\frac{\pi y}{1.92024}\right) , x \in [0,0.6858], y \in [0,1.92024] \\
+  0\ , \text{otherwise}.
+  \label{eq:msreflux}
+\end{cases}
 \end{equation}
 
-\noindent where temperature is in Fahrenheit. For the lump depletion cases, the bulk mean temperature is calculated to be 1203.06 $^{\circ}$F or 650.6 $^{\circ}$C. 
+Using the mean value theorem, the neutron flux is integrated over each finite volume mesh from point y$_{1}$ to y$_{2}$ and x$_[1}$ and x$_{2}$:
 
-
+\begin{equation}
+	\int_{y_{1}}^{y_{2} \int_{x_{1}}^{x_{2} 1.0\text{E}13 \sin\left(\frac{\pi x}{0.6858}\right)\sin\left(\frac{\pi y}{1.92024}\right)dy dx
+\end{equation}
 
 
 
