@@ -811,7 +811,7 @@ Run times for each solver using 40 cells are shown for each velocity in Table \r
 \clearpage
 
 \section{Case Studies}
-The following are a selection of case studies which aim to explore libowskis' accuracy and performance with problems which come up in modeling MSRs. The small and large MSR cases require cross section data for the isotopes listed in tables \ref{tab:small_nuclies} and \ref{tab:medium_nuclides}. This data is generated using ORIGEN f33 files with the Obiwan utility and exported to text files. These text file are then preprocessed by a python scrip (pyLibowski) to generate input files for libowski. 
+The following are a selection of case studies which aim to explore libowskis' accuracy and performance with problems which come up in modeling MSRs. The small and large MSR cases require cross section data for the isotopes listed in tables \ref{tab:small_nuclies} and \ref{tab:medium_nuclides}. This data is generated using ORIGEN f33 files with the Obiwan utility and exported to text files. These text file are then preprocessed by a python scrip (pyLibowski) to generate input files for libowski. For all of the case studies the first order upwind flux limiter function is used. For small and large lump and 2D transport studies, an MSRE type mesh is used. The description of this mesh and the calculation of other variables required for the model are in Appendix \ref{appen:nuclides}. For each of these studies there is no analytical solution. The reference solution is computed using the MATLAB method previously described. 
 
 \subsection{Neutron precursors}
 This problem examines a convection-driven flow with the 6 neutron precursor groups, as shown in equations (\ref{eq:problem3}) and (\ref{eq:problem3flux}): 
@@ -822,21 +822,23 @@ This problem examines a convection-driven flow with the 6 neutron precursor grou
 \end{equation}
 
 \begin{equation}
-\Psi (x, y) = \begin{cases}
-  \psi _0 \sin\left(\frac{\pi x}{50}\right)\sin\left(\frac{\pi y}{100}\right) , x \in [0,50], y \le 100 \\
+\phi (x, y) = \begin{cases}
+  \phi _0 \sin\left(\frac{\pi x}{50}\right)\sin\left(\frac{\pi y}{100}\right) , x \in [0,50], y \le 100 \\
   0\ , \text{otherwise},
   \label{eq:problem3flux}
 \end{cases}
 \end{equation}
 
-\noindent where $i \in [1,6]$, $x \in [0, 50]$, $y \in [0, 400]$, $t \in [0, 60]$, $v_{x} = 0$, and $v_{y} = 25$, subject to the following boundary conditions:
+\noindent where $i \in [1,6]$, $x \in [0, 50]$, $y \in [0, 400]$, $t \in [0, 60]$, $v_{x} = 0$, $\phi_0 = 1\text{E}13$ subject to the following boundary conditions:
 
 \begin{equation}
     C_{i}(x,0) = C_{i}(x,400), \quad \frac{dC_{i}}{dx}(0,y) = 0, \quad \frac{dC_{i}}{dx}(50, y) = 0.
 \end{equation}
 
+\noindent This problem is ran at three different velocities, 25, 50 and 100. 
+
 Coefficients for the system are shown in Table \ref{tab:precursorCoeffs} \cite{ott1985}. 
-Each precursor had the same initial condition of zero, and the source term for each precursor was scaled in the x and y directions by the sine function. The spatial domain was modeled to mimic an MSR with a core region extending from $y \in [0,100]$ and $x \in [0,50]$, with a core exterior loop modeled from $y \in [100, 400]$. 
+Each precursor had the same initial condition of zero, and the source term for each precursor was scaled in the x and y directions by the sine function. The spatial domain was modeled to mimic a core region extending from $y \in [0,100]$ and $x \in [0,50]$, with a core exterior loop modeled from $y \in [100, 400]$. 
 
 \begin{table}[h!]
    \caption{\label{tab:precursorCoeffs} Parameters for Neutron Precursors}
@@ -853,22 +855,26 @@ Each precursor had the same initial condition of zero, and the source term for e
    6 & 3.87 & 0.0007 \\
    \hline
    \end{tabular}
-\end{table}     
+\end{table} 
 
-While there is no analytic solution for this example problem, a reference solution was generated in Matlab using the symbolic tool box to solve for the matrix exponential. A small, spatially discretized problem was set up with 5 cells in the x direction and 20 in the y direction. The transition matrix that was built was then exported to Matlab, and the matrix exponential was solved at various times and saved as the reference solution. While the spatial accuracy was not tested in this case, this method will access the accuracy of each matrix exponential algorithm. To further simplify the problem, the first-order upwind difference scheme was applied to the convective flux.
+The eigenvalues for this problem are shown in Figure \ref{fig:spectrum_neutron_precursors}. Each column represents the eigenvalues scaled by the time step size 
 
-One important feature for many of these solvers was the location of the eigenvalues for the transition matrix. The spectrum was calculated using the Matlab symbolic tool box and is plotted in Figure \ref{fig:spectrum_neutron_precursors} for dx = 10, dy = 20, and various values of dt. Figure \ref{fig:spectrum_neutron_precursors} show 6 elliptical rings, one at each dt, each one representing a precursor group. For a given time step size, the eigenvalues shifted along lines with slopes that are the ratio of their real and imaginary parts \cite{pusaAccruacy2013}. For a system in which the eigenvalues are located in a region where solutions based on Cauchy's integral break down, these eigenvalues can be shifted into a region where the solutions hold. Figure \ref{fig:spectrum_neutron_precursors} shows how changing the time step size can shrink the real and imaginary parts of the eigen spectrum.
+%One important feature for many of these solvers was the location of the eigenvalues for the transition matrix. The spectrum was calculated using the Matlab symbolic tool box and is plotted in Figure \ref{fig:spectrum_neutron_precursors} for dx = 10, dy = 20, and various values of dt. Figure \ref{fig:spectrum_neutron_precursors} show 6 elliptical rings, one at each dt, each one representing a precursor group. For a given time step size, the eigenvalues shifted along lines with slopes that are the ratio of their real and imaginary parts \cite{pusaAccruacy2013}. For a system in which the eigenvalues are located in a region where solutions based on Cauchy's integral break down, these eigenvalues can be shifted into a region where the solutions hold. Figure \ref{fig:spectrum_neutron_precursors} shows how changing the time step size can shrink the real and imaginary parts of the eigen spectrum.
 
-\begin{figure}[htbp]
+\clearpage
+
+\begin{figure}[p]
     \centering
-    \includegraphics[width=3.5in]{images/neutronPrecursorEigenValues.png}
+    \includegraphics[width=6in]{images/chapter-5/caseStudies/neutronPrecursors/neutronPrecorsorsEigenvalues.png}
     \caption{Spectrum for the Neutron Precursors}
     \label{fig:spectrum_neutron_precursors}
 \end{figure}
 
+\clearpage
+
 
 %\subsubsection{Accuracy as a function of substepping}
-To understand how sub-stepping can work to improve the accuracy of a Cauchy-based solver, the neutron precursors problem was computed at 10-second time step intervals. The location of the eigenvalues is a function of the ratio $v_{x}/dx$ in the transition matrix; therefore, at the prescribed discretization, this ratio was manipulated by changing the flow velocity. For each Cauchy solver, the eigenvalues at two different flow velocities, 25 cm/s ($v_{x}/dx = 2.5$) and 60 cm/s ($v_{x}/dx = 6$), are shown in Figure \ref{fig:neturonprecursor_cauchy_eigenvalues}. As shown in Figure \ref{fig:neturonprecursor_cauchy_eigenvalues}, as the ratio increased, so did the spread of the eigenvalues on the real and imaginary axis. This led to a limitation of the velocity to discretization size for convection problems when using Cauchy solvers. One solution, which is also shown in Figure \ref{fig:neturonprecursor_cauchy_eigenvalues}, is to use sub-stepping to reduce the time step size, thus confining the eigenvalues. As the number of substeps is increased, the eigenvalues become confined in a region in which the contour encloses the spectrum, theoretically increasing the solver's accuracy. Each plot in Figure \ref{fig:neturonprecursor_cauchy_eigenvalues} shows how the the spectrum was confined using 0, 2 and 6 substeps. As the number of substeps increased, the spectrum shrank into the confines of the contour. 
+%To understand how sub-stepping can work to improve the accuracy of a Cauchy-based solver, the neutron precursors problem was computed at 10-second time step intervals. The location of the eigenvalues is a function of the ratio $v_{x}/dx$ in the transition matrix; therefore, at the prescribed discretization, this ratio was manipulated by changing the flow velocity. For each Cauchy solver, the eigenvalues at two different flow velocities, 25 cm/s ($v_{x}/dx = 2.5$) and 60 cm/s ($v_{x}/dx = 6$), are shown in Figure \ref{fig:neturonprecursor_cauchy_eigenvalues}. As shown in Figure \ref{fig:neturonprecursor_cauchy_eigenvalues}, as the ratio increased, so did the spread of the eigenvalues on the real and imaginary axis. This led to a limitation of the velocity to discretization size for convection problems when using Cauchy solvers. One solution, which is also shown in Figure \ref{fig:neturonprecursor_cauchy_eigenvalues}, is to use sub-stepping to reduce the time step size, thus confining the eigenvalues. As the number of substeps is increased, the eigenvalues become confined in a region in which the contour encloses the spectrum, theoretically increasing the solver's accuracy. Each plot in Figure \ref{fig:neturonprecursor_cauchy_eigenvalues} shows how the the spectrum was confined using 0, 2 and 6 substeps. As the number of substeps increased, the spectrum shrank into the confines of the contour. 
 
 
 \subsection{Small case lump depletion mass transport}
