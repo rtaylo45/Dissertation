@@ -840,7 +840,13 @@ This problem examines a convection-driven flow with the 6 neutron precursor grou
 Coefficients for the system are shown in Table \ref{tab:precursorCoeffs} \cite{ott1985}. 
 Each precursor had the same initial condition of zero, and the source term for each precursor was scaled in the x and y directions by the sine function. The spatial domain was modeled to mimic a core region extending from $y \in [0,100]$ and $x \in [0,50]$, with a core exterior loop modeled from $y \in [100, 400]$. 
 
-\begin{table}[h!]
+The eigenvalues for this problem are shown in Figure \ref{fig:spectrum_neutron_precursors}. Each column represents the eigenvalues scaled by a single time step size and the CRAM, Hyperbolic and Parabolic solvers. Each row is a single solver with varying time step sizes. The contours represent the log base 10 absolute error of each scalar complex value on the real-imaginary plane. As the color becomes darker, the error becomes lower. While plotting there error contours along with the eigenvalues does not directly correlate to the total error for all matrices, examining these plots will provide insight into the accuracy of computing the matrix exponential with the Cauchy based methods. Just by examining the first column of figure \ref{fig:spectrum_neutron_precursors}, it appears that based on the placement of the eigenvalues the accuracy of our solution should be very high for all three of the solvers. The eigenvalues for the lowest velocity are clusted in the center of the quadrature points. As the velocity is increased, the eigenvalues grow on the real axis at a larger rate than the imaginary axis. While the accuracy of the solution at 60 seconds is in fact while accuracy, shown in figure \ref{fig:neutron_precursors_Einf_steps0}, at the first time step, the solution is quite inaccurate. This error can be drastically decreased in the first few time steps by applying the sub-stepping routine to each of these solvers, shown in figure \ref{fig:neutron_precursors_Einf_with_substeps}. In figure \ref{fig:neutron_precursors_Einf_with_substeps} each of the Cauchy solvers show dramatic decrease in error with the addition of sub-stepping. Other interesting behavior can be found by looking at the error as a function of time while using 12 substeps, shown in figure \ref{fig:neutron_precursors_Einf_steps12}. When using zero sub-steps the error continues to decrease over the the time span. Using 12 sub-steps the error decreases to a point then gradually starts to increase. Both sub-stepping schemes end up leading to approximately the same solution at t = 60. The trend of the error beginning small and gradually increases can also be noticed in each of the Pad\'e solvers, with Pad\'e-method 2 being vastly more accuracy than Pad\'e-method 1. The Taylor solver also shows some decreased accuracy for the lower two velocities before self correcting and gradually increasing in error until t = 60. 
+
+The second column in figure \ref{fig:spectrum_neutron_precursors} shows the eigenvalues using a time step size of 10 seconds. Based on just the placement of the eigenvalues the error for a velocity of 100 should be the highest followed by 50 and 25. Figure \ref{fig:}
+
+\clearpage
+
+\begin{table}[p]
    \caption{\label{tab:precursorCoeffs} Parameters for Neutron Precursors}
    \centering
    \begin{tabular}{lll}
@@ -857,25 +863,52 @@ Each precursor had the same initial condition of zero, and the source term for e
    \end{tabular}
 \end{table} 
 
-The eigenvalues for this problem are shown in Figure \ref{fig:spectrum_neutron_precursors}. Each column represents the eigenvalues scaled by the time step size 
-
-%One important feature for many of these solvers was the location of the eigenvalues for the transition matrix. The spectrum was calculated using the Matlab symbolic tool box and is plotted in Figure \ref{fig:spectrum_neutron_precursors} for dx = 10, dy = 20, and various values of dt. Figure \ref{fig:spectrum_neutron_precursors} show 6 elliptical rings, one at each dt, each one representing a precursor group. For a given time step size, the eigenvalues shifted along lines with slopes that are the ratio of their real and imaginary parts \cite{pusaAccruacy2013}. For a system in which the eigenvalues are located in a region where solutions based on Cauchy's integral break down, these eigenvalues can be shifted into a region where the solutions hold. Figure \ref{fig:spectrum_neutron_precursors} shows how changing the time step size can shrink the real and imaginary parts of the eigen spectrum.
-
 \clearpage
 
 \begin{sidewaysfigure}[p]
     \centering
     \includegraphics[width=8in]{images/chapter-5/caseStudies/neutronPrecursors/neutronPrecursorsEigenvalues.png}
-    \caption{Spectrum for the Neutron Precursors}
+    \caption{Spectrum for the neutron precursors superimposed on the scalar complex error $\log_{10}|r(z)-e^{z}|$}
     \label{fig:spectrum_neutron_precursors}
 \end{sidewaysfigure}
 
 \clearpage
 
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=5in]{images/chapter-5/caseStudies/neutronPrecursors/dt1/neutronPrecursorsEinfErrorerrorSteps0.png}
+    \caption{Relative E$_{\infty}$ error with dt = 1 second for matrix exponential solvers in the neutron precursors case study using zero sub-steps for the Cauchy solvers}
+    \label{fig:neutron_precursors_Einf_steps0}
+\end{figure}
 
-%\subsubsection{Accuracy as a function of substepping}
-%To understand how sub-stepping can work to improve the accuracy of a Cauchy-based solver, the neutron precursors problem was computed at 10-second time step intervals. The location of the eigenvalues is a function of the ratio $v_{x}/dx$ in the transition matrix; therefore, at the prescribed discretization, this ratio was manipulated by changing the flow velocity. For each Cauchy solver, the eigenvalues at two different flow velocities, 25 cm/s ($v_{x}/dx = 2.5$) and 60 cm/s ($v_{x}/dx = 6$), are shown in Figure \ref{fig:neturonprecursor_cauchy_eigenvalues}. As shown in Figure \ref{fig:neturonprecursor_cauchy_eigenvalues}, as the ratio increased, so did the spread of the eigenvalues on the real and imaginary axis. This led to a limitation of the velocity to discretization size for convection problems when using Cauchy solvers. One solution, which is also shown in Figure \ref{fig:neturonprecursor_cauchy_eigenvalues}, is to use sub-stepping to reduce the time step size, thus confining the eigenvalues. As the number of substeps is increased, the eigenvalues become confined in a region in which the contour encloses the spectrum, theoretically increasing the solver's accuracy. Each plot in Figure \ref{fig:neturonprecursor_cauchy_eigenvalues} shows how the the spectrum was confined using 0, 2 and 6 substeps. As the number of substeps increased, the spectrum shrank into the confines of the contour. 
+\clearpage
 
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=5in]{images/chapter-5/caseStudies/neutronPrecursors/dt1/neutronPrecursorsEinfErrorerrorWithSteps.png}
+    \caption{Relative E$_{\infty}$ error for dt = 1 second as a function of sub-stepping in the neutron precursors case study}
+    \label{fig:neutron_precursors_Einf_dt1_with_substeps}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=5in]{images/chapter-5/caseStudies/neutronPrecursors/dt1/neutronPrecursorsEinfErrorerrorSteps12.png}
+    \caption{Relative E$_{\infty}$ error with dt = 1 second for matrix exponential solvers in the neutron precursors case study using 12 sub-steps for the Cauchy solvers}
+    \label{fig:neutron_precursors_Einf_dt1_steps12}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=5in]{images/chapter-5/caseStudies/neutronPrecursors/dt10/neutronPrecursorsEinfErrorerrorSteps0.png}
+    \caption{Relative E$_{\infty}$ error with dt = 10 second for matrix exponential solvers in the neutron precursors case study using zero sub-steps for the Cauchy solvers}
+    \label{fig:neutron_precursors_Einf_dt10_steps0}
+\end{figure}
+
+\clearpage
 
 \subsection{Small case lump depletion mass transport}
 This is a depletion problem using the selected isotopes in Table \ref{tab:small_nuclides} represented by the following equations:
