@@ -89,12 +89,7 @@ The method of lines (MOL) is a general technique for solving PDE's which transfo
 
 The finite volume method is a discretization technique which divides the initial spacial domain into smaller volumes. In each volume (cell), the dependent variable is averaged and assumed to be constant. Each volume connects to one another and allows the species to transport between cells. Volumetric generation terms from nuclear and chemical reactions will be a function of the averaged species concentration, neutron flux and microscopic cross sections in that cell. Next each of the transport operators discretized using a 2-D finite volume method. Each cell volume is fixed and of equal size. A visual representation of an internal finite volume cell is shown in Figure \ref{fig:2DFiniteVolume}
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=4in]{images/chapter-4/2DFiniteVoluem.png}\\
-  \caption{2-D finite volume cell}
-  \label{fig:2DFiniteVolume}
-\end{figure} 
+
  
 \subsubsection{Diffusion}
 The diffusive flux is assumed to follow Fick's law of diffusion for an ideal mixture,
@@ -127,6 +122,18 @@ The diffusive flux is assumed to follow Fick's law of diffusion for an ideal mix
 \end{equation}
 
 \noindent The species diffusive flux across each phase are defined as,
+
+\clearpage
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=5in]{images/chapter-4/2DFiniteVoluem.png}\\
+  \caption{2-D finite volume cell}
+  \label{fig:2DFiniteVolume}
+\end{figure} 
+
+\clearpage
+
 
 \begin{equation}
 \begin{split}
@@ -283,16 +290,22 @@ The criteria for a scheme to be TVD was derived by Sweby \cite{sweby1984} using 
 \noindent There are a number of flux limiters which can be applied to Equations \ref{eq:eastFaceFlux} - \ref{eq:southFaceFlux}: some of the most popular limiter functions are, Van Leer, Van Albada, Min-Mod, SUPERBEE, QUICK and UMIST. Figure \ref{fig:fluxlimiter} shows the grey shaded region for a second order scheme to be TVD, along with common flux limiter functions. In Figure \ref{fig:fluxlimiter} many of the limiter functions overlap. For the region of $r > 1$ QUICK and UMIST are the exact same and for $r > 5$ UMIST, QUICK and SUPERBEE are the same. 
 
 
-\begin{figure}[htbp]
+
+
+TVD schemes can become unstable due to negative main coefficients and they are often reformulated in a different way to maintain numerical stability. One of the ways in which TVD schemes can be reformulated is by deferred corrections. This is an iterative method which breaks apart the convective flux coefficients into its first order upwind difference component and the second order component. The upwind differencing components will still appear in the usual matrix element however, the second order approximations are moved into a source term. The source term for step $n$ is calculated using species densities from step $n-1$. In this way the source term is differed and the convection flux is corrected. This method can be implemented both explicitly or implicitly. If the implicit formulation is used then a method such as Newton must be used to allow the solution to converge at each time step. The explicit method does not require internal iterations at each step but does require small time steps to increase the accuracy and maintain stability for the second order portion. The explicit method is utilized in libowski. For smooth functions this formulation is second order, but reverts back to first order for discontinuous functions.  
+
+Coefficients for the convection flux can also be rewritten in the same way that was done for the diffusion coefficients. The deferred corrections are placed in a source term coefficient. For an interior node of species \textit{i}, the transition matrix will have coefficients representing,
+
+\clearpage
+
+\begin{figure}[p]
   \centering
   \includegraphics[width=5.5in]{images/chapter-4/CFLlimiterFunctions.png}\\
   \caption{Flux limiter functions on the $\Psi - r$ plane}
   \label{fig:fluxlimiter}
 \end{figure} 
 
-TVD schemes can become unstable due to negative main coefficients and they are often reformulated in a different way to maintain numerical stability. One of the ways in which TVD schemes can be reformulated is by deferred corrections. This is an iterative method which breaks apart the convective flux coefficients into its first order upwind difference component and the second order component. The upwind differencing components will still appear in the usual matrix element however, the second order approximations are moved into a source term. The source term for step $n$ is calculated using species densities from step $n-1$. In this way the source term is differed and the convection flux is corrected. This method can be implemented both explicitly or implicitly. If the implicit formulation is used then a method such as Newton must be used to allow the solution to converge at each time step. The explicit method does not require internal iterations at each step but does require small time steps to increase the accuracy and maintain stability for the second order portion. The explicit method is utilized in libowski. For smooth functions this formulation is second order, but reverts back to first order for discontinuous functions.  
-
-Coefficients for the convection flux can also be rewritten in the same way that was done for the diffusion coefficients. The deferred corrections are placed in a source term coefficient. For an interior node of species \textit{i}, the transition matrix will have coefficients representing,
+\clearpage
 
 \begin{equation}
     \frac{d \rho_{P}}{dt} = a^{C}_{E}\rho_{E} + a^{C}_{S}\rho_{S} + a^{C}_{P}\rho_{P} + a^{C}_{W}\rho_{W} + a^{C}_{N}\rho_{N} + S^{C},
@@ -492,9 +505,11 @@ Neumann boundary conditions are applied in a similar way by approximating the de
 
 \noindent The concentration in the south boundary cell is solved for and plugged back into the differential equation. A similar process is done for the top, left, right and corners. The results are shown in Table \ref{tab:newmannBoundaries} for the modified coefficients. A mixture of both of these boundary conditions can be used for each side, although special care needs to be taken with the corners if the boundary conditions are mixed. 
 
-Periodic boundary conditions are applied on either the top and bottom or the left and right. This type of boundary condition can be thought of as folding the rectangular domain creating a cylinder. These are implemented by pointing the cell at one boundary next to the cell at the opposite side. For example, if periodic boundary conditions are applied on the top and bottom and the flow is positive, then what comes out the top enters at the bottom. In this way, flow loops can be modeled.
+Periodic boundary conditions are applied on either the top and bottom or the left and right. This type of boundary condition can be thought of as folding the rectangular domain 
 
-\begin{table}[htbp]
+\clearpage
+
+\begin{table}[p]
     \caption{\label{tab:dirichletBoundaries} Modified Coefficients for Dirichlet Boundaries}
     \centering
     \begin{tabular}{c|c|c|c|c|c|c}
@@ -513,7 +528,9 @@ Periodic boundary conditions are applied on either the top and bottom or the lef
     \end{tabular}
 \end{table}
 
-\begin{table}[htbp]
+\clearpage
+
+\begin{table}[p]
     \caption{\label{tab:newmannBoundaries} Modified Coefficients for Newmann Boundaries}
     \centering
     \begin{tabular}{c|c|c|c|c|c|c}
@@ -531,6 +548,11 @@ Periodic boundary conditions are applied on either the top and bottom or the lef
     Top right corner & $0$ & $a_{S}$ & $a_{P} + a_{N} + a_{E}$ & $0$ & $a_{W}$ & $S - a_{N}\rho_{bt}'\delta y - a_{E}\rho_{br}'\delta x$ \\ \hline
     \end{tabular}
 \end{table}
+
+\clearpage
+
+\noindent creating a cylinder. These are implemented by pointing the cell at one boundary next to the cell at the opposite side. For example, if periodic boundary conditions are applied on the top and bottom and the flow is positive, then what comes out the top enters at the bottom. In this way, flow loops can be modeled.
+
 
 \subsection{Application of Matrix Exponential Solvers}
 Five different matrix exponential solver are implemented in libowski with the added ability to use the Krylov subspace approximation. Each of these methods were discussed in Chapter \ref{ch:matrixEXPMethods} and algorithms are presented in this section. These methods include three based on Cauchys integral formula and two based on Pad\'e's approximation with scaling and squaring. Because of the  various magnitudes of the transition matrix coefficients, a direct solver is used to solve the linear systems \cite{pusa2013}. The direct solver is Eigens sparse LU decomposition which is based on the SuperLU library \cite{eigen} \cite{superlu99}. Each of the algorithms listed in this paper are shown in Appendix \ref{appen:matexpalg}.

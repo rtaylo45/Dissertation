@@ -25,23 +25,7 @@ When the nucleus of an atomic element is unstable it can undergo spontaneous tra
 
 Some nuclides have more than one mode of decay. Some of these decay modes compete with one another such as $\beta^{+}$ and electron capture. When nuclide \textit{i} has more than one decay mode, its decay constant is a summation of all $k$ decay modes,
 
-\begin{equation}
-    \lambda_{i} = \lambda_{i,1} + \lambda_{i,2} + \lambda_{i,3} ... = \sum_{k} \lambda_{i,k}.
-\end{equation}
-
-\noindent While total decay is sufficient for use in the loss of nuclide \textit{i} from Equation \ref{eq:decaySingleMode}, a branching ratio must be used to denoted the fraction of nuclide \textit{j} which decays into \textit{i}. The branching ratio is defined as,
-
-\begin{equation}
-    b_{j\rightarrow i} = \frac{\lambda_{j\rightarrow i}}{\lambda_{j}}.
-\end{equation}
-
-\noindent For nuclide \textit{j} which has multiple decay modes k, the branching ratio denotes the fraction of decays for nuclide \textit{j} which produce nuclide \textit{i}. Substituting this relation into Equation \ref{eq:decaySingleMode},
-
-\begin{equation}
-    \frac{dn_{i}}{dt} = \sum_{j=1}^{N} b_{j\rightarrow i}\lambda_{j}n_{j}(t) -\lambda_{i} n_{i}(t).
-    \label{eq:decay}
-\end{equation}
-
+\clearpage
 
 \begin{table}[t]
     \caption{\label{tab:decayModes} Summary of Decay Modes where Z is atomic number and A is mass number \cite{pusaThesis}}
@@ -64,12 +48,44 @@ Some nuclides have more than one mode of decay. Some of these decay modes compet
     \end{tabular}
 \end{table}
 
+\clearpage
+
+\begin{equation}
+    \lambda_{i} = \lambda_{i,1} + \lambda_{i,2} + \lambda_{i,3} ... = \sum_{k} \lambda_{i,k}.
+\end{equation}
+
+\noindent While total decay is sufficient for use in the loss of nuclide \textit{i} from Equation \ref{eq:decaySingleMode}, a branching ratio must be used to denoted the fraction of nuclide \textit{j} which decays into \textit{i}. The branching ratio is defined as,
+
+\begin{equation}
+    b_{j\rightarrow i} = \frac{\lambda_{j\rightarrow i}}{\lambda_{j}}.
+\end{equation}
+
+\noindent For nuclide \textit{j} which has multiple decay modes k, the branching ratio denotes the fraction of decays for nuclide \textit{j} which produce nuclide \textit{i}. Substituting this relation into Equation \ref{eq:decaySingleMode},
+
+\begin{equation}
+    \frac{dn_{i}}{dt} = \sum_{j=1}^{N} b_{j\rightarrow i}\lambda_{j}n_{j}(t) -\lambda_{i} n_{i}(t).
+    \label{eq:decay}
+\end{equation}
+
+
+
+
 \subsection{Neutron Induced Reactions}
 Neutron induced reactions follow the schematic shown in Figure \ref{fig:nuclearReaction}.  The projectile neutron encounters a target, resulting in the nuclear reaction. In this reaction, the neutron is denoted by \textit{a} and the target by \textit{b}, \textit{c} and \textit{d} are the resulting products. These reactions are often written in the following notation \cite{duderstadt1976},
 
 \begin{equation*}
     b (a,c) d 
 \end{equation*}
+
+
+
+The frequency of a reaction is governed by the probability at which it can occur. This probability is related to the  cross section. The microscopic cross section is a factor that characterizes the probability of a neutron-nuclear reaction with an atomic nucleus \cite{duderstadt1976}. Specifically, the formal definition of the microscopic cross section is,
+
+\begin{equation}
+    \sigma = \frac{\text{Number of reactions} / \text{nucleus} / \text{sec}}{\text{Number of incident neutrons} / \text{cm}^{2} / \text{sec}} = \frac{(R/N_{i})}{\phi},
+\end{equation}
+
+\clearpage
 
 \begin{figure}[b]
   \centering
@@ -78,11 +94,7 @@ Neutron induced reactions follow the schematic shown in Figure \ref{fig:nuclearR
   \label{fig:nuclearReaction}
 \end{figure} 
 
-The frequency of a reaction is governed by the probability at which it can occur. This probability is related to the  cross section. The microscopic cross section is a factor that characterizes the probability of a neutron-nuclear reaction with an atomic nucleus \cite{duderstadt1976}. Specifically, the formal definition of the microscopic cross section is,
-
-\begin{equation}
-    \sigma = \frac{\text{Number of reactions} / \text{nucleus} / \text{sec}}{\text{Number of incident neutrons} / \text{cm}^{2} / \text{sec}} = \frac{(R/N_{i})}{\phi},
-\end{equation}
+\clearpage
 
 \begin{equation*}
     R = \bigg[\frac{\# \text{ of reactions}}{\text{cm}^{2}\cdot \text{sec}}\bigg], \quad \sigma = \big[\text{cm}^{2}\big], \quad \phi = \bigg[\frac{\# \text{ of neutrons}}{\text{cm}^{2}\cdot \text{sec}} \bigg], \quad n_{i} = \bigg[\frac{\# \text{ of atoms}}{\text{cm}^{3}}\bigg].
@@ -99,15 +111,12 @@ Absorption reactions are those in which a neutron is absorbed by the atomic nucl
 
 \noindent where $\gamma_{j\rightarrow i,k}$ is the fraction of nuclide \textit{i} from nuclide \textit{j} through reaction \textit{k}. The first term in Equation  \ref{eq:neutronIndecedReaction} is the generation from the reaction of nuclide. First each nuclide is summed over, followed by a summation of each reaction for nuclide \textit{j}. If reaction \textit{k} results in generating nuclide \textit{i}, then $\sigma_{k,j}$ and $\gamma_{j\rightarrow i,k}$ are both nonzero. The second term in Equation \ref{eq:neutronIndecedReaction} is the loss of nuclide \textit{i} from reaction \textit{k}. For each nuclide \textit{i} a summation is taken over all possible neutron induced reactions. 
 
-The microscopic cross section characterizes the probability that a neutron will have a reaction with a single nucleus. Often it is required to understand how neutrons will interact with macroscopic chunk of the material \cite{duderstadt1976}. The macroscopic cross section provides the ability to compute how a large portion of material will react under a flux of particles or energy. This macroscopic cross section is the computation of the atomic number density multiplied by the microscopic cross section. For a material consisting of multiple atomic elements, the macroscopic cross section of reaction $x$ is computed by,
 
-\begin{equation}
-    \Sigma_{x} = \sum_{i=1}^{N}n_{i}\sigma_{i,x},
-\end{equation}
+The microscopic cross section characterizes the probability that a neutron will have a reaction with a single nucleus. Often it is required to understand how neutrons will interact with macroscopic chunk of the material \cite{duderstadt1976}. The macroscopic cross section provides the 
 
-\noindent The macroscopic cross section can be thought of as the probability per length path that a neutron will have a reaction with the nucleus \cite{duderstadt1976}. 
+\clearpage
 
-\begin{table}[t]
+\begin{table}[p]
     \caption{\label{tab:reactionModes} Summary of Decay Modes where Z is atomic number and A is mass number \cite{pusaThesis}}
     \centering
     \begin{tabular}{c|c|c}
@@ -138,14 +147,18 @@ The microscopic cross section characterizes the probability that a neutron will 
     \end{tabular}
 \end{table}
 
+\clearpage
+
+\noindent ability to compute how a large portion of material will react under a flux of particles or energy. This macroscopic cross section is the computation of the atomic number density multiplied by the microscopic cross section. For a material consisting of multiple atomic elements, the macroscopic cross section of reaction $x$ is computed by,
+
+\begin{equation}
+    \Sigma_{x} = \sum_{i=1}^{N}n_{i}\sigma_{i,x},
+\end{equation}
+
+\noindent The macroscopic cross section can be thought of as the probability per length path that a neutron will have a reaction with the nucleus \cite{duderstadt1976}. 
+
 When fissile material undergoes a neutron absorption (to relate it to the previous paragraphs), neutron induced fission can occur releasing neutrons, energy and fission products. Typically, fission is a two-body reaction, meaning that the target nucleus splits into two isotopes of smaller atomic number. The independent fission product yield is the expected fraction a nuclide is produced for a single fission event. Because the cross section is dependent on the incident neutron energy, fission product yields dependent on the neutron energy. The yields of fission products for ${}^{235}$U for fast and thermal neutrons is shown in Figure \ref{fig:fissionYield}.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=5.5in]{images/chapter-2/fissionYield.png}\\
-  \caption{Fission product yield for thermal and fast neutrons}
-  \label{fig:fissionYield}
-\end{figure} 
 
 
 \section{Neutron Transport Equation}
@@ -157,6 +170,17 @@ The neutron transport equation describes the angular neutron density as a functi
 \end{equation}
 
 \noindent where 
+
+\clearpage
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=5.5in]{images/chapter-2/fissionYield.png}\\
+  \caption{Fission product yield for thermal and fast neutrons}
+  \label{fig:fissionYield}
+\end{figure} 
+
+\clearpage
 
 $\begin{aligned}
 &\varphi = \varphi(r, E, \Omega) \equiv   \text{Angular neutron flux at energy } E \text{ and angle } \Omega  \\

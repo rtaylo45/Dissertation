@@ -347,26 +347,25 @@ Applying these approximations to real valued scalars or matrices requires half t
     e^{x} \approx r(x) = 2Re\bigg(\sum_{k=1}^{N/2}\frac{c_{k}}{x - z_{k}}\bigg).
 \end{equation}
 
-%\FloatBarrier
+\clearpage
 
-\begin{figure}[htbp]
+\begin{figure}[p]
   \centering
   \includegraphics[width=5in]{images/chapter-3/RationApproxParabolicError32.png}\\
   \caption{$\log_{10}|r(z)-e^{z}|$ for N = 32 where the contour is defined by a parabola, Equation \ref{eq:parabolicContour}. Quadrature points are denoted with x's}
   \label{fig:complexRationalApproxParabola}
 \end{figure} 
 
-\begin{figure}[htbp]
+\clearpage
+
+\begin{figure}[p]
   \centering
   \includegraphics[width=5in]{images/chapter-3/RationApproxHyperbolicError32.png}\\
   \caption{$\log_{10}|r(z)-e^{z}|$ for N = 32 where the contour is defined by a hyperbola, Equation \ref{eq:hyperbolicContour}. Quadrature points are denoted with x's}
   \label{fig:complexRationalApproxHyperbola}
 \end{figure} 
 
-%\FloatBarrier
-
-
-
+\clearpage
 
 \noindent When applying the rational function to a real valued matrix, the approximation becomes,
 
@@ -400,12 +399,7 @@ A different approach is to choose a function $r(z)$ that is the best approximati
 
 The difficulty with using the CRAM approximation is finding the coefficient for the rational approximation. For CRAM of order 14 and 16 the rational coefficient can be found in Reference \cite{pusa2011} up to 20 digits. Figure \ref{fig:complexRationalApproxCRAM} shows the accuracy of CRAM to the function $e^{z}$ on the complex plane. Because the rational function was built in such a way to be the best approximation on the negative real axis, the accuracy of CRAM is in a more narrow range of the real axis. For a real values matrix the CRAM algorithm leads to the following solution,
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=5in]{images/chapter-3/RationApproxCRAMError16.png}\\
-  \caption{$\log_{10}|r(z)-e^{z}|$ for CRAM with N = 16. Quadrature points are denoted with x's}
-  \label{fig:complexRationalApproxCRAM}
-\end{figure} 
+
 
 \begin{equation}
     e^{\boldsymbol{A}} \approx r(\boldsymbol{A}) = c_{0} + 2Re\Bigg( \sum_{k=1}^{N/2}c_{k}(\boldsymbol{A} - z_{k}\boldsymbol{I})^{-1}\Bigg), 
@@ -419,7 +413,20 @@ The difficulty with using the CRAM approximation is finding the coefficient for 
 \end{equation}
 
 \subsubsection{Accuracy of Rational Approximations}
-While the matrix exponential can be formally defined by Eq. (\ref{eq:power_series_exp}), when examining the accuracy of rational approximations presented, it is more useful to define the matrix exponential in terms of the transition matrix's eigenvalues. Because the contour $\Gamma$ must wind around the eigenvalues of $\boldsymbol{A}t$, if $\boldsymbol{A}$ has eigenvalues which have non-trivial imaginary parts then these eigenvalues will scale as a function of $t$. If these eigenvalues scale to a portion of the complex plane which fall outside the contour, then the accuracy of these methods can be compromised. For traditional burnup matrices it was stated earlier that the eigenvalues are clustered around the negative real axis \cite{pusa2010}. Because of this, the accuracy of CRAM as well as the other two rational approximations are not a function of time $t$ \cite{pusaAccruacy2013}. For burnup calculations in MSRs defined by Eq. (\ref{eq:MSRDepletion}) the eigenvalues are not necessarily clustered around the negative real axis as they have non-trival imaginary parts. Through numerical experiments is was found by the author that these imaginary parts were introduced by the addition of convection terms in the transition matrix. In addition, these imaginary parts were found to be correlated with the ratio the velocity to the spatial discretization as well as the boundary conditions. 
+While the matrix exponential can be formally defined by Eq. (\ref{eq:power_series_exp}), when examining the accuracy of rational approximations presented, it is more useful to define the matrix exponential in terms of the transition matrix's eigenvalues. Because the contour $\Gamma$ must wind around the eigenvalues of $\boldsymbol{A}t$, if $\boldsymbol{A}$ has eigenvalues which have non-trivial imaginary parts then these eigenvalues will scale as a function of $t$. If these eigenvalues scale to a portion of the complex plane which fall outside the contour, then the accuracy of these methods can be compromised. For traditional burnup matrices it was stated earlier that the eigenvalues are clustered around the negative real axis \cite{pusa2010}. Because of this, the accuracy of CRAM as well as the other two rational approximations are not a function of time $t$ \cite{pusaAccruacy2013}. For burnup calculations in MSRs defined by Eq. (\ref{eq:MSRDepletion}) the eigenvalues are not necessarily clustered around the negative real axis as they have non-trival imaginary parts. Through numerical 
+
+\clearpage
+
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=5in]{images/chapter-3/RationApproxCRAMError16.png}\\
+  \caption{$\log_{10}|r(z)-e^{z}|$ for CRAM with N = 16. Quadrature points are denoted with x's}
+  \label{fig:complexRationalApproxCRAM}
+\end{figure} 
+
+\clearpage
+
+\noindent experiments is was found by the author that these imaginary parts were introduced by the addition of convection terms in the transition matrix. In addition, these imaginary parts were found to be correlated with the ratio the velocity to the spatial discretization as well as the boundary conditions. 
 
 While rational approximations such as CRAM have shown fantastic results in burnup calculations, is has been shown that the relative accuracy of CRAM diminishes when the nuclide concentration diminishes significantly over the time step. For a nuclide concentration $n_{i}(t) << n_{i}(0)$ the error estimate for CRAM follows \cite{isotalo2016}:
 
