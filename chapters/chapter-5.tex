@@ -267,12 +267,15 @@ The Krylov subspace approximation was applied to each sub-problem with 1,000 cel
 
 \clearpage
 
-\begin{sidewaysfigure}[htbp]
+\begin{landscape}
+\thispagestyle{mylandscape}
+\begin{figure}[p]
     \centering
     \includegraphics[width=8in]{images/chapter-5/progressionProblems/problem2/krylovProblem2.png}
     \caption{Results for the Krylov subspace approximation for each sub-problem}
     \label{fig:problem2_krylov}
-\end{sidewaysfigure}
+\end{figure}
+\end{landscape}
 
 \clearpage
 
@@ -892,12 +895,15 @@ The eigenvalues for this problem are shown in Figure \ref{fig:spectrum_neutron_p
 
 \clearpage
 
-\begin{sidewaysfigure}[p]
+\begin{landscape}
+\thispagestyle{mylandscape}
+\begin{figure}[p]
     \centering
     \includegraphics[width=8in]{images/chapter-5/caseStudies/neutronPrecursors/neutronPrecursorsEigenvalues.png}
     \caption{Spectrum for the neutron precursors superimposed on the scalar complex error $\log_{10}|r(z)-e^{z}|$}
     \label{fig:spectrum_neutron_precursors}
-\end{sidewaysfigure}
+\end{figure}
+\end{landscape}
 
 \clearpage
 
@@ -1035,21 +1041,28 @@ This is a depletion problem using the selected isotopes in Table \ref{tab:small_
 
 \clearpage
 
-\begin{sidewaysfigure}[p]
+\begin{landscape}
+\thispagestyle{mylandscape}
+\begin{figure}[p]
     \centering
     \includegraphics[width=8in]{images/chapter-5/caseStudies/neutronPrecursors/neutronPrecursorsCauchyParallelSpeedup.png}
     \caption{Parallel speedup for Cauchy solvers as various time step sizes and sub-steps in neutron precursor case study}
     \label{fig:neutron_precursors_cauchy_speedup}
-\end{sidewaysfigure}
+\end{figure}
+\end{landscape}
 
 \clearpage
 
-\begin{sidewaysfigure}[p]
+\begin{landscape}
+\thispagestyle{mylandscape}
+\begin{figure}[p]
     \centering
     \includegraphics[width=8in]{images/chapter-5/caseStudies/neutronPrecursors/neutronPrecursorsCauchyParallelEfficiency.png}
     \caption{Parallel efficiency for Cauchy solvers as various time step sizes and sub-steps in neutron precursor case study}
     \label{fig:neutron_precursors_cauchy_parallel_eff}
-\end{sidewaysfigure}
+\end{figure}
+\end{landscape}
+
 
 \clearpage
 
@@ -1087,12 +1100,11 @@ This is a depletion problem using the selected isotopes in Table \ref{tab:small_
 \noindent where $N_{l}$, $N_{w}$ and $N_{g}$ represent the set of species which exist in the liquid, wall and gas phases. A species that exist in the liquid, wall a gas phase is represented by $\rho_{i,l}$, $\rho_{i,w}$ and $\rho_{i,g}$.  This problem is ran with two different time ranges in mind. The first is computing the solution over 10 time steps in the range $t \in [0, 200]$, resulting in time step sizes of 20 days. The matrix exponential solvers are tested using this range. The second is by computing a single time step of just 20 days using the matrix exponential solvers and the classical integrator methods. This is done is such a way to understand the classical integrator requirements for solving for just one hypothetical depletion time step. 
 
 \subsubsection{Small case}
-Eigenvalues for this problem are shown in Figure \ref{fig:small_lumped_depletion_eigenvalues}. These eigenvalues are clustered around the negative real axis and will not have an affect on the error for Cauchy based solvers, even with a time step size of 20 days. Using zero sub-steps, results for all solvers are shown in Figure \ref{fig:small_lumped_depletion_Einf_steps0}. These errors shown the typical behavior that as been shown in other problems. The Cauchy based solvers begin with a large error which exponentially decreases as the solution progresses. This is cased by the magnitude of growth or decay of various isotopes in the system. Pad\'e-method 2 has the highest error, with Pad\'e-method 1 and Taylor having approximately the same and over all lowest errors. The error for all three of these solvers begins low and gradually increases over the time span. 
+Eigenvalues for this problem are shown in Figure \ref{fig:small_lumped_depletion_eigenvalues}. These eigenvalues are clustered around the negative real axis and will not have an affect on the error for Cauchy based solvers, even with a time step size of 20 days. Using zero sub-steps, results for all solvers are shown in Figure \ref{fig:small_lumped_depletion_Einf_steps0} over 200 days and in Figure \ref{fig:small_lumped_depletion_species_errors} for each isotope at t = 20 days. These errors shown the typical behavior that as been shown in other problems. The Cauchy based solvers begin with a large error which exponentially decreases as the solution progresses. Figure \ref{small_lumped_depletion_species_errors} shows very interesting results in that the error for the Cauchy solvers is driven by the error in actinide elements Pu, Am and Cm. For the CRAM and Hyperbolic solvers, every other element as error at or below $10^-{11}$. The Parabolic solver has all other elemental errors at or below $10^{-9}$. Pad\'e-method 2 has the highest error, with Pad\'e-method 1 and Taylor having approximately the same and over all lowest errors. The error for all three of these solvers begins low and gradually increases over the time span. 
 
 Figure \ref{fig:small_lumped_depletion_Einf_with_substeps} shows Cauchy solvers errors as a function of sub-stepping. Each solver shows the same general trend of exponential decay in error with sub-stepping. The Parabolic solver has the highest error, with the CRAM and Hyperbolic solvers following closely in error. Figure \ref{fig:small_lumped_depletion_Einf_steps12} shows the error for each solver were each of the Cauchy solvers have 12 sub-steps. The Parabolic solver follows the same exponential decay trend as before. The CRAM and Hyperbolic solvers begin to decay until they reach a point where the error begins the climb. With sub-stepping, each of the Cauchy solvers achieves lower error at 200 days than the series solvers. 
 
 Results for the classical integrator methods are shown in Figure \ref{fig:small_lumped_depletion_Einf_integrators}. These results are for a total time of 20 days, representing a single time step taken from the exponential time differencing solvers. Integrator errors are capped at 10, so any error which is 10 is unstable. All of the explicit solvers are unstable except for the lowest time step size. BDF1-3 show classical convergence rates for all time step sizes, BDF4-6 reach a minimal value before increasing with a reduction in time step size. This is the same behavior that was seen in the neutron precursors case study. 
-
 
 
 \clearpage
@@ -1111,6 +1123,15 @@ Results for the classical integrator methods are shown in Figure \ref{fig:small_
     \includegraphics[width=5in]{images/chapter-5/caseStudies/smallLumpedDepletion/msrSmallLumpDepletionEinfErrorerrorSteps0.png}
     \caption{Relative E$_{\infty}$ error with dt = 20 days for matrix exponential solvers in the small lumped depletion case study using zero sub-steps for the Cauchy solvers}
     \label{fig:small_lumped_depletion_Einf_steps0}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=5in]{images/chapter-5/caseStudies/smallLumpedDepletion/msrLumpedDepletionSmallSteps0.png}
+    \caption{Relative E$_{\infty}$ error for each isotope at t = 20 days for matrix exponential solvers in the small lumped depletion case study using zero sub-steps for the Cauchy solvers}
+    \label{fig:small_lumped_depletion_species_errors}
 \end{figure}
 
 \clearpage
