@@ -1024,7 +1024,7 @@ Next the run times for each of the methods are discussed, the results for each m
 
 \noindent differencing solvers had higher run times for the same dt size however, the cost vs accuracy for the exponential time differencing solvers is better than the classical integrator methods. Run times as a function of sub-stepping for each of the Cauchy solvers is shown in Figure \ref{fig:neutron_precursors_substepping_cauchy_runtimes}. As expected, run times linearly increase as the number of sub-steps is increased, with the run times for Cauchy solvers with dt = 1 reaching values as high has 300 seconds. 
 
-The Cauchy solvers were written to perform in parallel and performance study is conducted to assess this capability. Each solver is ran is such a way to evenly distribute the work load for each CPU core. A single 16th order CRAM solve consist of solving 8 independent linear systems, the 32nd order Hyperbolic and Parabolic solver each have 16 independent linear systems. In the case of CRAM, this leads to using 1, 2, 4 and 8 cores. For the Hyperbolic and Parabolic solvers, this set is extended to include 16 cores. Two sets of results are shown, the first is for speedup and the second is for parallel efficiency. Speedup is defined as run time for a single core over run time for multi-core. Parallel efficiency is the same ratio as speedup but also divided by the number of cores. Results for parallel speedup is shown in Figure \ref{fig:neutron_precursors_cauchy_speedup} and parallel efficiency in Figure \ref{fig:neutron_precursors_cauchy_parallel_eff}. Figure \ref{fig:neutron_precursors_cauchy_speedup} shows that for up to 8 cores, each of the solvers have close to the ideal linear speedup. As the number of cores grows larger to 16, the speedup diminishes some but overall the speedup is quite good. The Hyperbolic and Parabolic speedup closely resemble one another up to 8 cores, followed by the Parabolic solver showing slightly better speedup. Figure \ref{fig:neutron_precursors_cauchy_parallel_eff} shows a linear regression of parallel efficiency with all solvers, with CRAM diminishing more quickly. The differences in each of the Cauchy solvers might be within the complex valued coefficients causing some discrepancy in the linear solve time. 
+The Cauchy solvers were written to perform in parallel and performance study is conducted to assess this capability. Each solver is ran is such a way to evenly distribute the work load for each CPU core. A single 16th order CRAM solve consist of solving 8 independent linear systems, the 32nd order Hyperbolic and Parabolic solver each have 16 independent linear systems. In the case of CRAM, this leads to using 1, 2, 4 and 8 cores. For the Hyperbolic and Parabolic solvers, this set is extended to include 16 cores. Two sets of results are shown, the first is for speedup and the second is for parallel efficiency. Speedup is defined as run time for a single core over run time for multi-core. Parallel efficiency is the same ratio as speedup but also divided by the number of cores. Results for parallel speedup is shown in Figure \ref{fig:neutron_precursors_cauchy_speedup} and parallel efficiency in Figure \ref{fig:neutron_precursors_cauchy_parallel_eff}. Figure \ref{fig:neutron_precursors_cauchy_speedup} shows that for up to 8 cores, each of the solvers have close to the ideal linear speedup. As the number of cores grows larger to 16, the speedup diminishes some but overall the speedup is quite good. The Hyperbolic and Parabolic speedup closely resemble one another up to 8 cores, followed by the Parabolic solver showing slightly better speedup. Figure \ref{fig:neutron_precursors_cauchy_parallel_eff} shows a linear regression of parallel efficiency with all solvers, with CRAM diminishing more quickly. The differences in each of the Cauchy solvers might be within the complex valued coefficients causing some discrepancy in the linear solve time. A summary of each solver is shown in Table \ref{tab:neutron_precursors_runtimes}. 
 
 \subsection{Lump depletion and mass transport}
 This is a depletion problem using the selected isotopes in Table \ref{tab:small_nuclides} represented by the following equations:
@@ -1063,8 +1063,50 @@ This is a depletion problem using the selected isotopes in Table \ref{tab:small_
 \end{figure}
 \end{landscape}
 
+\clearpage
+
+\begin{table}[p]
+\centering
+\begin{adjustbox}{width=1\textwidth}
+\begin{threeparttable}
+   \caption{\label{tab:neutron_precursors_runtimes} Summary of results for at 60 seconds for neutron precursor case study}
+   \begin{tabular}{lllllll}
+   \hline
+   \multicolumn{1}{c}{} & \multicolumn{2}{c}{Velocity 25\tnote{1}} & \multicolumn{2}{c}{Velocity 50\tnote{1}} & \multicolumn{2}{c}{Velocity 100\tnote{1}}\\
+   \cline{2-7} 
+   Solver & Run time (sec) & E$_{\infty}$ error & Run time (sec) & E$_{\infty}$ error & Run time (sec) & E$_{\infty}$ error\\
+   \hline
+	CRAM\tnote{2} & 2.67E+00 & 2.72E-12 & 2.73E+00 & 1.03E-11 & 2.63E+00 & 6.91E-12 \\
+	Hyperbolic\tnote{2} & 5.38E+00 & 8.58E-13 & 5.25E+00 & 2.97E-12 & 5.22E+00 & 2.19E-12 \\
+	Parabolic\tnote{2} & 5.42E+00 & 6.56E-11 & 5.25E+00 & 3.39E-10 & 5.00E+00 & 4.90E-10 \\
+	Pad\'e-method 1 & 5.73E-01 & 5.23E-03 & 4.54E-01 & 1.97E-03 & 4.53E-01 & 1.64E-03 \\
+	Pad\'e-method 2 & 1.02E+00 & 1.93E-12 & 1.00E+00 & 7.28E-12 & 9.43E-01 & 1.20E-11 \\
+	Taylor & 2.11E-01 & 1.75E-14 & 2.36E-01 & 3.64E-14 & 2.96E-01 & 6.52E-14 \\
+	BDF1\tnote{3} & 2.21E+02 & 1.05E-05 & 2.24E+02 & 5.87E-06 & 2.24E+02 & 5.60E-06 \\
+	BDF2\tnote{3} & 2.21E+02 & 1.81E-09 & 2.23E+02 & 2.01E-10 & 2.24E+02 & 1.00E-10 \\
+	BDF3\tnote{3} & 2.22E+02 & 4.96E-12 & 2.22E+02 & 7.24E-12 & 2.23E+02 & 2.76E-12 \\
+	BDF4\tnote{3} & 2.21E+02 & 3.76E-12 & 2.23E+02 & 2.76E-12 & 2.23E+02 & 2.63E-12 \\
+	BDF5\tnote{4} & 2.30E+01 & 5.59E-13 & 2.25E+01 & 3.33E-13 & 2.29E+01 & 4.11E-13 \\
+	BDF6\tnote{4} & 2.30E+01 & 1.56E-12 & 2.28E+01 & 1.04E-12 & 2.33E+01 & 1.34E-12 \\
+	Forward Euler\tnote{3} & 9.12E+00 & 1.05E-05 & 9.07E+00 & 5.87E-06 & 9.51E+00 & 5.60E-06 \\
+	Midpoint\tnote{3} & 9.37E+00 & 8.98E-10 & 9.58E+00 & 1.07E-10 & 1.06E+01 & 5.93E-11 \\
+	Kutta 3rd Order\tnote{3} & 1.06E+01 & 6.77E-13 & 1.08E+01 & 5.83E-13 & 1.15E+01 & 5.60E-11 \\
+	Kutta 4th Order\tnote{3} & 1.31E+01 & 6.52E-13 & 1.34E+01 & 5.93E-13 & 1.42E+01 & 5.60E-13 \\
+   \hline
+   \end{tabular}
+	\begin{tablenotes}
+      \small
+      \item [1] Ran with one time step for the matrix exponential solvers
+      \item [2] Ran with 12 sub-steps
+      \item [3] dt = 1E-03
+      \item [4] dt = 1E-02
+    \end{tablenotes}
+\end{threeparttable}
+\end{adjustbox}
+\end{table} 
 
 \clearpage
+
 
 \begin{equation}
 \begin{split}
@@ -1100,7 +1142,9 @@ This is a depletion problem using the selected isotopes in Table \ref{tab:small_
 \noindent where $N_{l}$, $N_{w}$ and $N_{g}$ represent the set of species which exist in the liquid, wall and gas phases. A species that exist in the liquid, wall a gas phase is represented by $\rho_{i,l}$, $\rho_{i,w}$ and $\rho_{i,g}$.  This problem is ran with two different time ranges in mind. The first is computing the solution over 10 time steps in the range $t \in [0, 200]$, resulting in time step sizes of 20 days. The matrix exponential solvers are tested using this range. The second is by computing a single time step of just 20 days using the matrix exponential solvers and the classical integrator methods. This is done is such a way to understand the classical integrator requirements for solving for just one hypothetical depletion time step. 
 
 \subsubsection{Small case}
-Eigenvalues for this problem are shown in Figure \ref{fig:small_lumped_depletion_eigenvalues}. These eigenvalues are clustered around the negative real axis and will not have an affect on the error for Cauchy based solvers, even with a time step size of 20 days. Using zero sub-steps, results for all solvers are shown in Figure \ref{fig:small_lumped_depletion_Einf_steps0} over 200 days and in Figure \ref{fig:small_lumped_depletion_species_errors} for each isotope at t = 20 days. These errors shown the typical behavior that as been shown in other problems. The Cauchy based solvers begin with a large error which exponentially decreases as the solution progresses. Figure \ref{small_lumped_depletion_species_errors} shows very interesting results in that the error for the Cauchy solvers is driven by the error in actinide elements Pu, Am and Cm. For the CRAM and Hyperbolic solvers, every other element as error at or below $10^-{11}$. The Parabolic solver has all other elemental errors at or below $10^{-9}$. Pad\'e-method 2 has the highest error, with Pad\'e-method 1 and Taylor having approximately the same and over all lowest errors. The error for all three of these solvers begins low and gradually increases over the time span. 
+Eigenvalues for this problem are shown in Figure \ref{fig:small_lumped_depletion_eigenvalues}. These eigenvalues are clustered around the negative real axis and will not have an affect on the error for Cauchy based solvers, even with a time step size of 20 days. Using zero sub-steps, results for all solvers are shown in Figure \ref{fig:small_lumped_depletion_Einf_steps0} over 200 days and in Figure \ref{fig:small_lumped_depletion_species_errors} for each isotope at t = 20 days. These errors shown the typical behavior that as been shown in other problems. The Cauchy based solvers begin with a large error which exponentially decreases as the solution progresses. Figure \ref{small_lumped_depletion_species_errors} shows very interesting results in that the error for the Cauchy solvers is driven by the error in actinide elements Pu, Am and Cm. For the CRAM and Hyperbolic solvers, every other element as error at or below $10^{-11}$. The Parabolic solver has all other elemental errors at or below $10^{-9}$. 
+
+Pad\'e-method 2 has the highest error, with Pad\'e-method 1 and Taylor having approximately the same and over all lowest errors. The error for all three of these solvers begins low and gradually increases over the time span. 
 
 Figure \ref{fig:small_lumped_depletion_Einf_with_substeps} shows Cauchy solvers errors as a function of sub-stepping. Each solver shows the same general trend of exponential decay in error with sub-stepping. The Parabolic solver has the highest error, with the CRAM and Hyperbolic solvers following closely in error. Figure \ref{fig:small_lumped_depletion_Einf_steps12} shows the error for each solver were each of the Cauchy solvers have 12 sub-steps. The Parabolic solver follows the same exponential decay trend as before. The CRAM and Hyperbolic solvers begin to decay until they reach a point where the error begins the climb. With sub-stepping, each of the Cauchy solvers achieves lower error at 200 days than the series solvers. 
 
@@ -1482,8 +1526,6 @@ A summary of results for each of solvers tested is shown in Table \ref{tab:small
 
 Results for the parallel Cauchy solvers are shown in Figures \ref{fig:small_2D_depletion_cauchy_speedup} and \ref{fig:small_2D_depletion_cauchy_parallel_eff}. These results show good parallel speed up for each of the sub-steps, reaching 12 times the speed up for 16 cores in the Hyperbolic and Parabolic solvers. The parallel efficiency shows an apparent elevated value for 2 processors when using 6 and 12 sub-steps. This is due to the slight differences in run times each time the problem is ran. After two cores the parallel efficiency shows the common linear decrease as the number of cores is increased. 
 
-\subsubsection{Large case}
-
 
 \clearpage
 
@@ -1530,6 +1572,8 @@ Results for the parallel Cauchy solvers are shown in Figures \ref{fig:small_2D_d
 \end{threeparttable}
 \end{table} 
 
+\clearpage
+
 \begin{figure}[p]
     \centering
     \includegraphics[width=5in]{images/chapter-5/caseStudies/small2DDepletion/msrSmall2DDepletionCauchyParallelSpeedup.png}
@@ -1545,5 +1589,45 @@ Results for the parallel Cauchy solvers are shown in Figures \ref{fig:small_2D_d
     \caption{Parallel efficiency for Cauchy solvers as various time step sizes and sub-steps for the small 2D depletion case}
     \label{fig:small_2D_depletion_cauchy_parallel_eff}
 \end{figure}
+
+\clearpage
+
+\subsubsection{Large case}
+
+
+
+\begin{table}[p]
+\centering
+\begin{threeparttable}
+   \caption{\label{tab:small_2D_depletion_runtimes} Summary of results for large 2D depletion case}
+   \begin{tabular}{lllll}
+   \hline
+   \multicolumn{1}{c}{} & \multicolumn{2}{c}{20 days\tnote{1}} & \multicolumn{2}{c}{200 days\tnote{2}} \\
+   \cline{2-5} 
+   Solver & Run time (sec) & E$_{\infty}$ error & Run time (sec) & E$_{\infty}$ error \\
+   \hline
+   CRAM\tnote{3} & 6.54E+02 & 9.60E-10 & 6.30E+03 & 8.67E-09 \\
+   Hyperbolic\tnote{3} & 1.21E+03 & 9.60E-10 & 1.19E+04 & 8.67E-09 \\
+   Parabolic\tnote{3} & 1.17E+03 & 1.24E-08 & 1.17E+04 & 8.67E-09 \\
+   Pad\'e-method 1 & 2.96E+02 & 9.84E-10 & 2.89E+03 & 8.91E-09 \\
+   Pad\'e-method 2 & 6.18E+02 & 5.93E-08 & 5.90E+03 & 5.92E-07 \\
+   Taylor & 1.15E+04 & 1.04E-09 & 8.20E+04 & 9.25E-09 \\
+   BDF1\tnote{4} &  &  & - & - \\
+   BDF2\tnote{4} &  &  & - & - \\
+   BDF3\tnote{4} &  &  & - & - \\
+   BDF4\tnote{4} &  &  & - & - \\
+   BDF5\tnote{4} &  &  & - & - \\
+   BDF6\tnote{4} &  &  & - & - \\
+   \hline
+   \end{tabular}
+	\begin{tablenotes}
+      \small
+      \item [1] Ran with one time step for the matrix exponential solvers
+      \item [2] Ran with 10 time steps
+      \item [3] Ran with 6 sub-steps
+      \item [4] Results shown for dt = 172.8 seconds
+    \end{tablenotes}
+\end{threeparttable}
+\end{table} 
 
 \clearpage
