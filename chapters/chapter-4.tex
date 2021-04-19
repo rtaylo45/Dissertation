@@ -33,7 +33,7 @@ Nuclear burnup calculations involve solving a set of first order linear ODEs of 
     \label{eq:offdiagonalCoeffsTraditionalBurnup}
 \end{equation}
 
-\noindent While it is possible to order index the nuclides in any order, the transition matrix becomes nearly upper triangular if the nuclides are indexed by ascending order by their ZAI index defined by $ZAI = 10000Z + 10A + I$, where $Z$ is the atomic number, $A$ is the mass number and $I$ is the isomeric state \cite{pusa2013}.
+\noindent While it is possible to index the nuclides in any order, the transition matrix becomes nearly upper triangular if the nuclides are indexed by ascending order by their ZAI index defined by $ZAI = 10000Z + 10A + I$, where $Z$ is the atomic number, $A$ is the mass number and $I$ is the isomeric state \cite{pusa2013}.
 
 There are two major matrix properties which influence the accuracy of the matrix exponential algorithms described in Chapter \ref{ch:matrixEXPMethods}, these are the matrix norm and the location of the eigenvalues of the matrix. Series approximations such as Pad\'e are most accurate around the origin, meaning that he norm of the matrix must be small. How small the norm must be depends on the order of the Pad\'e approximation. The $\ell_{1}$ norm the for $\boldsymbol{A}t$ is known to be,
 
@@ -87,7 +87,7 @@ The implementation of Equation \ref{eq:MSRDepletionChemKinetics} is done on a fi
 \subsection{Method of Lines}
 The method of lines (MOL) is a general technique for solving PDE's which transforms the spacial dependence into an approximate algebraic expression. All but one dimension is discretized, resulting in a system of ODE's. In many physical problems, the undiscretized variable is time. After MOL is applied then normal analytic or numerical integration techniques can be used to solve the system of ODE's. MOL is a generic scheme and can be applied using methods such as finite difference or finite volume \cite{hamdi2007}. 
 
-The finite volume method is a discretization technique which divides the initial spacial domain into smaller volumes. In each volume (cell), the dependent variable is averaged and assumed to be constant. Each volume connects to one another and allows the species to transport between cells. Volumetric generation terms from nuclear and chemical reactions will be a function of the averaged species concentration, neutron flux and microscopic cross sections in that cell. Next each of the transport operators discretized using a 2-D finite volume method. Each cell volume is fixed and of equal size. A visual representation of an internal finite volume cell is shown in Figure \ref{fig:2DFiniteVolume}
+The finite volume method is a discretization technique which divides the initial spatial domain into smaller volumes. In each volume (cell), the dependent variable is averaged and assumed to be constant. Each volume connects to one another and allows the species to transport between cells. Volumetric generation terms from nuclear and chemical reactions will be a function of the averaged species concentration, neutron flux and microscopic cross sections in that cell. Next each of the transport operators discretized using a 2-D finite volume method. Each cell volume is fixed and of equal size. A visual representation of an internal finite volume cell is shown in Figure \ref{fig:2DFiniteVolume}
 
 
  
@@ -98,7 +98,7 @@ The diffusive flux is assumed to follow Fick's law of diffusion for an ideal mix
     j_{i,x} = -D_{i}\frac{d\rho_{i}}{dx}.
 \end{equation}
 
-\noindent In a 2-D system, the diffusion terms results in,
+\noindent In a 2-D system, the diffusion term results in,
 
 \begin{equation}
     -\int_{V}\nabla \cdot j_{i}dV = -\int_{V}\frac{\partial }{\partial x}\bigg( -D_{i}\frac{\partial \rho_{i}}{\partial x}\bigg)dV - \int_{V}\frac{\partial }{\partial y}\bigg( -D_{i}\frac{\partial \rho_{i}}{\partial y}\bigg)dV.
@@ -115,7 +115,7 @@ The diffusive flux is assumed to follow Fick's law of diffusion for an ideal mix
 \end{split}
 \end{equation}
 
-\noindent Each of the first order spacial derivatives are assumed to linearly vary between the cell centered points. The diffusion coefficient are defined to be the average between each of pair of points,
+\noindent Each of the first order spatial derivatives are assumed to linearly vary between the cell centered points. The diffusion coefficient are defined to be the average between each of pair of points,
 
 \begin{equation}
     D_{w} =\frac{D_{W} + D_{P}}{2}, \quad D_{e} =\frac{D_{P} + D_{E}}{2}, \quad D_{s} =\frac{D_{S} + D_{P}}{2}, \quad D_{n} =\frac{D_{P} + D_{N}}{2}. 
@@ -497,7 +497,7 @@ Dirichlet and Neumann boundary conditions can be easily implemented by the use o
 
 \noindent The species concentration for the East cell is solved for and plugged back in to the differential equation to yield new coefficients for the matrix elements. This same method is used for the top, bottom, left, right and the corners. Let the subscript \textit{b} denote a boundary condition value and let \textit{r}, \textit{l}, \textit{t} and \textit{b} denote the right, left, top and bottom boundaries. Table \ref{tab:dirichletBoundaries} shows the modified coefficients for Dirichlet boundary conditions. 
 
-Neumann boundary conditions are applied in a similar way by approximating the derivative at the boundary using a second order central difference approximation at the boundary. For a the bottom boundary this leads to,
+Neumann boundary conditions are applied in a similar way by approximating the derivative at the boundary using a second order central difference approximation at the boundary. For the bottom boundary this leads to,
 
 \begin{equation}
     \rho_{b}' \approx \frac{\rho_{P} - \rho_{S}}{\delta y}.
@@ -555,7 +555,7 @@ Periodic boundary conditions are applied on either the top and bottom or the lef
 
 
 \subsection{Application of Matrix Exponential Solvers}
-Five different matrix exponential solver are implemented in libowski with the added ability to use the Krylov subspace approximation. Each of these methods were discussed in Chapter \ref{ch:matrixEXPMethods} and algorithms are presented in this section. These methods include three based on Cauchys integral formula and two based on Pad\'e's approximation with scaling and squaring. Because of the  various magnitudes of the transition matrix coefficients, a direct solver is used to solve the linear systems \cite{pusa2013}. The direct solver is Eigens sparse LU decomposition which is based on the SuperLU library \cite{eigen} \cite{superlu99}. Each of the algorithms listed in this paper are shown in Appendix \ref{appen:matexpalg}.
+Five different matrix exponential solver are implemented in libowski with the added ability to use the Krylov subspace approximation. Each of these methods were discussed in Chapter \ref{ch:matrixEXPMethods} and algorithms are presented in this section. These methods include three based on Cauchys integral formula and two based on Pad\'e's approximation with scaling and squaring. Because of the  various magnitudes of the transition matrix coefficients, a direct solver is used to solve the linear systems \cite{pusa2013}. The direct solver is Eigens sparse LU decomposition which is based on the SuperLU library \cite{eigen} \cite{superlu99}. Each of the algorithms listed in this thesis are shown in Appendix \ref{appen:matexpalg}.
 
 \subsubsection{CRAM}
 The biggest problem with using CRAM is obtaining the coefficients for the partial fraction decomposition. These coefficients for order 14 and 16 can be found in Reference \cite{pusa2011}, only order 16 is implemented in libowski. As discussed earlier for Cauchy method of order $N$, $N/2$ number of complex linear systems need to be solved. The general algorithm for a method based on contour integrals in partial fraction decomposition form is shown in Algorithm \ref{alg:cauchy}. Both the Parabolic and Hyperbolic methods used this same algorithm but with different poles and residues. It should be noted that notation for the residues where changed from $c_{k}$ to $\alpha_{k}$ and the residues from $z_{k}$ to $\theta_{k}$. For complex matrices and scalars $\alpha$ and $\theta$ would need to be the same size as the approximation order. Real valued matrices and scalars require half of these coefficients. Because all the matrices here are real, $\alpha$ and $\theta$ are all of size $N/2$. 
@@ -570,14 +570,14 @@ Solutions with the parabolic and hyperbolic contours use Algorithm \ref{alg:cauc
 As mentioned before, for a given order $N$ of the Cauchy solvers $N/2$ linear systems need to be solved. Each of these systems are independent and can be performed separately. Paralelization takes two general forms: shared and distributed memory. Shared memory archetypes involve using multicore CPUs which have access to the same shared memory. Because of this; all processors have access to the same set of variables and can modify them individually. Distributed memory works by connecting multiple CPUs over a network and having each computer solve a portion of the problem. In this case; each computer has its own copy of the variables required to solve its portion of the problem. Libraries exist which allow programmers the ability to parallelize their code on a high level for each of these two architectures. Open multiprocessing (OpenMP) is used for shared memory and message massing interface (MPI) for distributed memory \cite{openmp} \cite{mpi}. In general OpenMP is easier to implement but less flexible because of the memory requirement. This issue with MPI is that using it on a shared memory device will unnecessarily increase the memory consumption. Because of its inherent flexibility MPI is utilized in parallizing the Cauchy solver in libowski. 
 
 \subsubsection{Pad\'e - Method 1}
-The first method bast on the Pad\'e approximation was developed by Nicholas J. Higham and can be found in Reference \cite{higham2005}. Higham developed this algorithm in a similar manner which was done before by Moler and Van Loan \cite{moler2003} by choosing the optimal number of matrix scalings required for the Pad\'e of a certain order. Higham noted that the backward error analysis done by Moler and Van Loan was simple and elegant, however not sharp. Instead of only developing an algorithm based on a numerical error bound, Highman also considered computational cost. The resulting algorithm developed by Highman can be found in Reference \cite{higham2005} and the reader should refer to Highman's paper for further detail in its development. Algorithm \ref{alg:method1} is the algorithm that was developed in the paper, and shows its implementation in libowski. From now it shall be referred to as Pad\'e Method 1. Pad\'e Method's 1 and 2 both rely on functions that are shown in Appendix \ref{appen:matexpalg}. Unlike methods based on contour functions, the Pa\'e method directly computes the matrix exponential. 
+The first method bast on the Pad\'e approximation was developed by Nicholas J. Higham and can be found in Reference \cite{higham2005}. Higham developed this algorithm in a similar manner which was done before by Moler and Van Loan \cite{moler2003} by choosing the optimal number of matrix scalings required for the Pad\'e of a certain order. Higham noted that the backward error analysis done by Moler and Van Loan was simple and elegant, however not sharp. Instead of only developing an algorithm based on a numerical error bound, Highman also considered computational cost. The resulting algorithm developed by Highman can be found in Reference \cite{higham2005} and the reader should refer to Highman's paper for further detail in its development. Algorithm \ref{alg:method1} is the algorithm that was developed in the paper, and shows its implementation in libowski. From now it shall be referred to as Pad\'e Method 1. Pad\'e Method's 1 and 2 both rely on functions that are shown in Appendix \ref{appen:matexpalg}. Unlike methods based on contour functions, the Pad\'e method directly computes the matrix exponential. 
 
 \subsubsection{Pad\'e - Method 2}
 The second Pad\'e method is a modification of the first Pad\'e method that addresses the weakness in overscaling. Overscaling occurs when a large matrix norm causes a larger than necessary $\alpha$ to be used, leading to decreased accuracy \cite{higham2009}. Al-Mohy and Higham developed this algorithm by inroducing a new sharper truncation error bound, which is likely to help correct the overscaling problem. More information on the new algorithm can be found in Referenence \cite{higham2009}. Algorithm 6.1 from said reference is implemented in libowski and is shown in Algorithm \ref{alg:method2}. There are two helper functions that are used in Algorithm \ref{alg:method2}, these function are defined Appendix \ref{appen:matexpalg} along with Algorithm \ref{alg:method2}. 
 
 
 \subsubsection{Taylor}
-The Taylor algorithms implemented in libowski was taken from Reference \cite{higham2011} for computing $F \approx e^{\boldsymbol{A}t}\boldsymbol{B}$ over a single step, where $\boldsymbol{A} \in \mathbb{C}^{n\times n}$ and $\boldsymbol{B} \in \mathbb{C}^{n\times n_{0}}$. Unlike the Pad\'e methods, the Taylor algorithm does not require the need for linear solves. This was done in an attempt to reduce the computational cost. Three key ideas were employed when developing this algorithm:
+The Taylor algorithms implemented in libowski was taken from Reference \cite{higham2011} for computing $\boldsymbol{F} \approx e^{\boldsymbol{A}t}\boldsymbol{B}$ over a single step, where $\boldsymbol{A} \in \mathbb{C}^{n\times n}$ and $\boldsymbol{B} \in \mathbb{C}^{n\times n_{0}}$. Unlike the Pad\'e methods, the Taylor algorithm does not require the need for linear solves. This was done in an attempt to reduce the computational cost. Three key ideas were employed when developing this algorithm:
 
 \begin{enumerate}
     \item Careful choice of the Taylor series order and scaling parameter, exploiting estimates of $||t{\boldsymbol{A}}^{p}||^{p}$, to keep the backward error suitably bounded while minimizing the computational cost.
