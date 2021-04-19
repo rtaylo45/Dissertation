@@ -1,14 +1,14 @@
 \chapter{Nuclear Fuel Depletion} \label{ch:burnupEquations}
-Over the life time of a nuclear reactor the composition of the fuel changes from being exposed to a neutron rich environment. The changes in fuel composition have an important impact on the reactor power distribution, stability and control. Reactor efficiency as well as fuel utilization and economics are also greatly influenced from changes in fuel composition. As a nuclear reactor operates through time, the composition of the fuel elements changes due to fission, radioactive decay and neutron capture reactions. This change in composition is important because nuclear reaction rates are dependent on the material they occur. Fission rates are most important to calculate in order to maintain core critically. Not only does fissile material deplete producing fission products but fertile material can be converted into new fissile material. 
+Over the life time of a nuclear reactor the composition of the fuel changes due to it being exposed to a neutron rich environment. The changes in fuel composition have an important impact on the reactor power distribution, stability and control. Reactor efficiency as well as fuel utilization and economics are also greatly influenced from changes in fuel composition. As a nuclear reactor operates through time, the composition of the fuel elements changes due to fission, radioactive decay and neutron capture reaction rates. Fission reaction rates are most important to calculate in order to assess core critically. Not only does fissile material deplete producing fission products but fertile material can also be converted into new fissile material.
 
-A complete depletion calculation would involve the simultaneous solution of the neutron transport equation along with the isotopic evolution of thousands of fission products and fissile material depletion. This is not possible in practice and approximations to these calculations must be done. The neutron transport and fuel depletion calculations are done separately and their coupling is often done with predictor corrector methods. During neutron transport calculations fuel composition is assumed to be constant. For depletion, reaction rates are assumed to be constant. This process is repeated until a stopping criteria is reached. 
+A complete depletion calculation would involve the simultaneous solution of the neutron transport equation along with the isotopic evolution of thousands of fission products and fissile material depletion. This is not possible in practice so that approximations to these calculations must be done. The neutron transport and fuel depletion calculations are done separately and their coupling is often done with predictor-corrector methods. During neutron transport calculations, fuel composition is assumed to be constant. For depletion, reaction rates are assumed to be constant. This process is repeated until a stopping criteria is reached. 
 
-In traditional light water reactors, fuel elements are housed in fuel rod bundles, which are not allowed to move during operation. Because molten salt reactors are liquid fueled, they can be refueled and have fission products processed online. In addition to online processing, fissial material circulates through the reactor loop. These unique design features of molten salt reactors produce new challenges for fuel depletion calculations. The following sections discuss the nuclear reactions involved in the production of radionuclides, neutron transport and the burnup equations.
+In traditional light water reactors, fuel elements are housed in fuel rod bundles, which are not allowed to move during operation. Because molten salt reactors are liquid fueled, they can be refueled and have fission products processed online. In addition to online processing, fissile material circulates through the reactor loop. These unique design features of molten salt reactors produce new challenges for fuel depletion calculations. The following sections discuss the nuclear reactions involved in the production of radionuclides, neutron transport and the burnup equations.
 
 \section{Nuclear Reactions}
 
 \subsection{Radioactive Decay}
-When the nucleus of an atomic element is unstable it can undergo spontaneous transformation into a different element by the emission of energy and or particles \cite{duderstadt1976}. The most relevant modes for decay in burnup calculations are $\alpha$ decay, proton emission, neutron emission, $\beta^{-}$ and $\beta^{+}$. A summary of these decay modes are shown in Table \ref{tab:decayModes} \cite{pusaThesis}. The rate at which a nuclide $i$ changes as a function of time is proportional to its decay constant $\lambda_{i}$ and the decay of other nuclides which contribute as a source to nuclide $i$  \cite{duderstadt1976}, 
+When the nucleus of an atomic element is unstable it can undergo spontaneous transformation into a different element by the emission of energy and or particles \cite{duderstadt1976}. The most common modes for decay in burnup calculations are $\alpha$ decay, proton emission, neutron emission, and $\beta^{-}$ or $\beta^{+}$ decay. A summary of these decay modes is shown in Table \ref{tab:decayModes} \cite{pusaThesis}. The rate at which nuclide "$i$" changes as a function of time is proportional to its decay constant $\lambda_{i}$ and the decay of other nuclides which contribute as a source to this nuclide $i$  \cite{duderstadt1976},
 
 \begin{equation}
     \frac{dn_{i}}{dt} = \sum_{j=1}^{N} \lambda_{j\rightarrow i}n_{j}(t) -\lambda_{i} n_{i}(t).
@@ -23,7 +23,7 @@ When the nucleus of an atomic element is unstable it can undergo spontaneous tra
 
 \noindent As the half life of the isotope decreases, its decay constant increases. 
 
-Some nuclides have more than one mode of decay. Some of these decay modes compete with one another such as $\beta^{+}$ and electron capture. When nuclide \textit{i} has more than one decay mode, its decay constant is a summation of all $k$ decay modes,
+Some nuclides have more than one mode of decay, and these decay modes compete with one another such as $\beta^{+}$ and electron capture. When a nuclide \textit{i} has more than one decay mode, its decay constant is the summation of all of its $k$ decay modes,
 
 \clearpage
 
@@ -36,7 +36,7 @@ Some nuclides have more than one mode of decay. Some of these decay modes compet
     \hline
     \hline
     \\ [-1em]
-    $\alpha$ decay & (Z - 2, A - 1) & ${}^{4}$He \\ \hline 
+    $\alpha$ decay & (Z - 2, A - 4) & ${}^{4}$He \\ \hline 
     \\ [-1em]
     Proton emission & (Z - 1, A - 1) & ${}^{1}$H \\ \hline
     \\ [-1em]
@@ -79,7 +79,7 @@ Neutron induced reactions follow the schematic shown in Figure \ref{fig:nuclearR
 
 
 
-The frequency of a reaction is governed by the probability at which it can occur. This probability is related to the  cross section. The microscopic cross section is a factor that characterizes the probability of a neutron-nuclear reaction with an atomic nucleus \cite{duderstadt1976}. Specifically, the formal definition of the microscopic cross section is,
+The frequency of a reaction is governed by the probability at which it can occur. This probability is related to the microscopic cross section of the target. The microscopic cross section is a parameter that characterizes the probability of a neutron-induced reaction with an atomic nucleus \cite{duderstadt1976}. Specifically, the formal definition of the microscopic cross section is,
 
 \begin{equation}
     \sigma = \frac{\text{Number of reactions} / \text{nucleus} / \text{sec}}{\text{Number of incident neutrons} / \text{cm}^{2} / \text{sec}} = \frac{(R/N_{i})}{\phi},
@@ -100,9 +100,9 @@ The frequency of a reaction is governed by the probability at which it can occur
     R = \bigg[\frac{\# \text{ of reactions}}{\text{cm}^{2}\cdot \text{sec}}\bigg], \quad \sigma = \big[\text{cm}^{2}\big], \quad \phi = \bigg[\frac{\# \text{ of neutrons}}{\text{cm}^{2}\cdot \text{sec}} \bigg], \quad n_{i} = \bigg[\frac{\# \text{ of atoms}}{\text{cm}^{3}}\bigg].
 \end{equation*}
 
-There are a number of neutron induced reactions that occur in a nuclear reactor. They can be divided into two main categories: scattering and absorption. Scattering reactions can then be further divided into elastic and inelastic reactions. Elastic scattering reactions, denoted by $(n,n)$ are those reactions in which an incoming neutron scatters off of a nucleus, changing the neutrons energy and direction. In some cases the neutron can be absorbed into the nucleus for a short time, before being ejected. This may leave the nucleus in an excited state before returning to its initial state. These type of reactions are noted by $(n,n')$ and are known as inelastic scattering. 
+There are a number of neutron induced reactions that occur in a nuclear reactor. They can be divided into two main categories: scattering and absorption. Scattering reactions can then be further divided into elastic and inelastic reactions. Elastic scattering reactions, denoted by $(n,n)$ are those reactions in which an incoming neutron scatters off of a nucleus, but not changing the neutron's energy and direction. Alternatively, the neutron can be absorbed into the nucleus for a short time, before being ejected. This may leave the nucleus in an excited state before returning to its initial state. These type of reactions are noted by $(n,n')$ and are known as inelastic scattering, which change the neutron's energy and direction. 
 
-Absorption reactions are those in which a neutron is absorbed by the atomic nucleus. The resulting products from these reactions include, energy, neutrons, protons and $\alpha$ particles. A summary of these reactions which are relevant in burnup calculations are shown in Table \ref{tab:reactionModes} \cite{pusaThesis}. The change in a nuclides concentration as a function of time for a general absorption reaction is,
+Absorption reactions are those in which a neutron is absorbed by the target's nucleus. The resulting products from these reactions include, energy, neutrons, protons or $\alpha$ particles. A summary of these reactions which are relevant in burnup calculations are shown in Table \ref{tab:reactionModes} \cite{pusaThesis}. The change in a nuclides concentration as a function of time for a general absorption reaction is,
 
 \begin{equation}
     \frac{dn_{i}}{dt} = \sum_{j=1}^{N} \sum_{k=1}^{K}\gamma_{j\rightarrow i,k}\sigma_{k,j}\phi n_{j}(t) - \phi\sum_{k=1}^{K} \sigma_{k,i}n_{i}(t),
@@ -149,20 +149,20 @@ The microscopic cross section characterizes the probability that a neutron will 
 
 \clearpage
 
-\noindent ability to compute how a large portion of material will react under a flux of particles or energy. This macroscopic cross section is the computation of the atomic number density multiplied by the microscopic cross section. For a material consisting of multiple atomic elements, the macroscopic cross section of reaction $x$ is computed by,
+\noindent ability to compute how a given portion of material will react under a flux of particles or energy. The macroscopic cross section is the product of the atomic number density multiplied by the microscopic cross section. For a material consisting of multiple elements, the macroscopic cross section of reaction $x$ is computed by,
 
 \begin{equation}
     \Sigma_{x} = \sum_{i=1}^{N}n_{i}\sigma_{i,x},
 \end{equation}
 
-\noindent The macroscopic cross section can be thought of as the probability per length path that a neutron will have a reaction with the nucleus \cite{duderstadt1976}. 
+\noindent The macroscopic cross section can be thought of as the probability per unit path length that a neutron will have that specific reaction with the nucleus \cite{duderstadt1976}. 
 
-When fissile material undergoes a neutron absorption (to relate it to the previous paragraphs), neutron induced fission can occur releasing neutrons, energy and fission products. Typically, fission is a two-body reaction, meaning that the target nucleus splits into two isotopes of smaller atomic number. The independent fission product yield is the expected fraction a nuclide is produced for a single fission event. Because the cross section is dependent on the incident neutron energy, fission product yields dependent on the neutron energy. The yields of fission products for ${}^{235}$U for fast and thermal neutrons is shown in Figure \ref{fig:fissionYield}.
+When fissile material undergoes a neutron absorption (to relate it to the previous paragraphs), neutron induced fission can occur and release neutrons, energy and fission products. Typically, fission is a two-fragment reaction, meaning that the target nucleus splits into two isotopes of smaller atomic number. The fission product yield is the expected fraction that a nuclide is produced per single fission event. Because the cross section is dependent on the incident neutron energy, fission product yields also depend on the neutron energy. The yields of fission products for ${}^{235}$U for fast and thermal neutrons are shown in Figure \ref{fig:fissionYield}.
 
 
 
 \section{Neutron Transport Equation}
-The neutron transport equation describes the angular neutron density as a function of time, space and energy. Let the spatial position be denoted by $r$ and the energy of a neutron $E$. A neutron will travel in direction $\Omega$ and will scatter at angle $\Omega'$ and energy $E'$.  The neutron transport equation is,
+The neutron transport equation describes the angular neutron density as a function of time, space, energy, and angular direction. Let the spatial position be denoted by $r$ and the energy of a neutron $E$. A neutron will travel in direction $\Omega$ and will scatter at angle $\Omega'$ and energy $E'$.  The neutron transport equation is,
 
 \begin{equation}
     \frac{1}{v}\frac{\partial \varphi}{\partial t} + \Omega \cdot \nabla \varphi + \Sigma_{t}\varphi = \int_{4\pi} d\Omega'\int_{0}^{\infty}dE'\Sigma_{s}\varphi' + \frac{\chi}{4\pi}\int_{0}^{\infty}dE'\nu\Sigma_{f}\varphi,
@@ -191,18 +191,18 @@ $\begin{aligned}
 & \text{ and angle } \Omega \text{ to energy } E' \text{ and angle } \Omega' \\
 &\chi = \chi(E) \equiv \text{ Energy distribution of fission neutrons} \\
 &\nu = \nu(E') \equiv \text{ Average number of neutrons released during fission at energy } E' \\ 
-&\Sigma_{f} = \Sigma_{f}(E') \equiv \text{ Cross section for neutron fission at energy } E' 
+&\Sigma_{f} = \Sigma_{f}(E') \equiv \text{ Fission neutron cross section at energy } E' 
 \end{aligned}$
 
 \vspace{0.5cm}
 
-\noindent Starting from the left hand side of Equation \ref{eq:angularNeutronTransport} we have the change in neutron density with time, neutron streaming and neutron removal from reaction. On the right hand side is the source from a neutron scattering in from and different energy and angle, followed by the source from nuclear fission. The source for the scattering term must be integrated over all angles and energy and the same for the fission source. The angular neutron flux cannot be directly used in the neutron induced reaction equations presented before. These equations require the scalar flux, which is the integral over all angles for the angular neutron flux,
+\noindent Starting from the left hand side of Equation \ref{eq:angularNeutronTransport} we have the change in neutron density with time, neutron streaming and neutron removal from reactions. On the right hand side is the source from a neutron scattering in from a different energy and angle, followed by the source from nuclear fission. The source for the scattering term must be integrated over all angles and energy and the same for the fission source. The angular neutron flux cannot be directly used in the neutron induced reaction equations presented before. These equations require the scalar flux, which is the integral over all angles for the angular neutron flux,
 
 \begin{equation}
     \phi(r,E) = \int \varphi(r,E,\Omega)d \Omega.
 \end{equation}
 
-Angular dependence for the scattering source can be handled through the use of Legendre expansions or spherical harmonics. Spacial angular dependence is often treated with Gauss-Legendre quadratures such as the Sn or Pn equations, such methods are out of the scope of this work \cite{millerCompTransport}. The energy dependence in Equation \ref{eq:angularNeutronTransport} is almost always handled using the multigroup approximation. This approximation works by dividing up the energy dependence in groups by applying an energy interval for each group and integrating over that interval. The group cross sections are defined in a way to conserve the reaction rates. The multigroup constants are defined by \cite{millerCompTransport} \cite{duderstadt1976},
+Angular dependence for scattering, source, and flux can be handled through the use of Legendre expansions or spherical harmonics, which lead to the Pn equations, while angular dependence is often treated with Gauss-Legendre quadratures such as the Sn equations, such methods are standard techniques to solving the transport equation, but out of the scope of this work \cite{millerCompTransport}. The energy dependence in Equation \ref{eq:angularNeutronTransport} is usually handled by using the multigroup approximation. This approximation divides the energy dependence into discrete groups by applying an energy interval for each group and integrating over that interval. The group cross sections are defined in a way to conserve the reaction rates. The multigroup constants are defined by \cite{millerCompTransport} \cite{duderstadt1976},
 
 \begin{equation}
     \Sigma_{s}^{gg'} = \frac{\int_{g}^{g-1}\int_{g'}^{g'-1}\Sigma_{s}(r,E'\rightarrow E,t)\varphi(r,E',t) dE'dE}{\int_{g}^{g-1}\varphi(r,E,t) dE},
@@ -224,13 +224,13 @@ Angular dependence for the scattering source can be handled through the use of L
     \varphi^{g} = \int_{g}^{g-1}\varphi(r,E,t) dE.
 \end{equation}
 
-The time variance in Equation \ref{eq:angularNeutronTransport} is most often neglected for reactor analysis. Instead the problem is transformed into an eigenvalue problem. Although there are multiple different eigenvalue formulations, the $\lambda$ (k-effective, criticality) eigenvalue is the most common \cite{millerCompTransport}. If Equation \ref{eq:angularNeutronTransport} is written in matrix vector form, then the criticality equation is,
+The time variance in Equation \ref{eq:angularNeutronTransport} is often neglected for reactor analysis, and for steady-state applications, the problem is transformed into an eigenvalue problem. Although there are multiple different eigenvalue formulations, the $\lambda$ (k-effective, criticality) eigenvalue is the most common \cite{millerCompTransport}. If Equation \ref{eq:angularNeutronTransport} is written in matrix vector form, then the criticality equation is,
 
 \begin{equation}
     \boldsymbol{A}\boldsymbol{\varphi} = \frac{1}{\lambda}\boldsymbol{B}\boldsymbol{\varphi}.
 \end{equation}
 
-\noindent where $\lambda$ is the largest of the eigenvalues and can be found using the power iteration. When $\lambda$ is greater than 1 then the reactor is supercritical and the neutron population will increase over time. If $\lambda$ is less than 1 the system is subcritical and the neutron population will decrease over time. If $\lambda$ is equal to 1 then the system is critical and the neutron population will remain constant \cite{duderstadt1976}. 
+\noindent where $\lambda$ is the largest (fundamental mode) eigenvalue and can be found using the power iteration. When $\lambda$ is greater than 1 then the reactor is supercritical and the neutron population will increase over time. If $\lambda$ is less than 1 the system is subcritical and the neutron population will decrease over time. If $\lambda$ is equal to 1 then the system is critical and the neutron population will remain constant \cite{duderstadt1976}. 
 
 
 \section{Burnup Equations}
