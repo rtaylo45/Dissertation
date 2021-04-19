@@ -15,7 +15,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %First, is this a thesis or dissertation? Choose one by commenting out the one you don't need:
 %\documentclass[thesis,letterpaper,12pt]{utthesis} % thesis
-\documentclass[dissertation,letterpaper, 12pt]{utthesis} %dissertation
+\documentclass[dissertation,letterpaper, draft, 12pt]{utthesis} %dissertation
 % some alternatives are:
 %\documentclass[thesis,monochrome,letterpaper,12pt]{utthesis} %thesis, monochrome text
 \renewcommand{\baselinestretch}{1.5} 	 % line Spacing
@@ -59,6 +59,7 @@
 \usepackage{xparse}
 \usepackage{array}
 \usepackage{hyperref}
+\usepackage{adjustbox}
 \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 
 
@@ -73,9 +74,9 @@
 	\fancyhf{} %Clears the header/footer
 	\fancyfoot{% Footer
     \makebox[\textwidth][r]{% Right
-      \rlap{\hspace{.75cm}% Push out of margin by \footskip
+      \rlap{\hspace{-0.4cm}% Push out of margin by \footskip
         \smash{% Remove vertical height
-          \raisebox{4.87in}{% Raise vertically
+          \raisebox{4.40in}{% Raise vertically
             \rotatebox{90}{\thepage}}}}}}% Rotate counter-clockwise
   \renewcommand{\headrulewidth}{0pt}% No header rule
   \renewcommand{\footrulewidth}{0pt}% No footer rule
