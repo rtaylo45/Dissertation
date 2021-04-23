@@ -60,7 +60,7 @@ Some nuclides have more than one mode of decay, and these decay modes compete wi
     b_{j\rightarrow i} = \frac{\lambda_{j\rightarrow i}}{\lambda_{j}}.
 \end{equation}
 
-\noindent For nuclide \textit{j} which has multiple decay modes k, the branching ratio denotes the fraction of decays for nuclide \textit{j} which produce nuclide \textit{i}. Substituting this relation into Equation \ref{eq:decaySingleMode},
+\noindent For nuclide \textit{j} which has multiple decay modes k, the branching ratio denotes the fraction of decays for nuclide \textit{j} which produce nuclide \textit{i}. Substituting this relation into Equation \ref{eq:decaySingleMode}, leads to the following modified balance:
 
 \begin{equation}
     \frac{dn_{i}}{dt} = \sum_{j=1}^{N} b_{j\rightarrow i}\lambda_{j}n_{j}(t) -\lambda_{i} n_{i}(t).
@@ -111,13 +111,10 @@ Absorption reactions are those in which a neutron is absorbed by the target's nu
 
 \noindent where $\gamma_{j\rightarrow i,k}$ is the fraction of nuclide \textit{i} from nuclide \textit{j} through reaction \textit{k}. The first term in Equation  \ref{eq:neutronIndecedReaction} is the generation from the reaction of nuclide. First each nuclide is summed over, followed by a summation of each reaction for nuclide \textit{j}. If reaction \textit{k} results in generating nuclide \textit{i}, then $\sigma_{k,j}$ and $\gamma_{j\rightarrow i,k}$ are both nonzero. The second term in Equation \ref{eq:neutronIndecedReaction} is the loss of nuclide \textit{i} from reaction \textit{k}. For each nuclide \textit{i} a summation is taken over all possible neutron induced reactions. 
 
-
-The microscopic cross section characterizes the probability that a neutron will have a reaction with a single nucleus. Often it is required to understand how neutrons will interact with macroscopic chunk of the material \cite{duderstadt1976}. The macroscopic cross section provides the 
-
 \clearpage
 
 \begin{table}[p]
-    \caption{\label{tab:reactionModes} Summary of Decay Modes where Z is atomic number and A is mass number \cite{pusaThesis}}
+    \caption{\label{tab:reactionModes} Summary of neutron induced reactions where Z is atomic number and A is mass number \cite{pusaThesis}}
     \centering
     \begin{tabular}{c|c|c}
     \hline
@@ -149,7 +146,7 @@ The microscopic cross section characterizes the probability that a neutron will 
 
 \clearpage
 
-\noindent ability to compute how a given portion of material will react under a flux of particles or energy. The macroscopic cross section is the product of the atomic number density multiplied by the microscopic cross section. For a material consisting of multiple elements, the macroscopic cross section of reaction $x$ is computed by,
+The microscopic cross section characterizes the probability that a neutron will have a reaction with a single nucleus. Often it is required to understand how neutrons will interact with macroscopic chunk of the material \cite{duderstadt1976}. The macroscopic cross section provides the ability to compute how a given portion of material will react under a flux of particles or energy. The macroscopic cross section is the product of the atomic number density multiplied by the microscopic cross section. For a material consisting of multiple elements, the macroscopic cross section of reaction $x$ is computed by,
 
 \begin{equation}
     \Sigma_{x} = \sum_{i=1}^{N}n_{i}\sigma_{i,x},
@@ -159,8 +156,6 @@ The microscopic cross section characterizes the probability that a neutron will 
 
 When fissile material undergoes a neutron absorption (to relate it to the previous paragraphs), neutron induced fission can occur and release neutrons, energy and fission products. Typically, fission is a two-fragment reaction, meaning that the target nucleus splits into two isotopes of smaller atomic number. The fission product yield is the expected fraction that a nuclide is produced per single fission event. Because the cross section is dependent on the incident neutron energy, fission product yields also depend on the neutron energy. The yields of fission products for ${}^{235}$U for fast and thermal neutrons are shown in Figure \ref{fig:fissionYield}.
 
-
-
 \section{Neutron Transport Equation}
 The neutron transport equation describes the angular neutron density as a function of time, space, energy, and angular direction. Let the spatial position be denoted by $r$ and the energy of a neutron $E$. A neutron will travel in direction $\Omega$ and will scatter at angle $\Omega'$ and energy $E'$.  The neutron transport equation is,
 
@@ -168,8 +163,6 @@ The neutron transport equation describes the angular neutron density as a functi
     \frac{1}{v}\frac{\partial \varphi}{\partial t} + \Omega \cdot \nabla \varphi + \Sigma_{t}\varphi = \int_{4\pi} d\Omega'\int_{0}^{\infty}dE'\Sigma_{s}\varphi' + \frac{\chi}{4\pi}\int_{0}^{\infty}dE'\nu\Sigma_{f}\varphi,
     \label{eq:angularNeutronTransport}
 \end{equation}
-
-\noindent where 
 
 \clearpage
 
@@ -181,6 +174,7 @@ The neutron transport equation describes the angular neutron density as a functi
 \end{figure} 
 
 \clearpage
+\noindent where 
 
 $\begin{aligned}
 &\varphi = \varphi(r, E, \Omega) \equiv   \text{Angular neutron flux at energy } E \text{ and angle } \Omega  \\

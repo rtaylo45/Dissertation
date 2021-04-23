@@ -46,9 +46,9 @@ The first diffusion problem consists of a 2-D system shown as:
     U(x,y,t) = e^{-t}\sin(2\pi x)\sin(2\pi y),
 \end{equation}
 
-\noindent with $k = 1/(8\pi^{2}$). The Problem is ran for a total time of 2.0 seconds with the number of cells in the x and y direction being the same [10, 20, 40, 80]. These results are shown in Table \ref{tab:diffusion_problem1_results}. These results show good convergence rates for the E${}_{\infty}$ and E${}_{1}$ error functions previous described, but not E${}_{2}$. While each of the solvers maintained the same error, the run times were drastically different. Run times for each of the solvers is shown in Figure (\ref{fig:runtime_diffusion_one}).
+\noindent with $k = 1/(8\pi^{2}$). The Problem is ran for a total time of 2.0 seconds with the number of cells in the x and y direction being the same [10, 20, 40, 80]. These results are shown in Table \ref{tab:diffusion_problem1_results}. These results show good convergence rates for the E${}_{\infty}$ and E${}_{1}$ error functions previous described, but not E${}_{2}$. While each of the solvers maintained the same error, the run times were drastically different. Run times for each of the solvers is shown in Figure \ref{fig:runtime_diffusion_one}.
 
-From Figure (\ref{fig:runtime_diffusion_one}) each of the solvers show a monomial relation between the problem size and run time. Both the Parabolic and Hyperbolic solvers have almost the exact same solve time. This is because they have to solve the same number of linear systems. The CRAM solver requires half the number of linear solves, making it about twice as fast. For this example the Taylor solver is the fastest but only slightly beats each of the Cauchy solvers. The Pad\'e solvers scale much more poorly than the other ones. Starting out each of the solvers have a similar run time but as the problem size increases, the Pad\'e methods run times grow at a faster rate. Each of these solvers maintain the same numerical error due to the error being dominated by the spatial discretization error of the diffusion operator. 
+From Figure \ref{fig:runtime_diffusion_one} each of the solvers show a monomial relation between the problem size and run time. Both the Parabolic and Hyperbolic solvers have almost the exact same solve time. This is because they have to solve the same number of linear systems. The CRAM solver requires half the number of linear solves, making it about twice as fast. For this example the Taylor solver is the fastest but only slightly beats each of the Cauchy solvers. The Pad\'e solvers scale much more poorly than the other ones. Starting out each of the solvers have a similar run time but as the problem size increases, the Pad\'e methods run times grow at a faster rate. Each of these solvers maintain the same numerical error due to the error being dominated by the spatial discretization error of the diffusion operator. 
 
 The eigenvalues for this problem were found to be clustered on the negative real axis with zero imaginary parts. For the 400 x 400 case, the eigenvalues are shown in Figure \ref{fig:eigenvalues_diffusion_one}.  On exception to this is a positive eigenvalue which is very close to the origin at 6.0396e-14. This positive value only appears in the 400 x 400 case. The other discretizations show the same behavior with the eigenvalues being clustered on the negative real axis but do not show the positive valued eigenvalue at the origin. Due to the relatively long solve times, particularly for the Pad\'e solvers, the Krylov subspace approximation was used to analyze the error and run time. For a spatial resolution of 160 cells in both the x and y direction, results for various subspace dimensions $M$ are shown in Table \ref{tab:diffusion_problem1_results_krylov}. Interestingly, the error associated with reducing the overall dimension of the problem did not change, even though the run time drastically decreased leading to the conclusion that the dimension of the true space is much smaller. 
 
@@ -843,7 +843,7 @@ The following are a selection of case studies which aim to explore libowskis' ac
 
 \clearpage
 
-For two of the case studies, classical numerical integration methods are shown. These two test are the neutron precursors and lump depletion. The purpose of showing results for these solvers is to demonstrate why exponential time differencing is the preferred method for these problems.  
+For each of the case studies, classical numerical integration methods are shown. The 2D depletion case only shows solvers which are stable for all time steps. The purpose of showing results for these solvers is to demonstrate why exponential time differencing is the preferred method for these problems.  
 
 \subsection{Neutron precursors}
 This problem examines a convection-driven flow with the 6 neutron precursor groups, as shown in Equations (\ref{eq:problem3}) and (\ref{eq:problem3flux}): 
@@ -1144,10 +1144,7 @@ This is a depletion problem using the selected isotopes in Table \ref{tab:small_
 \subsubsection{Small case}
 Eigenvalues for this problem are shown in Figure \ref{fig:small_lumped_depletion_eigenvalues}. These eigenvalues are clustered around the negative real axis and will not have an effect on the error for Cauchy based solvers, even with a time step size of 20 days. Using zero sub-steps, results for all solvers are shown in Figure \ref{fig:small_lumped_depletion_Einf_steps0} over 200 days and in Figure \ref{fig:small_lumped_depletion_species_relative_errors} for each isotope at t = 20 days. Errors shown in Figure \ref{fig:small_lumped_depletion_Einf_steps0} depict  the typical behavior that as been shown in other problems. The Cauchy based solvers begin with a large error which exponentially decreases as the solution progresses. Figure \ref{fig:small_lumped_depletion_species_relative_errors} shows very interesting results in that the error for the Cauchy solvers is driven by the error in actinide elements Pu, Am and Cm. For the CRAM and Hyperbolic solvers, every other element as error at or below $10^{-11}$. The Parabolic solver has all other elemental errors at or below $10^{-9}$. The absolute errors for each species is shown in Figure \ref{fig:small_lumped_depletion_species_absolute_errors}. Because the chosen units of mass concentration, the absolute errors for most species is extremely small.  A closer look as to why these relative errors are so high is shown in Figure \ref{fig:small_lumped_depletion_actnide_errors}. The top plot in Figure \ref{fig:small_lumped_depletion_actnide_errors} shows the mass concentration, the middle plot shows the absolute error and the bottom plot shows the relative error. The trend shows isotopes with the lowest concentration have the lowest absolute error and the highest relative error. Looking at Cm-244Liq, the solution increases over 6 orders of magnitude while the absolute error only increases about less than 3. This is why the relative error of Cm-244Liq decreases as a function of time. This same trend is shown for all of the isotopes in this figure. In general, the solution for low concentrations have high relative error for Cauchy based solvers. Going back to Figure \ref{fig:small_lumped_depletion_Einf_steps0}, Pad\'e-method 2 has the highest error, with Pad\'e-method 1 and Taylor having approximately the same and over all lowest errors. The error for all three of these solvers begins low and gradually increases over the time span. 
 
-Figure \ref{fig:small_lumped_depletion_Einf_with_substeps} shows Cauchy solvers errors as a function of sub-stepping. Each solver shows the same general trend of exponential decay in error with sub-stepping. The Parabolic solver has the highest error, with the CRAM and Hyperbolic solvers following closely in error. Figure \ref{fig:small_lumped_depletion_Einf_steps12} shows the error for each solver were each of the Cauchy solvers have 12 sub-steps. The Parabolic solver follows the same exponential decay trend as before. The CRAM and Hyperbolic solvers begin to decay until they reach a point where the error begins the climb. With sub-stepping, each of the Cauchy solvers achieves lower error at 200 days than the series solvers. 
-
-Results for the classical integrator methods are shown in Figure \ref{fig:small_lumped_depletion_Einf_integrators}. These results are for a total time of 20 days, representing a single time step taken from the exponential time differencing solvers. Integrator errors are capped at 10, so any error which is 10 is unstable. All of the explicit solvers are unstable except for the lowest time step size. BDF1-3 show classical convergence rates for all time step sizes, BDF4-6 reach a minimal value before increasing with a reduction in time step size. This is the same behavior that was seen in the neutron precursors case study. 
-
+Figure \ref{fig:small_lumped_depletion_Einf_with_substeps} shows Cauchy solvers errors as a function of sub-stepping. Each solver shows the same general trend of exponential decay in error with sub-stepping. The Parabolic solver has the highest error, with the CRAM and Hyperbolic solvers following closely in error. Figure \ref{fig:small_lumped_depletion_Einf_steps12} shows the error for each solver were each of the Cauchy solvers have 12 sub-steps. The Parabolic solver follows the same exponential decay trend as before. The 
 
 \clearpage
 
@@ -1220,22 +1217,23 @@ Results for the classical integrator methods are shown in Figure \ref{fig:small_
 
 \clearpage
 
+
+\noindent CRAM and Hyperbolic solvers begin to decay until they reach a point where the error begins the climb. With sub-stepping, each of the Cauchy solvers achieves lower error at 200 days than the series solvers. 
+
+Results for the classical integrator methods are shown in Figure \ref{fig:small_lumped_depletion_Einf_integrators}. These results are for a total time of 20 days, representing a single time step taken from the exponential time differencing solvers. Integrator errors are capped at 10, so any error which is 10 is unstable. All of the explicit solvers are unstable except for the lowest time step size. BDF1-3 show classical convergence rates for all time step sizes, BDF4-6 reach a minimal value before increasing with a reduction in time step size. This is the same behavior that was seen in the neutron precursors case study. 
+
+Run times for each of the Cauchy solvers as a function of sub-stepping are shown in Figure \ref{fig:small_lumped_depletion_Cauchy_runtimes}. The results show the typical linear run time increase with the number of sub-steps. Run times for the BDF integrators are shown in Figure \ref{fig:small_lumped_depletion_integrator_runtimes}. These shown the same trend shown in the neutron precursors case. As the largest time step size, each of the integrator run times are separated by order. These values are ranked from lowest to highest according to the BDF order. As the time step size is increased, each of the solvers converge to approximately the same value.  
+
+A summary of results for each of the matrix exponential solvers and backward differencing solvers are shown in Table \ref{tab:small_lumped_depletion_runtimes} for both a single time step of 20 days and the total run time for 200 days with 10 20 day time steps for each of the matrix exponential solvers. Each of the Cauchy solvers is shown with 12 sub-steps. BDF solvers 4-6 reach their minimal error for time step sizes that are not the minimal value tested, resulting in smaller run times. CRAM, Hyperbolic, Pad\'e-method 1 and the Taylor solvers have the same order of magnitude for error. The Hyperbolic solver has twice the run time as CRAM and Taylor but takes about 14 times longer to run than CRAM. Pad\'e-method 1 is 42 times fast than CRAM. BDF3 also has the same order of magnitude as these solvers but takes 158 times longer than CRAM and 6,660 times longer than Pad\'e-method 1. BDF4 is an order of magnitude greater in accuracy but is 16 times slower than CRAM and 660 times slower than Pad\'e-method 1. BDF5 and 6 
+
+\clearpage
+
 \begin{figure}[p]
     \centering
     \includegraphics[width=5in]{images/chapter-5/caseStudies/smallLumpedDepletion/msrSmallLumpedDepletionEinfErrorerrorIntegrators.png}
     \caption{Relative E$_{\infty}$ error with at time = 20 days for the classical integrator methods in small lumped depletion case}
     \label{fig:small_lumped_depletion_Einf_integrators}
 \end{figure}
-
-\clearpage
-
-
-Run times for each of the Cauchy solvers as a function of sub-stepping are shown in Figure \ref{fig:small_lumped_depletion_Cauchy_runtimes}. The results show the typical linear run time increase with the number of sub-steps. Run times for the BDF integrators are shown in Figure \ref{fig:small_lumped_depletion_integrator_runtimes}. These shown the same trend shown in the neutron precursors case. As the largest time step size, each of the integrator run times are separated by order. These values are ranked from lowest to highest according to the BDF order. As the time step size is increased, each of the solvers converge to approximately the same value.  
-
-A summary of results for each of the matrix exponential solvers and backward differencing solvers are shown in Table \ref{tab:small_lumped_depletion_runtimes} for both a single time step of 20 days and the total run time for 200 days with 10 20 day time steps for each of the matrix exponential solvers. Each of the Cauchy solvers is shown with 12 sub-steps. BDF solvers 4-6 reach their minimal error for time step sizes that are not the minimal value tested, resulting in smaller run times. CRAM, Hyperbolic, Pad\'e-method 1 and the Taylor solvers have the same order of magnitude for error. The Hyperbolic solver has twice the run time as CRAM and Taylor but takes about 14 times longer to run than CRAM. Pad\'e-method 1 is 42 times fast than CRAM. BDF3 also has the same order of magnitude as these solvers but takes 158 times longer than CRAM and 6,660 times longer than Pad\'e-method 1. BDF4 is an order of magnitude greater in accuracy but is 16 times slower than CRAM and 660 times slower than Pad\'e-method 1. BDF5 and 6 each have the lowest two errors with about double the run time as CRAM but show some unwanted behavior with low run times.  Each of the explicit solvers showed major instability and were not included in Table \ref{tab:small_lumped_depletion_runtimes}. 
-
-Results for the parallel Cauchy solvers are shown in Figure \ref{fig:small_lumped_depletion_cauchy_speedup} for parallel speedup and Figure \ref{fig:small_lumped_depletion_cauchy_parallel_eff} for parallel efficiency. Figure \ref{fig:small_lumped_depletion_cauchy_speedup} shows that the parallel speed up increases as the number of sub-steps is increased. Figure \ref{fig:small_lumped_depletion_cauchy_parallel_eff} shows a linear decrease in parallel efficiency as the number of cores is increased. 
-
 
 \clearpage
 
@@ -1295,6 +1293,18 @@ Results for the parallel Cauchy solvers are shown in Figure \ref{fig:small_lumpe
 
 \clearpage
 
+\noindent each have the lowest two errors with about double the run time as CRAM but show some unwanted behavior with low run times.  Each of the explicit solvers showed major instability and were not included in Table \ref{tab:small_lumped_depletion_runtimes}. 
+
+Results for the parallel Cauchy solvers are shown in Figure \ref{fig:small_lumped_depletion_cauchy_speedup} for parallel speedup and Figure \ref{fig:small_lumped_depletion_cauchy_parallel_eff} for parallel efficiency. Figure \ref{fig:small_lumped_depletion_cauchy_speedup} shows that the parallel speed up increases as the number of sub-steps is increased. Figure \ref{fig:small_lumped_depletion_cauchy_parallel_eff} shows a linear decrease in parallel efficiency as the number of cores is increased. 
+
+
+
+
+\subsubsection{Large case}
+Eigenvalues for the large case are shown in Figure \ref{fig:large_lumped_depletion_eigenvalues}, these eigenvalues are clustered around the negative real axis and will not affect the accuracy of the Cauchy solvers. Results using zero sub-steps are shown in Figure \ref{fig:large_lumped_depletion_Einf_steps0}. These results are nearly identical to the small lumped depletion case except for the slightly elevated separation between the Taylor and Pad\'e-method 1 solvers. The Taylor solver has a slight increase in error between these two cases. Figure \ref{fig:large_lumped_depletion_Einf_with_substeps} also shows identical error behavior with increasing the number of sub-steps that was seen in the small case. The error exponential decays as a function of sub-steps. Figures \ref{fig:large_lumped_depletion_species_relative_errors} and \ref{fig:large_lumped_depletion_species_absolute_errors} show the relative and absolute errors for each species. The same trend that was shown in the small case is seen again. The relative errors for the Cauchy solvers is high for many of the actnide species, while the absolute error for these species is low due to the low concentrations. Figure \ref{fig:large_lumped_depletion_actnide_errors} takes a closer look at specific isotopes as a function of time. Figure \ref{fig:large_lumped_depletion_actnide_errors} shows identical behavior to the small case. The rate at which the species concentration grows is large than the rate for absolute errors, this is why the relative errors decrease over time. Figure \ref{fig:large_lumped_depletion_Einf_steps12} shows results for each solver were each of the Cauchy solver have 12 sub-steps. All solvers have the same behavior that was seen in the small case except for CRAM and the Hyperbolic solvers. The small case was able to achieve a lower minimal error than the large case. In both cases, the error decreases for the first few time steps but the large case increases in error to a greater degree as the solution progresses to 200 days. In this case, the CRAM and Hyperbolic solvers seem to more closely follow one another in 
+
+\clearpage
+
 \begin{figure}[p]
     \centering
     \includegraphics[width=5in]{images/chapter-5/caseStudies/smallLumpedDepletion/msrLumpedDepletionSmallCauchyParallelSpeedup.png}
@@ -1310,17 +1320,6 @@ Results for the parallel Cauchy solvers are shown in Figure \ref{fig:small_lumpe
     \caption{Parallel efficiency for Cauchy solvers as various time step sizes and sub-steps for the small lumped depletion case}
     \label{fig:small_lumped_depletion_cauchy_parallel_eff}
 \end{figure}
-
-\clearpage
-
-
-\subsubsection{Large case}
-Eigenvalues for the large case are shown in Figure \ref{fig:large_lumped_depletion_eigenvalues}, these eigenvalues are clustered around the negative real axis and will not affect the accuracy of the Cauchy solvers. Results using zero sub-steps are shown in Figure \ref{fig:large_lumped_depletion_Einf_steps0}. These results are nearly identical to the small lumped depletion case except for the slightly elevated separation between the Taylor and Pad\'e-method 1 solvers. The Taylor solver has a slight increase in error between these two cases. Figure \ref{fig:large_lumped_depletion_Einf_with_substeps} also shows identical error behavior with increasing the number of sub-steps that was seen in the small case. The error exponential decays as a function of sub-steps. Figures \ref{fig:large_lumped_depletion_species_relative_errors} and \ref{fig:large_lumped_depletion_species_absolute_errors} show the relative and absolute errors for each species. The same trend that was shown in the small case is seen again. The relative errors for the Cauchy solvers is high for many of the actnide species, while the absolute error for these species is low due to the low concentrations. Figure \ref{fig:large_lumped_depletion_actnide_errors} takes a closer look at specific isotopes as a function of time. Figure \ref{fig:large_lumped_depletion_actnide_errors} shows identical behavior to the small case. The rate at which the species concentration grows is large than the rate for absolute errors, this is why the relative errors decrease over time. Figure \ref{fig:large_lumped_depletion_Einf_steps12} shows results for each solver were each of the Cauchy solver have 12 sub-steps. All solvers have the same behavior that was seen in the small case except for CRAM and the Hyperbolic solvers. The small case was able to achieve a lower minimal error than the large case. In both cases, the error decreases for the first few time steps but the large case increases in error to a greater degree as the solution progresses to 200 days. In this case, the CRAM and Hyperbolic solvers seem to more closely follow one another in error across the time span. Results for the classical integrator methods are shown in Figure \ref{fig:large_lumped_depletion_Einf_integrators} for a total time of 20 days. These errors are almost identical to the small case, showing that the added nuclides did not result in any notable change in error performance. 
-
-Run times for each of the Cauchy solvers as a function of sub-stepping are shown in Figure \ref{fig:large_lumped_depletion_Cauchy_runtimes}. This trend is identical to the small case, only varying in run time. For the Hyperbolic and Parabolic solvers the run time for 12 sub-steps grow from about 8 seconds in the small case to a little over 20 seconds in the large case. CRAM increases from just under 8 seconds in the small case to about 12 seconds in the large case. Run time results for the classical integrator methods are shown in Figure \ref{fig:large_lumped_depletion_integrator_runtimes}. The same trend that was shown in the small case is seen here, except that the BDF1 integrator seems to converge closer to the other integrators as the time step size is decreased. 
-
-
-Table \ref{tab:large_lumped_depletion_runtimes} shows a summary of results for the large lumped depletion case. These results show the same general behavior with the small case. CRAM, Hyperbolic, Taylor and BDF3 all have the same order of magnitude
 
 \clearpage
 
@@ -1393,6 +1392,21 @@ Table \ref{tab:large_lumped_depletion_runtimes} shows a summary of results for t
 
 \clearpage
 
+
+\noindent error across the time span. Results for the classical integrator methods are shown in Figure \ref{fig:large_lumped_depletion_Einf_integrators} for a total time of 20 days. These errors are almost identical to the small case, showing that the added nuclides did not result in any notable change in error performance. 
+
+Run times for each of the Cauchy solvers as a function of sub-stepping are shown in Figure \ref{fig:large_lumped_depletion_Cauchy_runtimes}. This trend is identical to the small case, only varying in run time. For the Hyperbolic and Parabolic solvers the run time for 12 sub-steps grow from about 8 seconds in the small case to a little over 20 seconds in the large case. CRAM increases from just under 8 seconds in the small case to about 12 seconds in the large case. Run time results for the classical integrator methods are shown in Figure \ref{fig:large_lumped_depletion_integrator_runtimes}. The same trend that was shown in the small case is seen here, except that the BDF1 integrator seems to converge closer to the other integrators as the time step size is decreased. 
+
+Table \ref{tab:large_lumped_depletion_runtimes} shows a summary of results for the large lumped depletion case. These results show the same general behavior with the small case. CRAM, Hyperbolic, Taylor and BDF3 all have the same order of magnitude error with BEF4-6 having about an order of magnitude lower in error. Out of these solvers Pad\'e-method 1 had the lowest run time by 2 orders of magnitude. While the errors for the small and large cases are about the same, the run time almost doubles for each solver. 
+
+Parallel results for the Cauchy solvers are shown in Figure \ref{fig:large_lumped_depletion_cauchy_speedup} for speedup and Figure \ref{fig:large_lumped_depletion_cauchy_parallel_eff}. Figure \ref{fig:large_lumped_depletion_cauchy_speedup} shows interesting results due to a lack in speedup from 1 core to zero cores. At 4 cores the speed up should be around 4 times but only has twice the speed up. This same trend is seen for the rest of the cores. Figure \ref{fig:large_lumped_depletion_cauchy_parallel_eff} mirrors there results with a sharp decrease in parallel efficiency at 2 cores, followed by a slow linear decrease. This behavior seems to be driven by the machine the case was ran on. 
+
+
+
+
+\subsection{2D depletion and mass transport}
+This is a depletion problem using the selected isotopes in Table \ref{tab:small_nuclides} represented by the following equations:
+
 \begin{figure}[p]
     \centering
     \includegraphics[width=5in]{images/chapter-5/caseStudies/largeLumpedDepletion/msrLargeLumpedDepletionEinfErrorerrorIntegrators.png}
@@ -1459,15 +1473,23 @@ Table \ref{tab:large_lumped_depletion_runtimes} shows a summary of results for t
 
 \clearpage
 
-\noindent error with BEF4-6 having about an order of magnitude lower in error. Out of these solvers Pad\'e-method 1 had the lowest run time by 2 orders of magnitude. While the errors for the small and large cases are about the same, the run time almost doubles for each solver. 
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=5in]{images/chapter-5/caseStudies/largeLumpedDepletion/msrLumpedDepletionLargeCauchyParallelSpeedup.png}
+    \caption{Parallel speedup for Cauchy solvers as various time step sizes and sub-steps for the large lumped depletion case}
+    \label{fig:large_lumped_depletion_cauchy_speedup}
+\end{figure}
 
-Parallel results for the Cauchy solvers are shown in Figure \ref{fig:large_lumped_depletion_cauchy_speedup} for speedup and Figure \ref{fig:large_lumped_depletion_cauchy_parallel_eff}. Figure \ref{fig:large_lumped_depletion_cauchy_speedup} shows interesting results due to a lack in speedup from 1 core to zero cores. At 4 cores the speed up should be around 4 times but only has twice the speed up. This same trend is seen for the rest of the cores. Figure \ref{fig:large_lumped_depletion_cauchy_parallel_eff} mirrors there results with a sharp decrease in parallel efficiency at 2 cores, followed by a slow linear decrease. This behavior seems to be driven by the machine the case was ran on. 
+\clearpage
 
+\begin{figure}[p]
+    \centering
+    \includegraphics[width=5in]{images/chapter-5/caseStudies/largeLumpedDepletion/msrLumpedDepletionLargeCauchyParallelEfficiency.png}
+    \caption{Parallel efficiency for Cauchy solvers as various time step sizes and sub-steps for the large lumped depletion case}
+    \label{fig:large_lumped_depletion_cauchy_parallel_eff}
+\end{figure}
 
-
-
-\subsection{2D depletion and mass transport}
-This is a depletion problem using the selected isotopes in Table \ref{tab:small_nuclides} represented by the following equations:
+\clearpage
 
 \begin{equation}
 \begin{split}
@@ -1489,27 +1511,6 @@ This is a depletion problem using the selected isotopes in Table \ref{tab:small_
 \end{split}
 \end{equation}
 
-\clearpage
-
-\begin{figure}[p]
-    \centering
-    \includegraphics[width=5in]{images/chapter-5/caseStudies/largeLumpedDepletion/msrLumpedDepletionLargeCauchyParallelSpeedup.png}
-    \caption{Parallel speedup for Cauchy solvers as various time step sizes and sub-steps for the large lumped depletion case}
-    \label{fig:large_lumped_depletion_cauchy_speedup}
-\end{figure}
-
-\clearpage
-
-\begin{figure}[p]
-    \centering
-    \includegraphics[width=5in]{images/chapter-5/caseStudies/largeLumpedDepletion/msrLumpedDepletionLargeCauchyParallelEfficiency.png}
-    \caption{Parallel efficiency for Cauchy solvers as various time step sizes and sub-steps for the large lumped depletion case}
-    \label{fig:large_lumped_depletion_cauchy_parallel_eff}
-\end{figure}
-
-\clearpage
-
-
 \begin{equation}
 \begin{split}
     \frac{\partial \rho_{i,g}}{\partial t} + v_{y}\frac{\partial \rho_{i,g}}{\partial x}
@@ -1524,7 +1525,7 @@ This is a depletion problem using the selected isotopes in Table \ref{tab:small_
 \noindent where $N_{l}$, $N_{w}$ and $N_{g}$ represent the set of species which exist in the liquid, wall and gas phases. A species that exist in the liquid, wall a gas phase is represented by $\rho_{i,l}$, $\rho_{i,w}$ and $\rho_{i,g}$.
 
 \subsubsection{Small case}
-Eigenvalues are shown in Figure \ref{fig:small_2D_depletion_eigenvalues}. The top two figures show the eigenvalues on the imaginary plane and these eigenvalues adjusted with the time step size. These values show the typical cylindrical shape seen in convection problems. At their base values, they seem to fall within a region where they would not have an impact on the solution of Cauchy solvers. These values adjusted with the time step size push their values into a region where they are still within the quadrature points. The remaining plots in Figure \ref{fig:small_2D_depletion_eigenvalues} show a zoomed in portion which shows the eigenvalues clustered by the origin are within the quadrature points for each Cauchy solver. Results for zero sub-steps for each of the matrix exponential solvers is shown in Figure \ref{fig:small_2D_depletion_Einf_steps0}. Each of the Cauchy solvers begin with large error which decrease to match the errors of Pad\'e-method 1 and Taylor. CRAM and Hyperbolic decrease faster than the Parabolic solver. Pad\'e-method 2 has the largest error at 200 days. Errors as a function of sub-stepping for each of the Cauchy solvers is shown in Figure \ref{fig:small_2D_depletion_Einf_with_substeps}. What is most interesting about these results compared to the lumped cases is that increases the sub-steps reduces the errors for CRAM and Hyperbolic until a point which it remains level. The Parabolic solver continues to decrease for all of the sub-steps. This behavior is visualized in Figure \ref{fig:small_2D_depletion_Einf_species_with_substeps} for the CRAM solver. The actinides show a reduction in error with sub-steps, while many of the isotopes in the middle of the plot show no reduction. The overall relative 
+Eigenvalues are shown in Figure \ref{fig:small_2D_depletion_eigenvalues}. The top two figures show the eigenvalues on the imaginary plane and these eigenvalues adjusted with the time step size. These values show the typical cylindrical shape seen in convection problems. At their base values, they seem to fall within a region where they would not have an impact on the solution of Cauchy solvers. These values adjusted with the time step size push their values into a region where they are still within the quadrature points. The remaining plots in Figure \ref{fig:small_2D_depletion_eigenvalues} show a zoomed in 
 
 \clearpage
 
@@ -1535,6 +1536,13 @@ Eigenvalues are shown in Figure \ref{fig:small_2D_depletion_eigenvalues}. The to
     \label{fig:small_2D_depletion_eigenvalues}
 \end{figure}
 
+\clearpage
+
+\noindent portion which shows the eigenvalues clustered by the origin are within the quadrature points for each Cauchy solver. Results for zero sub-steps for each of the matrix exponential solvers is shown in Figure \ref{fig:small_2D_depletion_Einf_steps0}. Each of the Cauchy solvers begin with large error which decrease to match the errors of Pad\'e-method 1 and Taylor. CRAM and Hyperbolic decrease faster than the Parabolic solver. Pad\'e-method 2 has the largest error at 200 days. Errors as a function of sub-stepping for each of the Cauchy solvers is shown in Figure \ref{fig:small_2D_depletion_Einf_with_substeps}. What is most interesting about these results compared to the lumped cases is that increases the sub-steps reduces the errors for CRAM and Hyperbolic until a point which it remains level. The Parabolic solver continues to decrease for all of the sub-steps. This behavior is visualized in Figure \ref{fig:small_2D_depletion_Einf_species_with_substeps} for the CRAM solver. The actinides show a reduction in error with sub-steps, while many of the isotopes in the middle of the plot show no reduction. The overall relative error is controlled by the actinides until they fall below the error of U-234Liq, which fails to show reduction in error. Errors for 12 sub-steps are shown in Figure \ref{fig:small_2D_depletion_Einf_steps12}. All of the solvers except for Pad\'e method 2 have approximately the same error. This is a trend that was not seen in the lumped depletion cases. Errors for the BDF solvers are shown in Figure \ref{fig:small_2D_depletion_Einf_integrators}. BDF1-3 show good convergence rates over the time span. BEF4-6 show good convergence for the first three time steps, then the errors remain constant for the last two time steps. 
+
+Run times as a function of sub-stepping for the Cauchy solvers is shown in Figure \ref{fig:small_2D_depletion_Cauchy_runtimes}. These results show the typical linear run time increase for each solver. The Hyperbolic solver shows slightly higher run time than the parabolic solver. Run times for the BDF solvers is shown in Figure \ref{fig:small_2D_depletion_integrator_runtimes}, showing the typical behavior of each of the solvers being spread out for large time step sizes. These values converge as the time step size grows smaller. 
+
+A summary of results for each of solvers tested is shown in Table \ref{tab:small_2D_depletion_runtimes}. BDF4-6 are not shown with the lowest error because the increase obtained from a further reduction in time step size does not add too much accuracy to the problem. CRAM, Hyperbolic, Pad\'e-method 1, Taylor and 3 of the BDF solvers have about the same error. Taylor takes the longest by one to two orders of magnitude for the matrix exponential solvers. 
 \clearpage
 
 \begin{figure}[p]
@@ -1564,20 +1572,6 @@ Eigenvalues are shown in Figure \ref{fig:small_2D_depletion_eigenvalues}. The to
     \label{fig:small_2D_depletion_Einf_species_with_substeps}
 \end{figure}
 \end{landscape}
-
-\clearpage
-
-\noindent error is controlled by the actinides until they fall below the error of U-234Liq, which fails to show reduction in error. Errors for 12 sub-steps are shown in Figure \ref{fig:small_2D_depletion_Einf_steps12}. All of the solvers except for Pad\'e method 2 have approximately the same error. This is a trend that was not seen in the lumped depletion cases. Errors for the BDF solvers are shown in Figure \ref{fig:small_2D_depletion_Einf_integrators}. BDF1-3 show good convergence rates over the time span. BEF4-6 show good convergence for the first three time steps, then the errors remain constant for the last two time steps. 
-
-Run times as a function of sub-stepping for the Cauchy solvers is shown in Figure \ref{fig:small_2D_depletion_Cauchy_runtimes}. These results show the typical linear run time increase for each solver. The Hyperbolic solver shows slightly higher run time than the parabolic solver. Run times for the BDF solvers is shown in Figure \ref{fig:small_2D_depletion_integrator_runtimes}, showing the typical behavior of each of the solvers being spread out for large time step sizes. These values converge as the time step size grows smaller. 
-
-A summary of results for each of solvers tested is shown in Table \ref{tab:small_2D_depletion_runtimes}. BDF4-6 are not shown with the lowest error because the increase obtained from a further reduction in time step size does not add too much accuracy to the problem. CRAM, Hyperbolic, Pad\'e-method 1, Taylor and 3 of the BDF solvers have about the same error. Taylor takes the longest by one to two orders of magnitude for the matrix exponential solvers. 
-
-Results for the parallel Cauchy solvers are shown in Figures \ref{fig:small_2D_depletion_cauchy_speedup} and \ref{fig:small_2D_depletion_cauchy_parallel_eff}. These results show good parallel speed up for each of the sub-steps, reaching 12 times the speed up for 16 cores in the Hyperbolic and Parabolic solvers. The parallel efficiency shows an apparent elevated value for 2 processors when using 6 and 12 sub-steps. This is due to the slight differences in run times each time the problem is ran. After two cores the parallel efficiency shows the common linear decrease as the number of cores is increased. 
-
-
-\subsubsection{Large case}
-Eigenvalues are shown in Figure \ref{fig:large_2D_depletion_eigenvalues} with the same format as with the small 2D depletion case. The addition of the extra isotopes going from small to large case does not change the general distribution of the eigenvalues. The zoomed in portion of Figure \ref{fig:large_2D_depletion_eigenvalues} shows that the adjusted eigenvalues are sill confined within the quadrature points around the origin. 
 
 \clearpage
 
@@ -1654,6 +1648,16 @@ Eigenvalues are shown in Figure \ref{fig:large_2D_depletion_eigenvalues} with th
 
 \clearpage
 
+Results for the parallel Cauchy solvers are shown in Figures \ref{fig:small_2D_depletion_cauchy_speedup} and \ref{fig:small_2D_depletion_cauchy_parallel_eff}. These results show good parallel speed up for each of the sub-steps, reaching 12 times the speed up for 16 cores in the Hyperbolic and Parabolic solvers. The parallel efficiency shows an apparent elevated value for 2 processors when using 6 and 12 sub-steps. This is due to the slight differences in run times each time the problem is ran. After two cores the parallel efficiency shows the common linear decrease as the number of cores is increased. 
+
+
+\subsubsection{Large case}
+Eigenvalues are shown in Figure \ref{fig:large_2D_depletion_eigenvalues} with the same format as with the small 2D depletion case. The addition of the extra isotopes going from small to large case does not change the general distribution of the eigenvalues. The zoomed in portion of Figure \ref{fig:large_2D_depletion_eigenvalues} shows that the adjusted eigenvalues are sill confined within the quadrature points around the origin. 
+
+Results for zero sub-steps is shown for each solver shown in Figure \ref{fig:large_2D_depletion_Einf_steps0}, this shows the same behavior that was seen in the small case study. The Cauchy solvers begin with a high relative error and begin to converge to the Taylor and Pad\'e-method 1 results. Of the Cauchy solvers, Parabolic behaves the worst with error but does converge to the other solvers. Errors as a function of sub-stepping for the Cauchy solvers is shown in Figure \ref{fig:large_2D_depletion_Einf_with_substeps}. These show the same results for the small case, CRAM and the Hyperbolic solvers converge after 6 sub-steps with Parabolic continuing to decrease with steps. Figure \ref{fig:large_2D_depletion_Einf_species_with_substeps} shows the species error with sub-stepping using the CRAM solver. Looking at the error from this figure shows again why the Cauchy solvers show a plateau in E${}_{\infty}$ error. Sub-stepping does not decrease the error for most of the isotopes in the middle of the plot. After the heavier actinides reduce their error, U-234Liq dominates this error. Error at 12 sub-steps is shown in Figure \ref{fig:large_2D_depletion_Einf_steps12}. Just like with the small case, all solvers except for Pad\'e-method 2 converge to approximately the same solution over the 200 day run. Errors for the BDF integrators are shown in Figure \ref{fig:large_2D_depletion_Einf_integrators}, again these show the same trends that were seen with the small case. BDF1-3 show good convergence with time step reduction. BDF4-6 each show lower error until the final time step size, when they converge with BDF3. Run times for each of the Cauchy solvers 
+
+\clearpage
+
 \begin{figure}[p]
     \centering
     \includegraphics[width=5in]{images/chapter-5/caseStudies/small2DDepletion/msrSmall2DDepletionCauchyParallelSpeedup.png}
@@ -1678,13 +1682,6 @@ Eigenvalues are shown in Figure \ref{fig:large_2D_depletion_eigenvalues} with th
     \caption{Eigenvalues for the large 2D depletion case}
     \label{fig:large_2D_depletion_eigenvalues}
 \end{figure}
-
-\clearpage
-
-
-Results for zero sub-steps is shown for each solver shown in Figure \ref{fig:large_2D_depletion_Einf_steps0}, this shows the same behavior that was seen in the small case study. The Cauchy solvers begin with a high relative error and begin to converge to the Taylor and Pad\'e-method 1 results. Of the Cauchy solvers, Parabolic behaves the worst with error but does converge to the other solvers. Errors as a function of sub-stepping for the Cauchy solvers is shown in Figure \ref{fig:large_2D_depletion_Einf_with_substeps}. These show the same results for the small case, CRAM and the Hyperbolic solvers converge after 6 sub-steps with Parabolic continuing to decrease with steps. Figure \ref{fig:large_2D_depletion_Einf_species_with_substeps} shows the species error with sub-stepping using the CRAM solver. Looking at the error from this figure shows again why the Cauchy solvers show a plateau in E${}_{\infty}$ error. Sub-stepping does not decrease the error for most of the isotopes in the middle of the plot. After the heavier actinides reduce their error, U-234Liq dominates this error. Error at 12 sub-steps is shown in Figure \ref{fig:large_2D_depletion_Einf_steps12}. Just like with the small case, all solvers except for Pad\'e-method 2 converge to approximately the same solution over the 200 day run. Errors for the BDF integrators are shown in Figure \ref{fig:large_2D_depletion_Einf_integrators}, again these show the same trends that were seen with the small case. BDF1-3 show good convergence with time step reduction. BDF4-6 each show lower error until the final time step size, when they converge with BDF3. Run times for each of the Cauchy solvers as a function of sub-steps is shown in Figure \ref{fig:large_lumped_depletion_Cauchy_runtimes}, these results shown the typical linear increase in run time for the addition of sub-steps. Run times for the integrator solvers is shown in Figure \ref{fig:large_2D_depletion_integrator_runtimes}. This plot shows the typical result of linear increase as a function of time step size. Each of the solver run times begin separate and start to converge as the time step size decreases. This is because the number of linear systems each solver is required to solve becomes approximately the same number as the time step size decreases. 
-
-As summary of the large 2D depletion case is shown in Table \ref{tab:large_2D_depletion_runtimes}. The addition of sub-stepping increases the run times for the Cauchy based solver above the Pad\'e solvers, with CRAM being the same order of Pad\'e-method 1. BDF-1-3 have 1 to 2 orders greater run time than the matrix exponential algorithms with only BDF3 having the same order of accuracy. BDF4-6 have the same order run time as the Hyperbolic and Parabolic solvers with slightly higher error. At 200 days, all of the matrix exponential solvers have the same 
 
 \clearpage
 
@@ -1733,6 +1730,12 @@ As summary of the large 2D depletion case is shown in Table \ref{tab:large_2D_de
     \caption{Relative E$_{\infty}$ error with at time = 20 days for the classical integrator methods in large 2D depletion case}
     \label{fig:large_2D_depletion_Einf_integrators}
 \end{figure}
+
+\clearpage
+
+\noindent as a function of sub-steps is shown in Figure \ref{fig:large_2D_depletion_Cauchy_runtimes}, these results shown the typical linear increase in run time for the addition of sub-steps. Run times for the integrator solvers is shown in Figure \ref{fig:large_2D_depletion_integrator_runtimes}. This plot shows the typical result of linear increase as a function of time step size. Each of the solver run times begin separate and start to converge as the time step size decreases. This is because the number of linear systems each solver is required to solve becomes approximately the same number as the time step size decreases. 
+
+As summary of the large 2D depletion case is shown in Table \ref{tab:large_2D_depletion_runtimes}. The addition of sub-stepping increases the run times for the Cauchy based solver above the Pad\'e solvers, with CRAM being the same order of Pad\'e-method 1. BDF-1-3 have 1 to 2 orders greater run time than the matrix exponential algorithms with only BDF3 having the same order of accuracy. BDF4-6 have the same order run time as the Hyperbolic and Parabolic solvers with slightly higher error. At 200 days, all of the matrix exponential solvers have the same accuracy accept for Pad\'e-method 2. Pad\'e-method 1 as the lowest run time followed by CRAM. Parallel performance of each of the Cauchy solvers is shown in Figures \ref{fig:large_2D_depletion_cauchy_speedup} and \ref{fig:large_2D_depletion_cauchy_parallel_eff}. Parallel speedup for this problem is quite good, showing nearly linear speed up over the number of cores. 
 
 \clearpage
 
@@ -1791,7 +1794,6 @@ As summary of the large 2D depletion case is shown in Table \ref{tab:large_2D_de
 
 \clearpage
 
-\noindent accuracy accept for Pad\'e-method 2. Pad\'e-method 1 as the lowest run time followed by CRAM. Parallel performance of each of the Cauchy solvers is shown in Figures \ref{fig:large_2D_depletion_cauchy_speedup} and \ref{fig:large_2D_depletion_cauchy_parallel_eff}. Parallel speedup for this problem is quite good, showing nearly linear speed up over the number of cores. 
 
 \clearpage
 
